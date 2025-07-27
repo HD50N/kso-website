@@ -1,36 +1,191 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Korean Students Organization (KSO) Website
 
-## Getting Started
+A modern, responsive website for the Korean Students Organization at the University of Chicago, built with Next.js and Tailwind CSS.
 
-First, run the development server:
+## 🎯 About KSO
 
+The Korean Students Organization (KSO) is dedicated to fostering a vibrant community that celebrates Korean culture, promotes cultural understanding, and provides a supportive network for Korean and Korean-American students at the University of Chicago. Founded in 1976, KSO has been serving the UChicago community for over 48 years.
+
+## ✨ Features
+
+### 🏠 Homepage
+- Hero section with mission statement
+- Upcoming events showcase
+- Quick statistics and achievements
+- Social media integration
+- Call-to-action sections
+
+### 📖 About Us
+- Organization history and timeline
+- Mission and vision statements
+- Core values
+- Past accomplishments
+- Community involvement opportunities
+
+### 👥 Executive Board
+- Board member profiles with roles and bios
+- Committee information
+- Leadership opportunities
+- Contact information
+
+### 🎭 Culture Show
+- Interactive countdown timer
+- Event details and RSVP form
+- Past show highlights
+- Volunteer opportunities
+- Performance information
+
+### 📝 Forms & Applications
+- General membership application
+- Committee application
+- Volunteer signup
+- Interactive form navigation
+- Contact information
+
+## 🛠️ Tech Stack
+
+- **Framework**: Next.js 14 with App Router
+- **Styling**: Tailwind CSS
+- **Language**: TypeScript
+- **Deployment**: Vercel-ready
+- **Responsive**: Mobile-first design
+
+## 🚀 Getting Started
+
+### Prerequisites
+- Node.js 18+ 
+- npm or yarn
+
+### Installation
+
+1. Clone the repository:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone <repository-url>
+cd kso-website
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Install dependencies:
+```bash
+npm install
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Run the development server:
+```bash
+npm run dev
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+4. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-## Learn More
+### Building for Production
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run build
+npm start
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📁 Project Structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+src/
+├── app/                    # Next.js App Router pages
+│   ├── page.tsx           # Homepage
+│   ├── about/             # About Us page
+│   ├── board/             # Executive Board page
+│   ├── culture-show/      # Culture Show page
+│   ├── forms/             # Forms & Applications page
+│   ├── layout.tsx         # Root layout
+│   └── globals.css        # Global styles
+├── components/            # Reusable components
+│   ├── Navigation.tsx     # Navigation component
+│   └── Footer.tsx         # Footer component
+└── ...
+```
 
-## Deploy on Vercel
+## 🎨 Design Features
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+- **Modern Aesthetic**: Clean, minimalist design with vibrant red accent colors
+- **Responsive Design**: Optimized for all device sizes
+- **Accessibility**: WCAG compliant with proper semantic HTML
+- **Performance**: Optimized images and code splitting
+- **SEO**: Meta tags and structured data
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## 📱 Pages Overview
+
+### Homepage (`/`)
+- Hero section with organization branding
+- Mission statement
+- Featured upcoming events
+- Quick statistics
+- Social media links
+
+### About Us (`/about`)
+- Organization history timeline
+- Mission and vision
+- Core values
+- Past accomplishments
+- Community involvement
+
+### Executive Board (`/board`)
+- Board member profiles
+- Committee information
+- Leadership opportunities
+- Contact details
+
+### Culture Show (`/culture-show`)
+- Interactive countdown timer
+- Event details
+- RSVP form
+- Past show highlights
+- Volunteer signup
+
+### Forms (`/forms`)
+- Membership application
+- Committee application
+- Volunteer signup
+- Interactive form navigation
+
+## 🔧 Customization
+
+### Colors
+The primary color scheme uses red tones. To customize:
+- Primary: `red-600` (#DC2626)
+- Secondary: `red-500` (#EF4444)
+- Accent: `red-400` (#F87171)
+
+### Content
+- Update content in respective page files
+- Replace placeholder images with actual photos
+- Modify contact information and social media links
+
+### Styling
+- Tailwind CSS classes for styling
+- Custom CSS in `globals.css` for specific needs
+- Responsive breakpoints: `sm:`, `md:`, `lg:`, `xl:`
+
+## 📧 Contact Information
+
+- **Email**: kso@uchicago.edu
+- **Instagram**: @kso_uchicago
+- **Location**: University of Chicago, Chicago, IL 60637
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+## 📄 License
+
+This project is for the Korean Students Organization at the University of Chicago.
+
+## 🙏 Acknowledgments
+
+- University of Chicago community
+- KSO members and alumni
+- Next.js and Tailwind CSS communities
+
+---
+
+Built with ❤️ for the Korean Students Organization at the University of Chicago
