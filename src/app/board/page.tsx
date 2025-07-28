@@ -177,12 +177,6 @@ export default function Board() {
       {/* Executive Board Members */}
       <section className="section-padding bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-8 sm:mb-12">
-            <h2 className="section-title text-2xl sm:text-3xl md:text-4xl text-black mb-3 sm:mb-4">2024-2025 Executive Board</h2>
-            <p className="font-body text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto px-4">
-              Our dedicated team of leaders working to build and strengthen the Korean community
-            </p>
-          </div>
           
           {/* Mobile: Compact List */}
           <div className="block md:hidden space-y-3">
