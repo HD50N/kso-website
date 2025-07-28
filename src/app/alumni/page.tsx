@@ -40,17 +40,10 @@ export default function AlumniPage() {
       
       setLoading(true);
       
-      // Add timeout to prevent hanging requests
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Request timeout')), 10000); // 10 second timeout
-      });
-
-      const fetchPromise = supabase
+      const { data, error } = await supabase
         .from('profiles')
         .select('id, full_name, username, graduation_year, major, user_type, board_position, linkedin_url, instagram_url, bio, avatar_url')
         .order('full_name');
-
-      const { data, error } = await Promise.race([fetchPromise, timeoutPromise]) as any;
 
       if (error) {
         console.error('Error fetching alumni:', error);

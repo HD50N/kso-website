@@ -23,30 +23,23 @@ export default function Board() {
       if (!isRetry) {
         setError('');
         setRetryCount(0);
+        console.log('Starting board members fetch...');
       }
       
       setLoading(true);
       
-      // Add timeout to prevent hanging requests
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Request timeout')), 10000); // 10 second timeout
-      });
-
       // Fetch board positions and user profiles in parallel for better performance
-      const [positionsResult, usersResult] = await Promise.race([
-        Promise.allSettled([
-          supabase
-            .from('board_positions')
-            .select('*')
-            .eq('is_active', true)
-            .order('display_order'),
-          supabase
-            .from('profiles')
-            .select('id, full_name, username, graduation_year, major, linkedin_url, instagram_url, bio, avatar_url')
-            .not('username', 'is', null)
-        ]),
-        timeoutPromise
-      ]) as any;
+      const [positionsResult, usersResult] = await Promise.allSettled([
+        supabase
+          .from('board_positions')
+          .select('*')
+          .eq('is_active', true)
+          .order('display_order'),
+        supabase
+          .from('profiles')
+          .select('id, full_name, username, graduation_year, major, linkedin_url, instagram_url, bio, avatar_url')
+          .not('username', 'is', null)
+      ]);
 
       // Handle positions result
       if (positionsResult.status === 'rejected' || positionsResult.value.error) {
@@ -55,6 +48,8 @@ export default function Board() {
       }
 
       const positions = positionsResult.value.data;
+      console.log('Board positions fetched:', positions?.length || 0);
+      
       if (!positions || positions.length === 0) {
         setBoardMembers([]);
         setLoading(false);
@@ -65,6 +60,9 @@ export default function Board() {
       let users: any[] = [];
       if (usersResult.status === 'fulfilled' && !usersResult.value.error) {
         users = usersResult.value.data || [];
+        console.log('Users fetched:', users.length);
+      } else {
+        console.log('Users fetch failed or empty');
       }
 
       // Get unique usernames from board positions
@@ -115,6 +113,7 @@ export default function Board() {
 
       setBoardMembers(combinedBoardMembers);
       setError(''); // Clear any previous errors
+      console.log('Board members processed:', combinedBoardMembers.length);
     } catch (error: any) {
       console.error('Error fetching board members:', error);
       
