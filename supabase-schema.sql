@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS profiles (
   user_type user_type NOT NULL DEFAULT 'undergrad',
   board_position TEXT,
   linkedin_url TEXT,
+  instagram_url TEXT,
   bio TEXT,
   avatar_url TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),

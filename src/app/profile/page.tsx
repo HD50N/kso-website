@@ -27,6 +27,8 @@ export default function ProfilePage() {
   const [crop, setCrop] = useState<Crop>();
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
   const [isOnline, setIsOnline] = useState(true);
+  const [pendingPhotoUrl, setPendingPhotoUrl] = useState<string | null>(null);
+  const [croppedFile, setCroppedFile] = useState<File | null>(null);
   const imgRef = useRef<HTMLImageElement>(null);
 
               useEffect(() => {
@@ -45,6 +47,7 @@ export default function ProfilePage() {
                     user_type: profile.user_type,
                     board_position: profile.board_position,
                     linkedin_url: profile.linkedin_url,
+                    instagram_url: profile.instagram_url,
                     bio: profile.bio,
                   });
                 }
@@ -107,9 +110,12 @@ export default function ProfilePage() {
                     major: formData.major?.trim(),
                     board_position: formData.board_position?.trim(),
                     linkedin_url: formData.linkedin_url?.trim(),
+                    instagram_url: formData.instagram_url?.trim(),
                     bio: formData.bio?.trim(),
                     // Convert graduation_year to number if it's a string, or undefined if null
                     graduation_year: formData.graduation_year ? Number(formData.graduation_year) : undefined,
+                    // Ensure user_type is not board_member (only admins can assign this)
+                    user_type: formData.user_type === 'board_member' ? profile?.user_type || 'undergrad' : formData.user_type,
                   };
 
                   console.log('Submitting profile update:', cleanedData);
@@ -120,7 +126,51 @@ export default function ProfilePage() {
                   });
                   
                   await Promise.race([
-                    updateProfile(cleanedData),
+                    (async () => {
+                      // Handle photo upload first if there's a cropped file
+                      let avatarUrl = cleanedData.avatar_url;
+                      
+                      if (croppedFile && user) {
+                        console.log('Uploading cropped photo...');
+                        
+                        // Upload cropped image to Supabase Storage
+                        const fileExt = croppedFile.name.split('.').pop();
+                        const fileName = `${Date.now()}.${fileExt}`;
+                        const filePath = `${user.id}/${fileName}`;
+
+                        const { error: uploadError } = await supabase.storage
+                          .from('avatars')
+                          .upload(filePath, croppedFile);
+
+                        if (uploadError) {
+                          throw new Error(`Photo upload failed: ${uploadError.message}`);
+                        }
+
+                        // Get public URL
+                        const { data: { publicUrl } } = supabase.storage
+                          .from('avatars')
+                          .getPublicUrl(filePath);
+                        
+                        avatarUrl = publicUrl;
+                        console.log('Photo uploaded successfully:', publicUrl);
+                      }
+                      
+                      // Update profile with all data including photo URL
+                      const finalData = {
+                        ...cleanedData,
+                        avatar_url: avatarUrl
+                      };
+                      
+                      await updateProfile(finalData);
+                      
+                      // Clear photo-related state after successful update
+                      if (croppedFile) {
+                        setCroppedFile(null);
+                        setSelectedFile(null);
+                        setPreviewUrl(null);
+                        setPendingPhotoUrl(null);
+                      }
+                    })(),
                     timeoutPromise
                   ]);
                   
@@ -135,9 +185,11 @@ export default function ProfilePage() {
                   if (error.message?.includes('duplicate key') || error.message?.includes('username')) {
                     setUsernameError('This username is already taken');
                   } else if (error.message?.includes('timeout') || error.message?.includes('timed out')) {
-                    setError('Request timed out. Please check your connection and try again.');
+                    setError('Request timed out. This might be due to a slow connection. Please try again.');
                   } else if (error.message?.includes('network') || error.message?.includes('connection')) {
                     setError('Network error. Please check your connection and try again.');
+                  } else if (error.message?.includes('offline')) {
+                    setError('You appear to be offline. Please check your internet connection and try again.');
                   } else if (error.message?.includes('auth') || error.message?.includes('session')) {
                     setError('Authentication error. Please refresh the page and try again.');
                   } else {
@@ -258,150 +310,43 @@ export default function ProfilePage() {
     try {
       setUploadingPhoto(true);
       setError('');
-      setSuccess('');
 
       // Get cropped image as file
-      const croppedFile = await getCroppedImg(
+      const croppedImageFile = await getCroppedImg(
         imgRef.current,
         completedCrop,
         selectedFile.name
       );
 
-      // Upload cropped image to Supabase Storage
-      const fileExt = croppedFile.name.split('.').pop();
-      const fileName = `${Date.now()}.${fileExt}`;
-      const filePath = `${user?.id}/${fileName}`;
-
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, croppedFile);
-
-      if (uploadError) {
-        throw uploadError;
-      }
-
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath);
-
-      // Update profile with new avatar URL
-      await updateProfile({ avatar_url: publicUrl });
+      // Store the cropped file for later upload
+      setCroppedFile(croppedImageFile);
       
-      setSuccess('Profile photo updated successfully!');
-      setSelectedFile(null);
-      setPreviewUrl(null);
+      // Close modal and show preview
       setShowCropModal(false);
       setCrop(undefined);
       setCompletedCrop(undefined);
       
-      // Clear success message after 3 seconds
+      // Show success message for cropping
+      setSuccess('Photo cropped successfully! Click "Save Changes" to upload.');
       setTimeout(() => setSuccess(''), 3000);
+      
     } catch (error: any) {
-      console.error('Photo upload error:', error);
-      setError(error.message || 'Failed to upload photo');
+      console.error('Photo cropping error:', error);
+      setError('Failed to crop photo. Please try again.');
     } finally {
       setUploadingPhoto(false);
     }
   };
 
-  const uploadProfilePhoto = async () => {
-    if (!selectedFile || !user) return;
 
-    setUploadingPhoto(true);
-    setError('');
-    setSuccess('');
 
-    try {
-      // Add timeout for upload operation
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Upload timed out')), 20000); // 20 seconds
-      });
-
-      await Promise.race([
-        (async () => {
-          // Upload to Supabase Storage
-          const fileExt = selectedFile.name.split('.').pop();
-          const fileName = `${Date.now()}.${fileExt}`;
-          const filePath = `${user.id}/${fileName}`;
-
-          const { error: uploadError } = await supabase.storage
-            .from('avatars')
-            .upload(filePath, selectedFile);
-
-          if (uploadError) {
-            throw uploadError;
-          }
-
-          // Get public URL
-          const { data: { publicUrl } } = supabase.storage
-            .from('avatars')
-            .getPublicUrl(filePath);
-
-          // Update profile with new avatar URL
-          await updateProfile({ avatar_url: publicUrl });
-        })(),
-        timeoutPromise
-      ]);
-      
-      setSuccess('Profile photo updated successfully!');
-      setSelectedFile(null);
-      setPreviewUrl(null);
-      
-      // Clear success message after 3 seconds
-      setTimeout(() => setSuccess(''), 3000);
-    } catch (error: any) {
-      console.error('Photo upload error:', error);
-      
-      // Handle specific error types
-      if (error.message?.includes('timeout') || error.message?.includes('timed out')) {
-        setError('Upload timed out. Please check your connection and try again.');
-      } else if (error.message?.includes('network') || error.message?.includes('connection')) {
-        setError('Network error. Please check your connection and try again.');
-      } else if (error.message?.includes('storage') || error.message?.includes('bucket')) {
-        setError('Storage error. Please try again or contact support.');
-      } else {
-        setError(error.message || 'Failed to upload photo. Please try again.');
-      }
-    } finally {
-      setUploadingPhoto(false);
-    }
-  };
-
-  const removeProfilePhoto = async () => {
+  const removeProfilePhoto = () => {
     if (!profile?.avatar_url) return;
 
-    setUploadingPhoto(true);
-    setError('');
-    setSuccess('');
-
-    try {
-      // Add timeout for removal operation
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Operation timed out')), 15000); // 15 seconds
-      });
-
-      await Promise.race([
-        updateProfile({ avatar_url: undefined }),
-        timeoutPromise
-      ]);
-      
-      setSuccess('Profile photo removed successfully!');
-      setTimeout(() => setSuccess(''), 3000);
-    } catch (error: any) {
-      console.error('Photo removal error:', error);
-      
-      // Handle specific error types
-      if (error.message?.includes('timeout') || error.message?.includes('timed out')) {
-        setError('Operation timed out. Please check your connection and try again.');
-      } else if (error.message?.includes('network') || error.message?.includes('connection')) {
-        setError('Network error. Please check your connection and try again.');
-      } else {
-        setError(error.message || 'Failed to remove photo. Please try again.');
-      }
-    } finally {
-      setUploadingPhoto(false);
-    }
+    // Set the avatar_url to undefined in form data
+    setFormData(prev => ({ ...prev, avatar_url: undefined }));
+    setSuccess('Profile photo will be removed when you save changes.');
+    setTimeout(() => setSuccess(''), 3000);
   };
 
   if (authLoading) {
@@ -487,7 +432,7 @@ export default function ProfilePage() {
                           disabled={uploadingPhoto}
                           className="w-full px-3 py-1 bg-green-600 text-white rounded text-xs hover:bg-green-700 transition-colors disabled:opacity-50"
                         >
-                          {uploadingPhoto ? 'Uploading...' : 'Crop & Save'}
+                          {uploadingPhoto ? 'Cropping...' : 'Crop Photo'}
                         </button>
                         <button
                           onClick={() => {
@@ -714,36 +659,58 @@ export default function ProfilePage() {
                             User Type
                           </label>
                           {isEditing ? (
-                            <select
-                              value={formData.user_type || 'undergrad'}
-                              onChange={(e) => handleInputChange('user_type', e.target.value)}
-                              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
-                            >
-                              <option value="undergrad">Undergraduate Student</option>
-                              <option value="grad">Graduate Student</option>
-                              <option value="alumni">Alumni</option>
-                              <option value="board_member">Board Member</option>
-                            </select>
+                            <div>
+                              <select
+                                value={formData.user_type || 'undergrad'}
+                                onChange={(e) => handleInputChange('user_type', e.target.value)}
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                              >
+                                <option value="undergrad">Undergraduate Student</option>
+                                <option value="grad">Graduate Student</option>
+                                <option value="alumni">Alumni</option>
+                                {/* Board member option removed - only admins can assign this */}
+                              </select>
+                              <p className="text-xs text-gray-500 mt-1">
+                                Board member status can only be assigned by administrators
+                              </p>
+                            </div>
                           ) : (
-                            <p className="text-gray-900 py-3 capitalize">{profile?.user_type?.replace('_', ' ')}</p>
+                            <div>
+                              <p className="text-gray-900 py-3 capitalize">{profile?.user_type?.replace('_', ' ')}</p>
+                              {profile?.user_type === 'board_member' && (
+                                <p className="text-xs text-gray-500 mt-1">
+                                  Board member status is managed by administrators
+                                </p>
+                              )}
+                            </div>
                           )}
                         </div>
 
-                        {formData.user_type === 'board_member' && (
+                        {(formData.user_type === 'board_member' || profile?.user_type === 'board_member') && (
                           <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                               Board Position
                             </label>
                             {isEditing ? (
-                              <input
-                                type="text"
-                                value={formData.board_position || ''}
-                                onChange={(e) => handleInputChange('board_position', e.target.value)}
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
-                                placeholder="e.g., President, Vice President"
-                              />
+                              <div>
+                                <input
+                                  type="text"
+                                  value={formData.board_position || ''}
+                                  onChange={(e) => handleInputChange('board_position', e.target.value)}
+                                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                                  placeholder="e.g., President, Vice President"
+                                />
+                                <p className="text-xs text-gray-500 mt-1">
+                                  Board position is only editable for existing board members
+                                </p>
+                              </div>
                             ) : (
-                              <p className="text-gray-900 py-3">{profile?.board_position || 'Not specified'}</p>
+                              <div>
+                                <p className="text-gray-900 py-3">{profile?.board_position || 'Not specified'}</p>
+                                <p className="text-xs text-gray-500 mt-1">
+                                  Board position is managed by administrators
+                                </p>
+                              </div>
                             )}
                           </div>
                         )}
@@ -771,6 +738,31 @@ export default function ProfilePage() {
                               {profile?.linkedin_url ? (
                                 <a href={profile.linkedin_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
                                   {profile.linkedin_url}
+                                </a>
+                              ) : (
+                                'Not specified'
+                              )}
+                            </p>
+                          )}
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-2">
+                            Instagram URL
+                          </label>
+                          {isEditing ? (
+                            <input
+                              type="url"
+                              value={formData.instagram_url || ''}
+                              onChange={(e) => handleInputChange('instagram_url', e.target.value)}
+                              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                              placeholder="https://instagram.com/yourusername"
+                            />
+                          ) : (
+                            <p className="text-gray-900 py-3">
+                              {profile?.instagram_url ? (
+                                <a href={profile.instagram_url} target="_blank" rel="noopener noreferrer" className="text-pink-600 hover:underline">
+                                  {profile.instagram_url}
                                 </a>
                               ) : (
                                 'Not specified'
@@ -812,7 +804,7 @@ export default function ProfilePage() {
                           disabled={loading}
                           className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 text-sm"
                         >
-                          {loading ? 'Saving...' : 'Save Changes'}
+                          {loading ? 'Saving...' : `Save Changes${croppedFile ? ' + Upload Photo' : ''}`}
                         </button>
                       </div>
                     )}
@@ -872,7 +864,7 @@ export default function ProfilePage() {
                 disabled={uploadingPhoto || !completedCrop}
                 className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50"
               >
-                {uploadingPhoto ? 'Uploading...' : 'Crop & Save'}
+                {uploadingPhoto ? 'Cropping...' : 'Crop Photo'}
               </button>
             </div>
           </div>

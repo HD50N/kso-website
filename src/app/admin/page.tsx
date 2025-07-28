@@ -724,6 +724,17 @@ export default function AdminPage() {
                                               {updatingUser === user.id ? 'Updating...' : (user.is_admin ? 'Remove Admin' : 'Make Admin')}
                                             </button>
                                             <button
+                                              onClick={() => updateUserStatus(user.id, { user_type: user.user_type === 'board_member' ? 'undergrad' : 'board_member' })}
+                                              disabled={updatingUser === user.id}
+                                              className={`px-3 py-1 text-xs rounded-md transition-colors ${
+                                                user.user_type === 'board_member'
+                                                  ? 'bg-gray-600 text-white hover:bg-gray-700'
+                                                  : 'bg-blue-600 text-white hover:bg-blue-700'
+                                              } disabled:opacity-50`}
+                                            >
+                                              {updatingUser === user.id ? 'Updating...' : (user.user_type === 'board_member' ? 'Remove Board' : 'Make Board')}
+                                            </button>
+                                            <button
                                               onClick={() => router.push(`/profile?user=${user.id}`)}
                                               className="px-3 py-1 text-xs bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                                             >

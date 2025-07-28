@@ -133,12 +133,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const updateProfile = async (updates: Partial<Profile>) => {
     if (!user) throw new Error('No user logged in');
 
+    // Check network connectivity first
+    if (!navigator.onLine) {
+      throw new Error('You appear to be offline. Please check your internet connection and try again.');
+    }
+
     console.log('Updating profile for user:', user.id);
     console.log('Updates:', updates);
 
     // Add timeout and retry logic
     const maxRetries = 3;
-    const timeoutMs = 10000; // 10 seconds timeout
+    const timeoutMs = 30000; // 30 seconds timeout for slow connections
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
@@ -189,7 +194,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (attempt === maxRetries) {
           // Final attempt failed
           if (error.message?.includes('timeout')) {
-            throw new Error('Request timed out. Please check your connection and try again.');
+            // Check if user is offline
+            if (!navigator.onLine) {
+              throw new Error('You appear to be offline. Please check your internet connection and try again.');
+            }
+            throw new Error('Request timed out. This might be due to a slow connection. Please try again.');
           } else if (error.message?.includes('network')) {
             throw new Error('Network error. Please check your connection and try again.');
           } else {

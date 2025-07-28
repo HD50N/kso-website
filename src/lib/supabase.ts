@@ -16,6 +16,7 @@ export interface User {
   user_type: 'undergrad' | 'grad' | 'alumni' | 'board_member'
   board_position?: string
   linkedin_url?: string
+  instagram_url?: string
   bio?: string
   avatar_url?: string
   is_admin: boolean
@@ -33,6 +34,7 @@ export interface Profile {
   user_type: 'undergrad' | 'grad' | 'alumni' | 'board_member'
   board_position?: string
   linkedin_url?: string
+  instagram_url?: string
   bio?: string
   avatar_url?: string
   is_admin: boolean
