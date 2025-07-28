@@ -22,14 +22,11 @@ CREATE INDEX IF NOT EXISTS idx_board_positions_active ON board_positions(is_acti
 ALTER TABLE board_positions ENABLE ROW LEVEL SECURITY;
 
 -- RLS Policies
--- Only admins can view, insert, update, and delete board positions
-CREATE POLICY "Admins can view board positions" ON board_positions
-  FOR SELECT USING (
-    EXISTS (
-      SELECT 1 FROM profiles
-      WHERE user_id = auth.uid() AND is_admin = true
-    )
-  );
+-- Everyone can view board positions (for public executive board page)
+CREATE POLICY "Everyone can view board positions" ON board_positions
+  FOR SELECT USING (true);
+
+-- Only admins can insert, update, and delete board positions
 
 CREATE POLICY "Admins can insert board positions" ON board_positions
   FOR INSERT WITH CHECK (

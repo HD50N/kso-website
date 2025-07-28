@@ -21,6 +21,7 @@ export default function ProfilePage() {
   const [success, setSuccess] = useState('');
   const [formData, setFormData] = useState<Partial<Profile>>({});
   const [usernameError, setUsernameError] = useState<string>('');
+  const [isCheckingUsername, setIsCheckingUsername] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [showCropModal, setShowCropModal] = useState(false);
@@ -79,7 +80,39 @@ export default function ProfilePage() {
                 };
               }, []);
 
-                const handleSubmit = async (e: React.FormEvent) => {
+              // Function to validate username availability
+              const validateUsername = async (username: string): Promise<boolean> => {
+                if (!username || username === profile?.username) return true; // Same username or empty is valid
+                
+                setIsCheckingUsername(true);
+                setUsernameError('');
+                
+                try {
+                  const { data, error } = await supabase
+                    .from('profiles')
+                    .select('username')
+                    .eq('username', username)
+                    .single();
+
+                  if (error && error.code === 'PGRST116') {
+                    // No rows returned - username is available
+                    return true;
+                  } else if (data) {
+                    // Username exists
+                    setUsernameError('This username is already taken');
+                    return false;
+                  }
+                  
+                  return true;
+                } catch (error) {
+                  console.error('Username validation error:', error);
+                  return true; // Allow submission if validation fails
+                } finally {
+                  setIsCheckingUsername(false);
+                }
+              };
+
+              const handleSubmit = async (e: React.FormEvent) => {
                 e.preventDefault();
                 setLoading(true);
                 setError('');
@@ -97,6 +130,13 @@ export default function ProfilePage() {
                     }
                     if (!/^[a-zA-Z0-9_]+$/.test(username)) {
                       setUsernameError('Username can only contain letters, numbers, and underscores');
+                      setLoading(false);
+                      return;
+                    }
+                    
+                    // Check if username is available
+                    const isUsernameAvailable = await validateUsername(username);
+                    if (!isUsernameAvailable) {
                       setLoading(false);
                       return;
                     }
@@ -202,6 +242,17 @@ export default function ProfilePage() {
 
   const handleInputChange = (field: keyof Profile, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    
+    // Clear username error when user starts typing
+    if (field === 'username') {
+      setUsernameError('');
+    }
+  };
+
+  const handleUsernameBlur = async () => {
+    if (formData.username && formData.username !== profile?.username) {
+      await validateUsername(formData.username);
+    }
   };
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -590,9 +641,13 @@ export default function ProfilePage() {
                                 type="text"
                                 value={formData.username || ''}
                                 onChange={(e) => handleInputChange('username', e.target.value)}
+                                onBlur={handleUsernameBlur}
                                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
                                 placeholder="Enter username (optional)"
                               />
+                              {isCheckingUsername && (
+                                <p className="text-blue-600 text-xs mt-1">Checking username availability...</p>
+                              )}
                               {usernameError && (
                                 <p className="text-red-600 text-xs mt-1">{usernameError}</p>
                               )}
