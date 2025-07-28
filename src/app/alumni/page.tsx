@@ -1,12 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { Profile } from '@/lib/supabase';
 import { useAuth } from '@/contexts/AuthContext';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
+import AuthPrompt from '@/components/AuthPrompt';
 
 export default function AlumniPage() {
   const { user, loading: authLoading } = useAuth();
@@ -19,19 +20,7 @@ export default function AlumniPage() {
   const [filterType, setFilterType] = useState<string>('all');
   const [filterYear, setFilterYear] = useState<string>('all');
 
-  useEffect(() => {
-    // Start loading data immediately, don't wait for full auth context
-    fetchAlumni();
-  }, []);
-
-  // Handle authentication redirect separately
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/auth');
-    }
-  }, [user, authLoading, router]);
-
-  const fetchAlumni = async (isRetry = false) => {
+  const fetchAlumni = useCallback(async (isRetry = false) => {
     try {
       if (!isRetry) {
         setError('');
@@ -67,7 +56,14 @@ export default function AlumniPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [retryCount]);
+
+  useEffect(() => {
+    // Start loading data immediately, don't wait for full auth context
+    fetchAlumni();
+  }, [fetchAlumni]);
+
+  // No authentication redirect - let users see the page but show login prompt if not authenticated
 
   const filteredAlumni = alumni.filter((person) => {
     const matchesSearch = person.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -85,20 +81,15 @@ export default function AlumniPage() {
     new Set(alumni.map(person => person.graduation_year).filter((year): year is number => year !== null && year !== undefined))
   ).sort((a, b) => b - a);
 
-  if (authLoading || loading) {
+  // Show loading only for auth, not for content loading
+  if (authLoading) {
     return (
       <div className="min-h-screen">
         <Navigation />
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto"></div>
-            <p className="mt-4 text-gray-600">
-              {authLoading ? 'Checking authentication...' : 
-               retryCount > 0 ? `Loading member directory... (Retry ${retryCount}/2)` : 'Loading member directory...'}
-            </p>
-            {error && !authLoading && (
-              <p className="mt-2 text-sm text-gray-500">{error}</p>
-            )}
+            <p className="mt-4 text-gray-600">Checking authentication...</p>
           </div>
         </div>
       </div>
@@ -107,15 +98,18 @@ export default function AlumniPage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen">
-        <Navigation />
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto"></div>
-            <p className="mt-4 text-gray-600">Redirecting to login...</p>
-          </div>
-        </div>
-      </div>
+      <AuthPrompt
+        title="Member Directory"
+        description="Connect with KSO alumni and current members. Sign in to access the full member directory."
+        features={[
+          "Connect with Korean culture and community",
+          "Build professional networks with alumni", 
+          "Access exclusive member resources",
+          "Stay updated on KSO events and activities"
+        ]}
+        ctaText="Sign In to Access Directory"
+        ctaHref="/auth"
+      />
     );
   }
 
@@ -136,16 +130,24 @@ export default function AlumniPage() {
         </div>
       )}
 
+      {/* Hero Section */}
+      <section className="bg-white text-black py-16 sm:py-20 lg:py-24">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+          <h1 className="hero-title text-3xl sm:text-4xl md:text-5xl lg:text-6xl mb-4 sm:mb-6 animate-bounce-in text-black">Member Directory</h1>
+          <p className="hero-subtitle text-lg sm:text-xl lg:text-2xl text-gray-700 px-4 animate-slide-in-up stagger-1">
+            Connect with KSO members from across different graduating classes and backgrounds
+          </p>
+        </div>
+      </section>
+
+      {/* Horizontal separator line */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="border-t border-gray-300"></div>
+      </div>
+
       {/* Alumni Directory Section */}
-      <section className="min-h-screen bg-white py-12">
+      <section className="section-padding bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h1 className="text-3xl sm:text-4xl font-bold text-black mb-4">Member Directory</h1>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Connect with KSO members from across different graduating classes and backgrounds. 
-              This directory is only accessible to authenticated members.
-            </p>
-          </div>
 
           {/* Search and Filters */}
           <div className="mb-8 space-y-4">
@@ -191,7 +193,37 @@ export default function AlumniPage() {
           </div>
 
           {/* Alumni Grid */}
-          {filteredAlumni.length > 0 ? (
+          {loading ? (
+            <div className="grid grid-cols-3 gap-2 sm:gap-4 md:gap-6">
+              {[...Array(9)].map((_, index) => (
+                <div key={index} className="bg-white rounded-xl shadow-lg p-2 sm:p-4 md:p-6 border border-gray-100 h-full flex flex-col animate-pulse">
+                  <div className="text-center flex-1 flex flex-col">
+                    {/* Avatar skeleton */}
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full mx-auto mb-2 sm:mb-3 md:mb-4 bg-gray-200"></div>
+                    
+                    {/* Name skeleton */}
+                    <div className="h-4 sm:h-5 md:h-6 bg-gray-200 rounded mb-1 sm:mb-2"></div>
+                    
+                    {/* Username skeleton */}
+                    <div className="h-3 sm:h-4 bg-gray-200 rounded mb-1 sm:mb-2 w-3/4 mx-auto"></div>
+
+                    {/* Info skeleton */}
+                    <div className="space-y-1 sm:space-y-2">
+                      <div className="h-3 sm:h-4 bg-gray-200 rounded"></div>
+                      <div className="h-3 sm:h-4 bg-gray-200 rounded"></div>
+                      <div className="h-3 sm:h-4 bg-gray-200 rounded"></div>
+                    </div>
+
+                    {/* Bio skeleton */}
+                    <div className="mt-2 sm:mt-4 space-y-1">
+                      <div className="h-3 bg-gray-200 rounded"></div>
+                      <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : filteredAlumni.length > 0 ? (
             <div className="grid grid-cols-3 gap-2 sm:gap-4 md:gap-6">
               {filteredAlumni.map((person) => (
                 <div key={person.id} className="bg-white rounded-xl shadow-lg p-2 sm:p-4 md:p-6 border border-gray-100 hover:shadow-xl transition-shadow h-full flex flex-col">

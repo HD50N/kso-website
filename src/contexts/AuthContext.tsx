@@ -11,7 +11,7 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, fullName: string) => Promise<void>;
+  signUp: (email: string, password: string, fullName: string, username: string) => Promise<void>;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<Profile>) => Promise<void>;
 }
@@ -25,8 +25,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    console.log('AuthContext: Initializing authentication...');
+    
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('AuthContext: Initial session loaded:', !!session);
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
@@ -39,35 +42,83 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('AuthContext: Auth state change event:', event, 'Session:', !!session);
+      
+      // Always update session and user for now to ensure consistency
       setSession(session);
       setUser(session?.user ?? null);
+      
       if (session?.user) {
         await fetchProfile(session.user.id);
       } else {
         setProfile(null);
       }
+      
+      // Always set loading to false after auth state change
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      console.log('AuthContext: Cleaning up auth subscription');
+      subscription.unsubscribe();
+    };
   }, []);
 
   const fetchProfile = async (userId: string) => {
     try {
-      const { data, error } = await supabase
+      console.log('AuthContext: Fetching profile for user:', userId);
+      
+      // Add a timeout to prevent hanging
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Profile fetch timeout')), 10000);
+      });
+      
+      const fetchPromise = supabase
         .from('profiles')
         .select('*')
         .eq('user_id', userId)
         .single();
+      
+      const { data, error } = await Promise.race([fetchPromise, timeoutPromise]) as any;
 
       if (error) {
         console.error('Error fetching profile:', error);
+        if (error.code === 'PGRST116') {
+          console.log('AuthContext: No profile found for user, creating one...');
+          // Try to create a basic profile
+          const { data: newProfile, error: createError } = await supabase
+            .from('profiles')
+            .insert({
+              user_id: userId,
+              full_name: 'Unknown User',
+              is_admin: false,
+            })
+            .select()
+            .single();
+          
+          if (createError) {
+            console.error('Error creating profile:', createError);
+          } else {
+            console.log('AuthContext: Profile created successfully');
+            setProfile(newProfile);
+          }
+        }
+        // Set loading to false even on error
+        setLoading(false);
       } else {
+        console.log('AuthContext: Profile fetched successfully');
         setProfile(data);
+        // Set loading to false on success
+        setLoading(false);
       }
-    } catch (error) {
-      console.error('Error fetching profile:', error);
-    }
+          } catch (error) {
+        console.error('Error fetching profile:', error);
+        // Set loading to false on exception
+        setLoading(false);
+      } finally {
+        // Ensure loading is always set to false
+        setLoading(false);
+      }
   };
 
   const signIn = async (email: string, password: string) => {
@@ -78,7 +129,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (error) throw error;
   };
 
-  const signUp = async (email: string, password: string, fullName: string) => {
+  const signUp = async (email: string, password: string, fullName: string, username: string) => {
     try {
       console.log('Attempting to sign up user:', email);
       
@@ -108,8 +159,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                       .insert({
                         user_id: data.user.id,
                         full_name: fullName,
+                        username: username,
                         is_admin: false,
-                        username: null, // Will be set later in profile
                       });
         
         if (profileError) {

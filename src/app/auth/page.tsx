@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/lib/supabase';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import ScrollAnimation from '@/components/ScrollAnimation';
@@ -12,10 +13,50 @@ export default function AuthPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [username, setUsername] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [usernameError, setUsernameError] = useState('');
+  const [isCheckingUsername, setIsCheckingUsername] = useState(false);
   const { signIn, signUp } = useAuth();
   const router = useRouter();
+
+  // Function to validate username availability
+  const validateUsername = async (username: string): Promise<boolean> => {
+    if (!username || username.length < 3) return false;
+    
+    setIsCheckingUsername(true);
+    setUsernameError('');
+    
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('username')
+        .eq('username', username)
+        .single();
+      
+      if (error && error.code === 'PGRST116') {
+        // No rows returned - username is available
+        setIsCheckingUsername(false);
+        return true;
+      }
+      
+      // Username exists
+      setUsernameError('This username is already taken');
+      setIsCheckingUsername(false);
+      return false;
+    } catch (error) {
+      console.error('Username validation error:', error);
+      setIsCheckingUsername(false);
+      return false;
+    }
+  };
+
+  const handleUsernameBlur = async () => {
+    if (username.trim()) {
+      await validateUsername(username.trim());
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,7 +67,24 @@ export default function AuthPage() {
       if (isLogin) {
         await signIn(email, password);
       } else {
-        await signUp(email, password, fullName);
+        // Validate username for signup
+        if (username.trim().length < 3) {
+          setError('Username must be at least 3 characters long');
+          return;
+        }
+        if (!/^[a-zA-Z0-9_]+$/.test(username.trim())) {
+          setError('Username can only contain letters, numbers, and underscores');
+          return;
+        }
+        
+        // Check if username is available
+        const isUsernameAvailable = await validateUsername(username.trim());
+        if (!isUsernameAvailable) {
+          setError('Username is already taken');
+          return;
+        }
+        
+        await signUp(email, password, fullName, username.trim());
       }
       router.push('/profile');
     } catch (error: any) {
@@ -144,20 +202,46 @@ export default function AuthPage() {
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                   {!isLogin && (
-                    <div>
-                      <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-2">
-                        Full Name
-                      </label>
-                      <input
-                        id="fullName"
-                        type="text"
-                        value={fullName}
-                        onChange={(e) => setFullName(e.target.value)}
-                        required={!isLogin}
-                        className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
-                        placeholder="Enter your full name"
-                      />
-                    </div>
+                    <>
+                      <div>
+                        <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-2">
+                          Full Name
+                        </label>
+                        <input
+                          id="fullName"
+                          type="text"
+                          value={fullName}
+                          onChange={(e) => setFullName(e.target.value)}
+                          required={!isLogin}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                          placeholder="Enter your full name"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="username" className="block text-sm font-medium text-gray-700 mb-2">
+                          Username
+                        </label>
+                        <input
+                          id="username"
+                          type="text"
+                          value={username}
+                          onChange={(e) => setUsername(e.target.value)}
+                          onBlur={handleUsernameBlur}
+                          required={!isLogin}
+                          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                          placeholder="Choose a username"
+                        />
+                        {isCheckingUsername && (
+                          <p className="text-blue-600 text-xs mt-1">Checking username availability...</p>
+                        )}
+                        {usernameError && (
+                          <p className="text-red-600 text-xs mt-1">{usernameError}</p>
+                        )}
+                        <p className="text-xs text-gray-500 mt-1">
+                          Username can contain letters, numbers, and underscores. Must be at least 3 characters.
+                        </p>
+                      </div>
+                    </>
                   )}
 
                   <div>
@@ -210,6 +294,8 @@ export default function AuthPage() {
                     onClick={() => {
                       setIsLogin(!isLogin);
                       setError('');
+                      setUsernameError('');
+                      setUsername('');
                     }}
                     className="text-black hover:text-gray-700 font-medium"
                   >

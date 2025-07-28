@@ -8,6 +8,7 @@ import { supabase } from '@/lib/supabase';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import ScrollAnimation from '@/components/ScrollAnimation';
+import AuthPrompt from '@/components/AuthPrompt';
 import ReactCrop, { Crop, PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 
@@ -32,11 +33,7 @@ export default function ProfilePage() {
   const [croppedFile, setCroppedFile] = useState<File | null>(null);
   const imgRef = useRef<HTMLImageElement>(null);
 
-              useEffect(() => {
-                if (!authLoading && !user) {
-                  router.push('/auth');
-                }
-              }, [user, authLoading, router]);
+              // No authentication redirect - show login prompt if not authenticated
 
               useEffect(() => {
                 if (profile) {
@@ -412,7 +409,21 @@ export default function ProfilePage() {
   }
 
   if (!user) {
-    return null;
+    return (
+      <AuthPrompt
+        title="Your Profile"
+        description="Manage your KSO profile, connect with other members, and stay updated on events."
+        features={[
+          "Update your personal information",
+          "Add your graduation year and major",
+          "Connect your social media profiles", 
+          "Upload a profile photo",
+          "Set a custom username"
+        ]}
+        ctaText="Sign In to Access Profile"
+        ctaHref="/auth"
+      />
+    );
   }
 
   return (

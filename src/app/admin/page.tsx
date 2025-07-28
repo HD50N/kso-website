@@ -1,12 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
 import { Profile, BoardPosition } from '@/lib/supabase';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
+import AuthPrompt from '@/components/AuthPrompt';
+import UserProfileModal from '@/components/UserProfileModal';
 
 export default function AdminPage() {
   const { user, profile, loading: authLoading } = useAuth();
@@ -27,25 +30,10 @@ export default function AdminPage() {
   const [addingPosition, setAddingPosition] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [savingChanges, setSavingChanges] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
 
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push('/auth');
-      return;
-    }
-
-    if (!authLoading && profile && !profile.is_admin) {
-      router.push('/profile');
-      return;
-    }
-
-    if (profile?.is_admin) {
-      fetchUsers();
-      fetchBoardPositions();
-    }
-  }, [user, profile, authLoading, router]);
-
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       const { data, error } = await supabase
         .from('profiles')
@@ -64,9 +52,9 @@ export default function AdminPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const fetchBoardPositions = async () => {
+  const fetchBoardPositions = useCallback(async () => {
     setBoardLoading(true);
     try {
       const { data, error } = await supabase
@@ -89,7 +77,14 @@ export default function AdminPage() {
     } finally {
       setBoardLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (!authLoading && profile?.is_admin) {
+      fetchUsers();
+      fetchBoardPositions();
+    }
+  }, [authLoading, profile?.is_admin, fetchUsers, fetchBoardPositions]);
 
   const updateBoardPosition = async (positionId: string, updates: Partial<BoardPosition>) => {
     setUpdatingPosition(positionId);
@@ -272,6 +267,16 @@ export default function AdminPage() {
     setHasUnsavedChanges(true);
   };
 
+  const openProfileModal = (userId: string) => {
+    setSelectedUserId(userId);
+    setIsProfileModalOpen(true);
+  };
+
+  const closeProfileModal = () => {
+    setIsProfileModalOpen(false);
+    setSelectedUserId(null);
+  };
+
   const saveAllChanges = async () => {
     setSavingChanges(true);
     setError('');
@@ -428,24 +433,67 @@ export default function AdminPage() {
     return matchesSearch && matchesType;
   });
 
-  if (authLoading || loading) {
+  // Show loading only for auth, not for content loading
+  if (authLoading) {
     return (
       <div className="min-h-screen">
         <Navigation />
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto"></div>
-            <p className="mt-4 text-gray-600">
-              {authLoading ? 'Checking authentication...' : 'Loading admin panel...'}
-            </p>
+            <p className="mt-4 text-gray-600">Checking authentication...</p>
           </div>
         </div>
       </div>
     );
   }
 
-  if (!user || !profile?.is_admin) {
-    return null;
+  if (!user) {
+    return (
+      <AuthPrompt
+        title="Admin Panel"
+        description="Access the KSO admin dashboard to manage users and board configurations."
+        features={[
+          "Manage user accounts and permissions",
+          "Configure board positions",
+          "Monitor member activity",
+          "Update organization settings"
+        ]}
+        ctaText="Sign In to Access Admin Panel"
+        ctaHref="/auth"
+      />
+    );
+  }
+
+  if (!profile?.is_admin) {
+    return (
+      <div className="min-h-screen">
+        <Navigation />
+        <div className="min-h-screen flex items-center justify-center">
+          <div className="text-center max-w-md mx-auto px-4">
+            <div className="mb-8">
+              <h1 className="text-3xl font-bold text-black mb-4">Access Denied</h1>
+              <p className="text-gray-600 mb-6">
+                You don't have permission to access the admin panel. Only administrators can view this page.
+              </p>
+            </div>
+            <div className="bg-gray-50 rounded-lg p-6 mb-6">
+              <h2 className="text-lg font-semibold text-black mb-2">Need Admin Access?</h2>
+              <p className="text-sm text-gray-600">
+                If you believe you should have admin access, please contact the KSO board or your organization administrator.
+              </p>
+            </div>
+            <Link 
+              href="/profile"
+              className="inline-block bg-black text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-800 transition-colors"
+            >
+              Go to Profile
+            </Link>
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
   }
 
   return (
@@ -656,7 +704,36 @@ export default function AdminPage() {
                                     </tr>
                                   </thead>
                                   <tbody className="bg-white divide-y divide-gray-200">
-                                    {filteredUsers.map((user) => (
+                                    {loading ? (
+                                      // Loading skeletons
+                                      [...Array(5)].map((_, index) => (
+                                        <tr key={index} className="animate-pulse">
+                                          <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="flex items-center">
+                                              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gray-200 mr-3"></div>
+                                              <div>
+                                                <div className="h-4 bg-gray-200 rounded w-24 mb-1"></div>
+                                                <div className="h-3 bg-gray-200 rounded w-16"></div>
+                                              </div>
+                                            </div>
+                                          </td>
+                                          <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="h-6 bg-gray-200 rounded w-20"></div>
+                                          </td>
+                                          <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="h-6 bg-gray-200 rounded w-16"></div>
+                                          </td>
+                                          <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="flex space-x-2">
+                                              <div className="h-6 bg-gray-200 rounded w-20"></div>
+                                              <div className="h-6 bg-gray-200 rounded w-20"></div>
+                                              <div className="h-6 bg-gray-200 rounded w-20"></div>
+                                            </div>
+                                          </td>
+                                        </tr>
+                                      ))
+                                    ) : (
+                                      filteredUsers.map((user) => (
                                       <tr key={user.id} className="hover:bg-gray-50">
                                         <td className="px-6 py-4 whitespace-nowrap">
                                           <div className="flex items-center">
@@ -735,7 +812,7 @@ export default function AdminPage() {
                                               {updatingUser === user.id ? 'Updating...' : (user.user_type === 'board_member' ? 'Remove Board' : 'Make Board')}
                                             </button>
                                             <button
-                                              onClick={() => router.push(`/profile?user=${user.id}`)}
+                                              onClick={() => openProfileModal(user.user_id)}
                                               className="px-3 py-1 text-xs bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                                             >
                                               View Profile
@@ -743,7 +820,8 @@ export default function AdminPage() {
                                           </div>
                                         </td>
                                       </tr>
-                                    ))}
+                                    ))
+                                    )}
                                   </tbody>
                                 </table>
                               </div>
@@ -912,6 +990,15 @@ export default function AdminPage() {
       </section>
 
       <Footer />
+      
+      {/* User Profile Modal */}
+      {selectedUserId && (
+        <UserProfileModal
+          userId={selectedUserId}
+          isOpen={isProfileModalOpen}
+          onClose={closeProfileModal}
+        />
+      )}
     </div>
   );
 } 

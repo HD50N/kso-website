@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 
@@ -14,11 +14,7 @@ export default function Board() {
   const [error, setError] = useState<string>('');
   const [retryCount, setRetryCount] = useState(0);
 
-  useEffect(() => {
-    fetchBoardMembers();
-  }, []);
-
-  const fetchBoardMembers = async (isRetry = false) => {
+  const fetchBoardMembers = useCallback(async (isRetry = false) => {
     try {
       if (!isRetry) {
         setError('');
@@ -136,26 +132,15 @@ export default function Board() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [retryCount]);
 
-  if (loading) {
-    return (
-      <div className="min-h-screen">
-        <Navigation />
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto"></div>
-            <p className="mt-4 text-gray-600">
-              {retryCount > 0 ? `Loading executive board... (Retry ${retryCount}/2)` : 'Loading executive board...'}
-            </p>
-            {error && (
-              <p className="mt-2 text-sm text-gray-500">{error}</p>
-            )}
-          </div>
-        </div>
-      </div>
-    );
-  }
+  useEffect(() => {
+    fetchBoardMembers();
+  }, [fetchBoardMembers]);
+
+
+
+  // Remove the full-page loading state - we'll show loading skeletons instead
 
   return (
     <div className="min-h-screen">
@@ -201,7 +186,27 @@ export default function Board() {
           
           {/* Mobile: Compact List */}
           <div className="block md:hidden space-y-3">
-            {boardMembers.map((member, index) => (
+            {loading ? (
+              // Loading skeletons for mobile
+              [...Array(6)].map((_, index) => (
+                <div key={index} className="modern-card overflow-hidden shadow-lg animate-pulse">
+                  <div className="flex p-4">
+                    <div className="flex-shrink-0 w-16 h-16 rounded-lg bg-gray-200 mr-4"></div>
+                    <div className="flex-1 min-w-0">
+                      <div className="h-4 bg-gray-200 rounded mb-1"></div>
+                      <div className="h-3 bg-gray-200 rounded mb-1"></div>
+                      <div className="h-3 bg-gray-200 rounded mb-1"></div>
+                      <div className="h-3 bg-gray-200 rounded mb-2 w-2/3"></div>
+                      <div className="flex space-x-2">
+                        <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
+                        <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              boardMembers.map((member, index) => (
                 <div key={index} className={`modern-card overflow-hidden hover-lift shadow-lg ${!member.hasUser ? 'border-2 border-dashed border-gray-300' : ''}`}>
                   <div className="flex p-4">
                     <div className="flex-shrink-0 w-16 h-16 rounded-lg flex items-center justify-center mr-4 animate-pulse-slow hover-scale overflow-hidden">
@@ -263,12 +268,38 @@ export default function Board() {
                     </div>
                   </div>
                 </div>
-            ))}
+            ))
+            )}
           </div>
 
           {/* Tablet/Desktop: Card Grid */}
           <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
-            {boardMembers.map((member, index) => (
+            {loading ? (
+              // Loading skeletons for desktop
+              [...Array(8)].map((_, index) => (
+                <div key={index} className="bg-white rounded-lg shadow-lg overflow-hidden h-full flex flex-col animate-pulse">
+                  <div className="h-48 lg:h-64 bg-gray-200 flex-shrink-0"></div>
+                  <div className="p-4 lg:p-6 flex flex-col flex-1">
+                    <div className="mb-2">
+                      <div className="h-5 lg:h-6 bg-gray-200 rounded mb-2"></div>
+                      <div className="flex space-x-2 mt-2">
+                        <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
+                        <div className="w-8 h-8 bg-gray-200 rounded-full"></div>
+                      </div>
+                    </div>
+                    <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded mb-2"></div>
+                    <div className="h-3 bg-gray-200 rounded mb-3"></div>
+                    <div className="space-y-1 flex-1">
+                      <div className="h-3 bg-gray-200 rounded"></div>
+                      <div className="h-3 bg-gray-200 rounded"></div>
+                      <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              boardMembers.map((member, index) => (
                 <div key={index} className={`bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow hover-lift h-full flex flex-col ${
                   !member.hasUser ? 'border-2 border-dashed border-gray-300' : ''
                 }`}>
@@ -331,7 +362,8 @@ export default function Board() {
                     <p className="text-gray-700 text-xs lg:text-sm line-clamp-3 flex-1">{member.bio}</p>
                   </div>
                 </div>
-            ))}
+            ))
+            )}
           </div>
         </div>
       </section>

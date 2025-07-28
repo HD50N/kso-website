@@ -14,7 +14,7 @@ export default function Navigation() {
     { name: 'Home', href: '/' },
     { name: 'About Us', href: '/about' },
     { name: 'Executive Board', href: '/board' },
-    ...(user ? [{ name: 'Network', href: '/alumni' }] : []),
+    { name: 'Network', href: '/alumni' },
     { name: 'Culture Show', href: '/culture-show' },
     ...(profile?.is_admin ? [{ name: 'Admin', href: '/admin' }] : []),
   ];
