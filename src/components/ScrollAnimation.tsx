@@ -12,8 +12,8 @@ interface ScrollAnimationProps {
 export default function ScrollAnimation({ 
   children, 
   className = '', 
-  threshold = 0.1, 
-  rootMargin = '0px 0px -50px 0px' 
+  threshold = 0.6, 
+  rootMargin = '0px 0px 100px 0px' 
 }: ScrollAnimationProps) {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -22,6 +22,8 @@ export default function ScrollAnimation({
       ([entry]) => {
         if (entry.isIntersecting) {
           entry.target.classList.add('visible');
+        } else {
+          entry.target.classList.remove('visible');
         }
       },
       {

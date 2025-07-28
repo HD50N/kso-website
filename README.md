@@ -24,7 +24,6 @@ The Korean Students Organization (KSO) is dedicated to fostering a vibrant commu
 
 ### 👥 Executive Board
 - Board member profiles with roles and bios
-- Committee information
 - Leadership opportunities
 - Contact information
 
@@ -35,12 +34,7 @@ The Korean Students Organization (KSO) is dedicated to fostering a vibrant commu
 - Volunteer opportunities
 - Performance information
 
-### 📝 Forms & Applications
-- General membership application
-- Committee application
-- Volunteer signup
-- Interactive form navigation
-- Contact information
+
 
 ## 🛠️ Tech Stack
 
@@ -92,7 +86,7 @@ src/
 │   ├── about/             # About Us page
 │   ├── board/             # Executive Board page
 │   ├── culture-show/      # Culture Show page
-│   ├── forms/             # Forms & Applications page
+
 │   ├── layout.tsx         # Root layout
 │   └── globals.css        # Global styles
 ├── components/            # Reusable components
@@ -127,7 +121,6 @@ src/
 
 ### Executive Board (`/board`)
 - Board member profiles
-- Committee information
 - Leadership opportunities
 - Contact details
 
@@ -138,11 +131,7 @@ src/
 - Past show highlights
 - Volunteer signup
 
-### Forms (`/forms`)
-- Membership application
-- Committee application
-- Volunteer signup
-- Interactive form navigation
+
 
 ## 🔧 Customization
 
