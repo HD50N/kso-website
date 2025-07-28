@@ -13,37 +13,64 @@ export default function AlumniPage() {
   const router = useRouter();
   const [alumni, setAlumni] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string>('');
+  const [retryCount, setRetryCount] = useState(0);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
   const [filterYear, setFilterYear] = useState<string>('all');
 
   useEffect(() => {
+    // Start loading data immediately, don't wait for full auth context
+    fetchAlumni();
+  }, []);
+
+  // Handle authentication redirect separately
+  useEffect(() => {
     if (!authLoading && !user) {
       router.push('/auth');
-      return;
-    }
-    
-    if (user) {
-      fetchAlumni();
     }
   }, [user, authLoading, router]);
 
-  const fetchAlumni = async () => {
+  const fetchAlumni = async (isRetry = false) => {
     try {
+      if (!isRetry) {
+        setError('');
+        setRetryCount(0);
+      }
+      
       setLoading(true);
       
-      const { data, error } = await supabase
+      // Add timeout to prevent hanging requests
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Request timeout')), 10000); // 10 second timeout
+      });
+
+      const fetchPromise = supabase
         .from('profiles')
         .select('id, full_name, username, graduation_year, major, user_type, board_position, linkedin_url, instagram_url, bio, avatar_url')
         .order('full_name');
 
+      const { data, error } = await Promise.race([fetchPromise, timeoutPromise]) as any;
+
       if (error) {
         console.error('Error fetching alumni:', error);
+        throw new Error('Failed to load member directory');
       } else {
         setAlumni((data as Profile[]) || []);
+        setError(''); // Clear any previous errors
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching alumni:', error);
+      
+      if (retryCount < 2 && !isRetry) {
+        // Retry up to 2 times
+        setRetryCount(prev => prev + 1);
+        setTimeout(() => fetchAlumni(true), 2000); // Retry after 2 seconds
+        setError('Loading member directory... Retrying...');
+      } else {
+        setError('Failed to load member directory. Please refresh the page.');
+        setAlumni([]);
+      }
     } finally {
       setLoading(false);
     }
@@ -73,8 +100,12 @@ export default function AlumniPage() {
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto"></div>
             <p className="mt-4 text-gray-600">
-              {authLoading ? 'Checking authentication...' : 'Loading member directory...'}
+              {authLoading ? 'Checking authentication...' : 
+               retryCount > 0 ? `Loading member directory... (Retry ${retryCount}/2)` : 'Loading member directory...'}
             </p>
+            {error && !authLoading && (
+              <p className="mt-2 text-sm text-gray-500">{error}</p>
+            )}
           </div>
         </div>
       </div>
@@ -99,6 +130,19 @@ export default function AlumniPage() {
     <div className="min-h-screen">
       <Navigation />
       
+      {/* Error Display */}
+      {error && !loading && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 max-w-4xl mx-auto">
+          <p className="text-red-600 text-sm mb-3">{error}</p>
+          <button
+            onClick={() => fetchAlumni()}
+            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
+          >
+            Try Again
+          </button>
+        </div>
+      )}
+
       {/* Alumni Directory Section */}
       <section className="min-h-screen bg-white py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

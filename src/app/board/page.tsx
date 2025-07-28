@@ -11,41 +11,60 @@ import { Profile, BoardPosition } from '@/lib/supabase';
 export default function Board() {
   const [boardMembers, setBoardMembers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string>('');
+  const [retryCount, setRetryCount] = useState(0);
 
   useEffect(() => {
     fetchBoardMembers();
   }, []);
 
-  const fetchBoardMembers = async () => {
+  const fetchBoardMembers = async (isRetry = false) => {
     try {
-      // Add timeout to prevent hanging
+      if (!isRetry) {
+        setError('');
+        setRetryCount(0);
+      }
+      
+      setLoading(true);
+      
+      // Add timeout to prevent hanging requests
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Request timeout')), 15000); // 15 second timeout
+        setTimeout(() => reject(new Error('Request timeout')), 10000); // 10 second timeout
       });
 
-      // Fetch board positions from the database
-      const positionsPromise = supabase
-        .from('board_positions')
-        .select('*')
-        .eq('is_active', true)
-        .order('display_order');
-
-      const { data: positions, error: positionsError } = await Promise.race([
-        positionsPromise,
+      // Fetch board positions and user profiles in parallel for better performance
+      const [positionsResult, usersResult] = await Promise.race([
+        Promise.allSettled([
+          supabase
+            .from('board_positions')
+            .select('*')
+            .eq('is_active', true)
+            .order('display_order'),
+          supabase
+            .from('profiles')
+            .select('id, full_name, username, graduation_year, major, linkedin_url, instagram_url, bio, avatar_url')
+            .not('username', 'is', null)
+        ]),
         timeoutPromise
       ]) as any;
 
-      if (positionsError) {
-        console.error('Error fetching board positions:', positionsError);
+      // Handle positions result
+      if (positionsResult.status === 'rejected' || positionsResult.value.error) {
+        console.error('Error fetching board positions:', positionsResult.status === 'rejected' ? positionsResult.reason : positionsResult.value.error);
+        throw new Error('Failed to load board positions');
+      }
+
+      const positions = positionsResult.value.data;
+      if (!positions || positions.length === 0) {
         setBoardMembers([]);
         setLoading(false);
         return;
       }
 
-      if (!positions || positions.length === 0) {
-        setBoardMembers([]);
-        setLoading(false);
-        return;
+      // Handle users result
+      let users: any[] = [];
+      if (usersResult.status === 'fulfilled' && !usersResult.value.error) {
+        users = usersResult.value.data || [];
       }
 
       // Get unique usernames from board positions
@@ -53,26 +72,12 @@ export default function Board() {
         .map((pos: BoardPosition) => pos.username)
         .filter((username: string | null | undefined) => username !== null && username !== undefined);
 
-      // Only fetch users that are actually assigned to board positions
-      let users: any[] = [];
-      if (assignedUsernames.length > 0) {
-        const { data: usersData, error: usersError } = await supabase
-          .from('profiles')
-          .select('*')
-          .in('username', assignedUsernames);
-
-        if (usersError) {
-          console.error('Error fetching users:', usersError);
-          setBoardMembers([]);
-          setLoading(false);
-          return;
-        }
-        users = usersData || [];
-      }
+      // Filter users to only those assigned to board positions
+      const relevantUsers = users.filter(user => assignedUsernames.includes(user.username));
 
       // Create a map of usernames to user data
       const userMap = new Map();
-      users?.forEach(user => {
+      relevantUsers.forEach(user => {
         userMap.set(user.username, user);
       });
 
@@ -81,18 +86,18 @@ export default function Board() {
         if (position.username && userMap.has(position.username)) {
           // Use database data for users with usernames
           const user = userMap.get(position.username);
-                      return {
-              name: user.full_name,
-              role: position.role,
-              year: user.graduation_year ? `Class of ${user.graduation_year}` : 'Class of 2025',
-              major: user.major || 'Various Majors',
-              bio: user.bio || 'KSO Executive Board Member.',
-              linkedin: user.linkedin_url || '#',
-              instagram: user.instagram_url || '#',
-              username: user.username,
-              avatar_url: user.avatar_url,
-              hasUser: true
-            };
+          return {
+            name: user.full_name,
+            role: position.role,
+            year: user.graduation_year ? `Class of ${user.graduation_year}` : 'Class of 2025',
+            major: user.major || 'Various Majors',
+            bio: user.bio || 'KSO Executive Board Member.',
+            linkedin: user.linkedin_url || '#',
+            instagram: user.instagram_url || '#',
+            username: user.username,
+            avatar_url: user.avatar_url,
+            hasUser: true
+          };
         } else {
           // Show "COMING SOON" for positions without usernames
           return {
@@ -109,12 +114,19 @@ export default function Board() {
       });
 
       setBoardMembers(combinedBoardMembers);
+      setError(''); // Clear any previous errors
     } catch (error: any) {
       console.error('Error fetching board members:', error);
-      if (error.message?.includes('timeout')) {
-        console.error('Board members fetch timed out');
+      
+      if (retryCount < 2 && !isRetry) {
+        // Retry up to 2 times
+        setRetryCount(prev => prev + 1);
+        setTimeout(() => fetchBoardMembers(true), 2000); // Retry after 2 seconds
+        setError('Loading board members... Retrying...');
+      } else {
+        setError('Failed to load board members. Please refresh the page.');
+        setBoardMembers([]);
       }
-      setBoardMembers([]);
     } finally {
       setLoading(false);
     }
@@ -127,7 +139,12 @@ export default function Board() {
         <div className="min-h-screen flex items-center justify-center">
           <div className="text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading executive board...</p>
+            <p className="mt-4 text-gray-600">
+              {retryCount > 0 ? `Loading executive board... (Retry ${retryCount}/2)` : 'Loading executive board...'}
+            </p>
+            {error && (
+              <p className="mt-2 text-sm text-gray-500">{error}</p>
+            )}
           </div>
         </div>
       </div>
@@ -138,6 +155,19 @@ export default function Board() {
     <div className="min-h-screen">
       <Navigation />
       
+      {/* Error Display */}
+      {error && !loading && (
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6 max-w-4xl mx-auto">
+          <p className="text-red-600 text-sm mb-3">{error}</p>
+          <button
+            onClick={() => fetchBoardMembers()}
+            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm"
+          >
+            Try Again
+          </button>
+        </div>
+      )}
+
       {/* Hero Section */}
       <section className="bg-white text-black py-16 sm:py-20 lg:py-24">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
