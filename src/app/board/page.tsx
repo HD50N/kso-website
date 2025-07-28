@@ -28,42 +28,49 @@ export default function Board() {
       
       setLoading(true);
       
-      // Fetch board positions and user profiles in parallel for better performance
-      const [positionsResult, usersResult] = await Promise.allSettled([
-        supabase
-          .from('board_positions')
-          .select('*')
-          .eq('is_active', true)
-          .order('display_order'),
-        supabase
-          .from('profiles')
-          .select('id, full_name, username, graduation_year, major, linkedin_url, instagram_url, bio, avatar_url')
-          .not('username', 'is', null)
-      ]);
-
-      // Handle positions result
-      if (positionsResult.status === 'rejected' || positionsResult.value.error) {
-        console.error('Error fetching board positions:', positionsResult.status === 'rejected' ? positionsResult.reason : positionsResult.value.error);
+      console.log('About to fetch board positions...');
+      
+      // Fetch board positions first
+      const { data: positions, error: positionsError } = await supabase
+        .from('board_positions')
+        .select('*')
+        .eq('is_active', true)
+        .order('display_order');
+      
+      console.log('Board positions query completed');
+      
+      if (positionsError) {
+        console.error('Error fetching board positions:', positionsError);
         throw new Error('Failed to load board positions');
       }
-
-      const positions = positionsResult.value.data;
-      console.log('Board positions fetched:', positions?.length || 0);
       
       if (!positions || positions.length === 0) {
         setBoardMembers([]);
         setLoading(false);
         return;
       }
-
-      // Handle users result
-      let users: any[] = [];
-      if (usersResult.status === 'fulfilled' && !usersResult.value.error) {
-        users = usersResult.value.data || [];
-        console.log('Users fetched:', users.length);
+      
+      console.log('About to fetch users...');
+      
+      // Fetch all users with usernames
+      const { data: users, error: usersError } = await supabase
+        .from('profiles')
+        .select('id, full_name, username, graduation_year, major, linkedin_url, instagram_url, bio, avatar_url')
+        .not('username', 'is', null);
+      
+      console.log('Users query completed');
+      
+      let userData: any[] = [];
+      if (usersError) {
+        console.error('Error fetching users:', usersError);
+        // Continue with just positions if user fetch fails
+        userData = [];
       } else {
-        console.log('Users fetch failed or empty');
+        userData = users || [];
       }
+
+      console.log('Board positions fetched:', positions?.length || 0);
+      console.log('Users fetched:', userData.length);
 
       // Get unique usernames from board positions
       const assignedUsernames = positions
@@ -71,7 +78,7 @@ export default function Board() {
         .filter((username: string | null | undefined) => username !== null && username !== undefined);
 
       // Filter users to only those assigned to board positions
-      const relevantUsers = users.filter(user => assignedUsernames.includes(user.username));
+      const relevantUsers = userData.filter(user => assignedUsernames.includes(user.username));
 
       // Create a map of usernames to user data
       const userMap = new Map();
