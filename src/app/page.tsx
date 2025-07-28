@@ -126,21 +126,21 @@ export default function Home() {
             <div className="text-center lg:text-left">
               {/* Title */}
               <ScrollAnimation>
-                <h1 className="hero-title text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl mb-4 sm:mb-6 animate-bounce-in text-black">
+                <h1 className="hero-title text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl mb-4 sm:mb-6 animate-bounce-in text-black">
                   Korean Students Organization
                 </h1>
               </ScrollAnimation>
               
               {/* Subtitle */}
               <ScrollAnimation>
-                <p className="hero-subtitle text-lg sm:text-xl md:text-2xl lg:text-3xl mb-6 sm:mb-8 text-gray-700 animate-slide-in-up stagger-1">
+                <p className="hero-subtitle text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl mb-6 sm:mb-8 text-gray-700 animate-slide-in-up stagger-1">
                   University of Chicago
                 </p>
               </ScrollAnimation>
               
               {/* Description */}
               <ScrollAnimation>
-                <p className="font-body text-base sm:text-lg md:text-xl lg:text-2xl mb-8 sm:mb-12 max-w-2xl sm:max-w-3xl lg:max-w-4xl mx-auto lg:mx-0 text-gray-600 animate-fade-in stagger-2 px-4 lg:px-0">
+                <p className="font-body text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl mb-8 sm:mb-12 max-w-2xl sm:max-w-3xl lg:max-w-4xl mx-auto lg:mx-0 text-gray-600 animate-fade-in stagger-2 px-4 lg:px-0">
                   Representing the Korean community and strengthening its voice on campus and beyond
                 </p>
               </ScrollAnimation>
@@ -208,7 +208,7 @@ export default function Home() {
       <section className="min-h-screen bg-white flex items-center justify-center relative overflow-hidden">
         <PhotoCollage />
         <ScrollAnimation className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-          <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-light text-black leading-relaxed max-w-4xl mx-auto">
+          <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-light text-black leading-relaxed max-w-4xl mx-auto">
             Our mission is to represent the Korean community and strengthen its voice on (and beyond) campus 
             and to bring together those who have a common interest in Korean culture through social activities and events
           </p>
@@ -226,41 +226,41 @@ export default function Home() {
       <section className="section-padding bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <ScrollAnimation className="text-center mb-8 sm:mb-12">
-            <h2 className="text-xl sm:text-2xl font-bold text-black mb-4">Sponsors</h2>
-            <p className="text-gray-600 text-sm sm:text-base max-w-2xl mx-auto">
+            <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-black mb-4">Sponsors</h2>
+            <p className="text-gray-600 text-xs sm:text-sm md:text-base max-w-2xl mx-auto px-4">
               We're grateful for the support of the past, present, and future sponsors that have and will help make our events possible. 
             </p>
           </ScrollAnimation>
           
                       <ScrollAnimation>
-                        <div className="flex flex-wrap justify-center gap-6 lg:gap-8">
+                        <div className="flex flex-wrap justify-center gap-4 sm:gap-6 lg:gap-8">
                           {/* Weee! Sponsor */}
-                          <div className="modern-card hover-lift shadow-lg p-6 sm:p-8 bg-white rounded-xl border border-gray-100 transition-all duration-300 hover:shadow-xl">
+                          <div className="modern-card hover-lift shadow-lg p-4 sm:p-6 lg:p-8 bg-white rounded-xl border border-gray-100 transition-all duration-300 hover:shadow-xl">
                             <div className="text-center">
-                              <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white rounded-xl mx-auto mb-4 flex items-center justify-center p-3 shadow-sm border border-gray-100">
+                              <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 bg-white rounded-xl mx-auto mb-4 flex items-center justify-center p-3 shadow-sm border border-gray-100">
                                 <img 
                                   src="/weee!.jpg" 
                                   alt="Weee! Sponsor Logo" 
                                   className="w-full h-full object-contain"
                                 />
                               </div>
-                              <h3 className="text-lg font-bold text-black mb-2">Weee!</h3>
-                              <p className="text-sm text-gray-600">Food & Grocery Sponsor</p>
+                              <h3 className="text-base sm:text-lg font-bold text-black mb-2">Weee!</h3>
+                              <p className="text-xs sm:text-sm text-gray-600">Food & Grocery Sponsor</p>
                             </div>
                           </div>
                           
                           {/* The Face Shop Sponsor */}
-                          <div className="modern-card hover-lift shadow-lg p-6 sm:p-8 bg-white rounded-xl border border-gray-100 transition-all duration-300 hover:shadow-xl">
+                          <div className="modern-card hover-lift shadow-lg p-4 sm:p-6 lg:p-8 bg-white rounded-xl border border-gray-100 transition-all duration-300 hover:shadow-xl">
                             <div className="text-center">
-                              <div className="w-20 h-20 sm:w-24 sm:h-24 bg-white rounded-xl mx-auto mb-4 flex items-center justify-center p-3 shadow-sm border border-gray-100">
+                              <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 bg-white rounded-xl mx-auto mb-4 flex items-center justify-center p-3 shadow-sm border border-gray-100">
                                 <img 
                                   src="/thefaceshop.jpg" 
                                   alt="The Face Shop Sponsor Logo" 
                                   className="w-full h-full object-contain"
                                 />
                               </div>
-                              <h3 className="text-lg font-bold text-black mb-2">The Face Shop</h3>
-                              <p className="text-sm text-gray-600">Clean Beauty Sponsor</p>
+                              <h3 className="text-base sm:text-lg font-bold text-black mb-2">The Face Shop</h3>
+                              <p className="text-xs sm:text-sm text-gray-600">Clean Beauty Sponsor</p>
                             </div>
                           </div>
                         </div>
@@ -286,8 +286,8 @@ export default function Home() {
       <section id="fall-events" className="section-padding">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <ScrollAnimation className="text-center mb-8 sm:mb-12 lg:mb-16">
-            <h2 className="section-title text-2xl sm:text-3xl md:text-4xl text-black mb-3 sm:mb-4">Fall 2025-2026</h2>
-            <p className="font-body text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto px-4">Check out our latest events and stay connected with the Korean community</p>
+            <h2 className="section-title text-xl sm:text-2xl md:text-3xl lg:text-4xl text-black mb-3 sm:mb-4">Fall 2025-2026</h2>
+            <p className="font-body text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl text-gray-600 max-w-2xl mx-auto px-4">Check out our latest events and stay connected with the Korean community</p>
           </ScrollAnimation>
           
           {/* Mobile: Timeline View */}
@@ -309,9 +309,9 @@ export default function Home() {
                     </div>
                     
                     {/* Event card */}
-                    <div className="flex-1 bg-white rounded-lg shadow-lg p-4 hover-lift border-l-4 border-black">
-                      <h3 className="text-lg font-bold text-black mb-2">{event.title}</h3>
-                      <p className="text-sm text-gray-600 line-clamp-3">{event.description}</p>
+                    <div className="flex-1 bg-white rounded-lg shadow-lg p-3 sm:p-4 hover-lift border-l-4 border-black">
+                      <h3 className="text-base sm:text-lg font-bold text-black mb-2">{event.title}</h3>
+                      <p className="text-xs sm:text-sm text-gray-600 line-clamp-3">{event.description}</p>
                     </div>
                   </div>
                 </ScrollAnimation>
@@ -376,7 +376,7 @@ export default function Home() {
       <section className="section-padding bg-white relative overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <ScrollAnimation className="text-center mb-6 sm:mb-8 lg:mb-12">
-            <h2 className="section-title text-xl sm:text-2xl md:text-3xl lg:text-4xl mb-3 sm:mb-4 text-black">Our Impact</h2>
+            <h2 className="section-title text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl mb-3 sm:mb-4 text-black">Our Impact</h2>
             <p className="font-body text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto px-4">Celebrating community building and cultural celebration</p>
           </ScrollAnimation>
           

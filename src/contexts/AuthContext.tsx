@@ -136,21 +136,71 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     console.log('Updating profile for user:', user.id);
     console.log('Updates:', updates);
 
-    const { data, error } = await supabase
-      .from('profiles')
-      .update(updates)
-      .eq('user_id', user.id)
-      .select();
+    // Add timeout and retry logic
+    const maxRetries = 3;
+    const timeoutMs = 10000; // 10 seconds timeout
 
-    if (error) {
-      console.error('Error updating profile:', error);
-      throw error;
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`Profile update attempt ${attempt}/${maxRetries}`);
+
+        // Create a timeout promise
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Request timeout')), timeoutMs);
+        });
+
+        // Create the update promise
+        const updatePromise = supabase
+          .from('profiles')
+          .update(updates)
+          .eq('user_id', user.id)
+          .select();
+
+        // Race between timeout and update
+        const { data, error } = await Promise.race([updatePromise, timeoutPromise]) as any;
+
+        if (error) {
+          console.error(`Error updating profile (attempt ${attempt}):`, error);
+          
+          // If it's a network error or timeout, retry
+          if (attempt < maxRetries && (
+            error.message?.includes('timeout') ||
+            error.message?.includes('network') ||
+            error.code === 'PGRST301' || // Supabase timeout
+            error.code === 'PGRST302'    // Supabase connection error
+          )) {
+            console.log(`Retrying in ${attempt * 1000}ms...`);
+            await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+            continue;
+          }
+          
+          throw error;
+        }
+
+        console.log('Profile updated successfully:', data);
+        
+        // Refresh profile
+        await fetchProfile(user.id);
+        return; // Success, exit retry loop
+
+      } catch (error: any) {
+        console.error(`Profile update failed (attempt ${attempt}):`, error);
+        
+        if (attempt === maxRetries) {
+          // Final attempt failed
+          if (error.message?.includes('timeout')) {
+            throw new Error('Request timed out. Please check your connection and try again.');
+          } else if (error.message?.includes('network')) {
+            throw new Error('Network error. Please check your connection and try again.');
+          } else {
+            throw error;
+          }
+        }
+        
+        // Wait before retrying (exponential backoff)
+        await new Promise(resolve => setTimeout(resolve, attempt * 1000));
+      }
     }
-
-    console.log('Profile updated successfully:', data);
-    
-    // Refresh profile
-    await fetchProfile(user.id);
   };
 
   const value = {

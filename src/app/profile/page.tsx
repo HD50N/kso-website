@@ -26,6 +26,7 @@ export default function ProfilePage() {
   const [showCropModal, setShowCropModal] = useState(false);
   const [crop, setCrop] = useState<Crop>();
   const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
+  const [isOnline, setIsOnline] = useState(true);
   const imgRef = useRef<HTMLImageElement>(null);
 
               useEffect(() => {
@@ -57,6 +58,23 @@ export default function ProfilePage() {
                   }
                 };
               }, [previewUrl]);
+
+              // Monitor online/offline status
+              useEffect(() => {
+                const handleOnline = () => setIsOnline(true);
+                const handleOffline = () => setIsOnline(false);
+
+                window.addEventListener('online', handleOnline);
+                window.addEventListener('offline', handleOffline);
+
+                // Check initial status
+                setIsOnline(navigator.onLine);
+
+                return () => {
+                  window.removeEventListener('online', handleOnline);
+                  window.removeEventListener('offline', handleOffline);
+                };
+              }, []);
 
                 const handleSubmit = async (e: React.FormEvent) => {
                 e.preventDefault();
@@ -95,17 +113,35 @@ export default function ProfilePage() {
                   };
 
                   console.log('Submitting profile update:', cleanedData);
-                  await updateProfile(cleanedData);
+                  
+                  // Add a timeout for the entire operation
+                  const timeoutPromise = new Promise((_, reject) => {
+                    setTimeout(() => reject(new Error('Operation timed out')), 15000); // 15 seconds
+                  });
+                  
+                  await Promise.race([
+                    updateProfile(cleanedData),
+                    timeoutPromise
+                  ]);
+                  
                   setIsEditing(false);
                   setSuccess('Profile updated successfully!');
                   // Clear success message after 3 seconds
                   setTimeout(() => setSuccess(''), 3000);
                 } catch (error: any) {
                   console.error('Profile update error:', error);
-                  if (error.message.includes('duplicate key') || error.message.includes('username')) {
+                  
+                  // Handle specific error types
+                  if (error.message?.includes('duplicate key') || error.message?.includes('username')) {
                     setUsernameError('This username is already taken');
+                  } else if (error.message?.includes('timeout') || error.message?.includes('timed out')) {
+                    setError('Request timed out. Please check your connection and try again.');
+                  } else if (error.message?.includes('network') || error.message?.includes('connection')) {
+                    setError('Network error. Please check your connection and try again.');
+                  } else if (error.message?.includes('auth') || error.message?.includes('session')) {
+                    setError('Authentication error. Please refresh the page and try again.');
                   } else {
-                    setError(error.message);
+                    setError(error.message || 'An unexpected error occurred. Please try again.');
                   }
                 } finally {
                   setLoading(false);
@@ -277,26 +313,36 @@ export default function ProfilePage() {
     setSuccess('');
 
     try {
-      // Upload to Supabase Storage
-      const fileExt = selectedFile.name.split('.').pop();
-      const fileName = `${Date.now()}.${fileExt}`;
-      const filePath = `${user.id}/${fileName}`;
+      // Add timeout for upload operation
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Upload timed out')), 20000); // 20 seconds
+      });
 
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(filePath, selectedFile);
+      await Promise.race([
+        (async () => {
+          // Upload to Supabase Storage
+          const fileExt = selectedFile.name.split('.').pop();
+          const fileName = `${Date.now()}.${fileExt}`;
+          const filePath = `${user.id}/${fileName}`;
 
-      if (uploadError) {
-        throw uploadError;
-      }
+          const { error: uploadError } = await supabase.storage
+            .from('avatars')
+            .upload(filePath, selectedFile);
 
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(filePath);
+          if (uploadError) {
+            throw uploadError;
+          }
 
-      // Update profile with new avatar URL
-      await updateProfile({ avatar_url: publicUrl });
+          // Get public URL
+          const { data: { publicUrl } } = supabase.storage
+            .from('avatars')
+            .getPublicUrl(filePath);
+
+          // Update profile with new avatar URL
+          await updateProfile({ avatar_url: publicUrl });
+        })(),
+        timeoutPromise
+      ]);
       
       setSuccess('Profile photo updated successfully!');
       setSelectedFile(null);
@@ -306,7 +352,17 @@ export default function ProfilePage() {
       setTimeout(() => setSuccess(''), 3000);
     } catch (error: any) {
       console.error('Photo upload error:', error);
-      setError(error.message || 'Failed to upload photo');
+      
+      // Handle specific error types
+      if (error.message?.includes('timeout') || error.message?.includes('timed out')) {
+        setError('Upload timed out. Please check your connection and try again.');
+      } else if (error.message?.includes('network') || error.message?.includes('connection')) {
+        setError('Network error. Please check your connection and try again.');
+      } else if (error.message?.includes('storage') || error.message?.includes('bucket')) {
+        setError('Storage error. Please try again or contact support.');
+      } else {
+        setError(error.message || 'Failed to upload photo. Please try again.');
+      }
     } finally {
       setUploadingPhoto(false);
     }
@@ -320,14 +376,29 @@ export default function ProfilePage() {
     setSuccess('');
 
     try {
-      // Update profile to remove avatar URL
-      await updateProfile({ avatar_url: undefined });
+      // Add timeout for removal operation
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Operation timed out')), 15000); // 15 seconds
+      });
+
+      await Promise.race([
+        updateProfile({ avatar_url: undefined }),
+        timeoutPromise
+      ]);
       
       setSuccess('Profile photo removed successfully!');
       setTimeout(() => setSuccess(''), 3000);
     } catch (error: any) {
       console.error('Photo removal error:', error);
-      setError(error.message || 'Failed to remove photo');
+      
+      // Handle specific error types
+      if (error.message?.includes('timeout') || error.message?.includes('timed out')) {
+        setError('Operation timed out. Please check your connection and try again.');
+      } else if (error.message?.includes('network') || error.message?.includes('connection')) {
+        setError('Network error. Please check your connection and try again.');
+      } else {
+        setError(error.message || 'Failed to remove photo. Please try again.');
+      }
     } finally {
       setUploadingPhoto(false);
     }
@@ -351,6 +422,19 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen">
       <Navigation />
+      
+      {/* Network Status Indicator */}
+      {!isOnline && (
+        <div className="fixed top-20 left-1/2 transform -translate-x-1/2 z-50 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg">
+          <div className="flex items-center space-x-2">
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192L5.636 18.364M12 2.25a9.75 9.75 0 100 19.5 9.75 9.75 0 000-19.5z" />
+            </svg>
+            <span className="text-sm font-medium">You're offline. Some features may not work.</span>
+          </div>
+        </div>
+      )}
+      
       {/* Profile Section */}
       <section className="min-h-screen bg-white py-8">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
