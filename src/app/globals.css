@@ -12,9 +12,318 @@
   --korean-ink: #1B1B1B;      /* Traditional ink black */
   --korean-cream: #F5F5DC;    /* Traditional paper color */
   
+  /* Dark mode colors - inverted versions */
+  --dark-korean-red: #32D1C5;      /* Inverted Korean red */
+  --dark-korean-blue: #FFB85F;     /* Inverted Korean blue */
+  --dark-korean-white: #000000;    /* Inverted white (black) */
+  --dark-korean-gold: #2B50C8;     /* Inverted gold */
+  --dark-korean-jade: #B583A6;     /* Inverted jade */
+  --dark-korean-ink: #E4E4E4;      /* Inverted ink (light gray) */
+  --dark-korean-cream: #0A0A23;    /* Inverted cream (dark blue-gray) */
+  
   /* Font variables */
   --font-inter: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-poppins: 'Poppins', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Dark mode class - applies inverted colors */
+.dark-mode {
+  --korean-red: var(--dark-korean-red);
+  --korean-blue: var(--dark-korean-blue);
+  --korean-white: var(--dark-korean-white);
+  --korean-gold: var(--dark-korean-gold);
+  --korean-jade: var(--dark-korean-jade);
+  --korean-ink: var(--dark-korean-ink);
+  --korean-cream: var(--dark-korean-cream);
+}
+
+/* Dark mode specific background and text colors */
+.dark-mode body {
+  background-color: #0A0A23;
+  color: #E4E4E4;
+}
+
+.dark-mode .bg-white {
+  background-color: #0A0A23;
+}
+
+.dark-mode .text-black {
+  color: #E4E4E4;
+}
+
+.dark-mode .text-gray-800 {
+  color: #E4E4E4;
+}
+
+.dark-mode .text-gray-700 {
+  color: #D1D5DB;
+}
+
+.dark-mode .text-gray-600 {
+  color: #9CA3AF;
+}
+
+.dark-mode .bg-gray-50 {
+  background-color: #1F2937;
+}
+
+.dark-mode .bg-gray-100 {
+  background-color: #374151;
+}
+
+.dark-mode .bg-gray-200 {
+  background-color: #4B5563;
+}
+
+.dark-mode .border-gray-200 {
+  border-color: #4B5563;
+}
+
+.dark-mode .border-gray-300 {
+  border-color: #6B7280;
+}
+
+/* Dark mode for glass morphism effects */
+.dark-mode .glass {
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dark-mode .modern-card {
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Additional dark mode overrides for common Tailwind classes */
+.dark-mode .bg-gray-900 {
+  background-color: #111827;
+}
+
+.dark-mode .bg-gray-800 {
+  background-color: #1F2937;
+}
+
+.dark-mode .bg-gray-700 {
+  background-color: #374151;
+}
+
+.dark-mode .bg-gray-600 {
+  background-color: #4B5563;
+}
+
+.dark-mode .text-gray-900 {
+  color: #F9FAFB;
+}
+
+.dark-mode .text-gray-500 {
+  color: #9CA3AF;
+}
+
+.dark-mode .text-gray-400 {
+  color: #9CA3AF;
+}
+
+.dark-mode .text-gray-300 {
+  color: #D1D5DB;
+}
+
+.dark-mode .text-gray-200 {
+  color: #E5E7EB;
+}
+
+.dark-mode .text-gray-100 {
+  color: #F3F4F6;
+}
+
+.dark-mode .border-gray-100 {
+  border-color: #374151;
+}
+
+.dark-mode .border-gray-400 {
+  border-color: #6B7280;
+}
+
+.dark-mode .border-gray-500 {
+  border-color: #9CA3AF;
+}
+
+.dark-mode .border-gray-600 {
+  border-color: #D1D5DB;
+}
+
+.dark-mode .shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+}
+
+.dark-mode .shadow-xl {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+}
+
+/* Dark mode hover effects */
+.dark-mode .hover\:bg-gray-50:hover {
+  background-color: #1F2937;
+}
+
+.dark-mode .hover\:bg-gray-100:hover {
+  background-color: #374151;
+}
+
+.dark-mode .hover\:text-gray-900:hover {
+  color: #F9FAFB;
+}
+
+.dark-mode .hover\:border-gray-300:hover {
+  border-color: #6B7280;
+}
+
+/* Dark mode for form elements */
+.dark-mode input,
+.dark-mode textarea,
+.dark-mode select {
+  background-color: #374151;
+  border-color: #6B7280;
+  color: #F9FAFB;
+}
+
+.dark-mode input:focus,
+.dark-mode textarea:focus,
+.dark-mode select:focus {
+  border-color: var(--korean-blue);
+  box-shadow: 0 0 0 3px rgba(0, 71, 160, 0.1);
+}
+
+/* Dark mode for buttons */
+.dark-mode .bg-blue-600 {
+  background-color: var(--korean-blue);
+}
+
+.dark-mode .bg-red-600 {
+  background-color: var(--korean-red);
+}
+
+.dark-mode .bg-green-600 {
+  background-color: var(--korean-jade);
+}
+
+.dark-mode .bg-yellow-600 {
+  background-color: var(--korean-gold);
+}
+
+/* Dark mode for links */
+.dark-mode a {
+  color: var(--korean-blue);
+}
+
+.dark-mode a:hover {
+  color: var(--korean-red);
+}
+
+/* Dark mode for code blocks */
+.dark-mode code {
+  background-color: #374151;
+  color: #F9FAFB;
+}
+
+.dark-mode pre {
+  background-color: #1F2937;
+  color: #F9FAFB;
+}
+
+/* Dark mode for tables */
+.dark-mode table {
+  border-color: #4B5563;
+}
+
+.dark-mode th,
+.dark-mode td {
+  border-color: #4B5563;
+}
+
+/* Dark mode for modals and overlays */
+.dark-mode .bg-black\/50 {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.dark-mode .bg-white\/90 {
+  background-color: rgba(0, 0, 0, 0.9);
+}
+
+/* Dark mode for scrollbars */
+.dark-mode ::-webkit-scrollbar {
+  width: 8px;
+}
+
+.dark-mode ::-webkit-scrollbar-track {
+  background: #1F2937;
+}
+
+.dark-mode ::-webkit-scrollbar-thumb {
+  background: #4B5563;
+  border-radius: 4px;
+}
+
+.dark-mode ::-webkit-scrollbar-thumb:hover {
+  background: #6B7280;
+}
+
+/* Dark mode for navbar */
+.dark-mode nav {
+  background-color: #111827;
+  border-color: #374151;
+}
+
+.dark-mode nav .text-black {
+  color: #F9FAFB;
+}
+
+.dark-mode nav .text-gray-700 {
+  color: #D1D5DB;
+}
+
+.dark-mode nav .hover\:text-black:hover {
+  color: #F9FAFB;
+}
+
+.dark-mode nav .hover\:bg-gray-50:hover {
+  background-color: #374151;
+}
+
+.dark-mode nav .bg-gray-50 {
+  background-color: #374151;
+}
+
+.dark-mode nav .border-gray-100 {
+  border-color: #374151;
+}
+
+.dark-mode nav .border-gray-300 {
+  border-color: #6B7280;
+}
+
+/* Dark mode for navbar logo and text */
+.dark-mode nav .font-display {
+  color: #F9FAFB;
+}
+
+.dark-mode nav .group-hover\:scale-110:hover {
+  color: #F9FAFB;
+}
+
+/* Dark mode for navbar underline */
+.dark-mode nav .bg-black {
+  background-color: #F9FAFB;
+}
+
+/* Dark mode for login button */
+.dark-mode nav .bg-black.text-white {
+  background-color: #F9FAFB;
+  color: #111827;
+}
+
+.dark-mode nav .bg-black.text-white:hover {
+  background-color: #E5E7EB;
 }
 
 /* Modern animations */

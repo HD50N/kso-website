@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
+import ThemeToggle from './ThemeToggle';
 
 interface NavigationProps {
   onOpenCart?: () => void;
@@ -67,6 +68,9 @@ export default function Navigation({ onOpenCart }: NavigationProps) {
           <div className="flex items-center w-32 justify-end z-10">
             {/* Auth buttons - Desktop */}
             <div className="hidden lg:flex items-center space-x-3">
+              {/* Theme Toggle */}
+              <ThemeToggle />
+              
               {/* Cart Icon */}
               {onOpenCart ? (
                 <button
@@ -131,7 +135,10 @@ export default function Navigation({ onOpenCart }: NavigationProps) {
             </div>
             
             {/* Mobile menu button */}
-            <div className="lg:hidden flex items-center">
+            <div className="lg:hidden flex items-center space-x-2">
+              {/* Theme Toggle for Mobile */}
+              <ThemeToggle />
+              
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-black hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-gray-500"
