@@ -22,9 +22,11 @@ async function getAuthenticatedUser(request?: NextRequest) {
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { itemId: string } }
+  context: { params: Promise<{ itemId: string }> }
 ) {
   try {
+    const params = await context.params;
+    
     // Get authenticated user
     const { user, error: authError } = await getAuthenticatedUser(request);
     
