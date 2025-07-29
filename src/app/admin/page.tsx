@@ -5,11 +5,13 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
-import { Profile, BoardPosition } from '@/lib/supabase';
+import { BoardPosition, Profile } from '@/lib/supabase';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import AuthPrompt from '@/components/AuthPrompt';
 import UserProfileModal from '@/components/UserProfileModal';
+import ProductPreviewModal from '@/components/shop/ProductPreviewModal';
+import { getProductDisplayImage } from '@/lib/utils';
 
 export default function AdminPage() {
   const { user, profile, loading: authLoading } = useAuth();
@@ -37,11 +39,16 @@ export default function AdminPage() {
   const [syncProducts, setSyncProducts] = useState<any[]>([]);
   const [syncedProducts, setSyncedProducts] = useState<any[]>([]);
   const [syncLoading, setSyncLoading] = useState(false);
+  const [previewLoading, setPreviewLoading] = useState(false);
   const [syncError, setSyncError] = useState('');
   
   // Orders state
   const [orders, setOrders] = useState<any[]>([]);
   const [ordersLoading, setOrdersLoading] = useState(false);
+
+  // Product preview modal state
+  const [previewProduct, setPreviewProduct] = useState<any>(null);
+  const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
 
   const fetchUsers = useCallback(async () => {
     try {
@@ -287,9 +294,19 @@ export default function AdminPage() {
     setSelectedUserId(null);
   };
 
+  const openProductPreview = (product: any) => {
+    setPreviewProduct(product);
+    setIsPreviewModalOpen(true);
+  };
+
+  const closeProductPreview = () => {
+    setIsPreviewModalOpen(false);
+    setPreviewProduct(null);
+  };
+
   // Sync products functions
   const fetchProductsFromPrintful = async () => {
-    setSyncLoading(true);
+    setPreviewLoading(true);
     setSyncError('');
     setSyncProducts([]);
     setSyncedProducts([]);
@@ -313,7 +330,7 @@ export default function AdminPage() {
       setSyncError(err instanceof Error ? err.message : 'Failed to fetch products');
       console.error('❌ Error fetching products:', err);
     } finally {
-      setSyncLoading(false);
+      setPreviewLoading(false);
     }
   };
 
@@ -1097,9 +1114,9 @@ export default function AdminPage() {
                               <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
                                 <h3 className="font-semibold text-blue-900 mb-2">How it works:</h3>
                                 <ul className="text-blue-800 space-y-1 text-sm">
-                                  <li>• <strong>Step 1:</strong> Fetch products from Printful</li>
+                                  <li>• <strong>Step 1:</strong> Preview products from Printful (safe - no changes)</li>
                                   <li>• <strong>Step 2:</strong> Review the products and prices</li>
-                                  <li>• <strong>Step 3:</strong> Sync to Stripe to add them to your shop</li>
+                                  <li>• <strong>Step 3:</strong> Sync to Stripe to add them to your shop (will delete removed products)</li>
                                 </ul>
                               </div>
 
@@ -1107,10 +1124,10 @@ export default function AdminPage() {
                               <div className="flex flex-col sm:flex-row gap-4 mb-8">
                                 <button
                                   onClick={fetchProductsFromPrintful}
-                                  disabled={syncLoading}
+                                  disabled={previewLoading}
                                   className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
                                 >
-                                  {syncLoading ? 'Loading...' : '📦 Fetch Products from Printful'}
+                                  {previewLoading ? 'Loading...' : '👁️ Preview Products from Printful'}
                                 </button>
                                 
                                 <button
@@ -1118,7 +1135,7 @@ export default function AdminPage() {
                                   disabled={syncLoading || syncProducts.length === 0}
                                   className="flex-1 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
                                 >
-                                  {syncLoading ? 'Syncing...' : '🔄 Sync to Stripe'}
+                                  {syncLoading ? 'Syncing...' : '🔄 Sync to Stripe (with cleanup)'}
                                 </button>
                               </div>
                             </div>
@@ -1133,19 +1150,22 @@ export default function AdminPage() {
                                   {syncProducts.map((product, index) => (
                                     <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden">
                                       {/* Product Image */}
-                                      <div className="h-48 bg-gray-100 flex items-center justify-center">
-                                        {product.thumbnail_url ? (
-                                          <img 
-                                            src={product.thumbnail_url} 
-                                            alt={product.name} 
-                                            className="w-full h-full object-cover"
-                                          />
-                                        ) : (
-                                          <div className="text-gray-500 text-center p-4">
-                                            <div className="text-2xl mb-2">🖼️</div>
-                                            <p className="text-sm">No Image</p>
-                                          </div>
-                                        )}
+                                      <div className="h-80 bg-gray-100 flex items-center justify-center">
+                                        {(() => {
+                                          const displayImage = getProductDisplayImage(product);
+                                          return displayImage ? (
+                                            <img 
+                                              src={displayImage} 
+                                              alt={product.name} 
+                                              className="w-full h-full object-cover"
+                                            />
+                                          ) : (
+                                            <div className="text-gray-500 text-center p-4">
+                                              <div className="text-2xl mb-2">🖼️</div>
+                                              <p className="text-sm">No Image</p>
+                                            </div>
+                                          );
+                                        })()}
                                       </div>
                                       
                                       {/* Product Details */}
@@ -1167,6 +1187,16 @@ export default function AdminPage() {
                                               {product.is_ignored ? 'Ignored' : 'Active'}
                                             </span>
                                           </div>
+                                        </div>
+                                        
+                                        {/* Preview Button */}
+                                        <div className="mt-3">
+                                          <button
+                                            onClick={() => openProductPreview(product)}
+                                            className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                                          >
+                                            👁️ Preview Product
+                                          </button>
                                         </div>
                                       </div>
                                     </div>
@@ -1359,6 +1389,15 @@ export default function AdminPage() {
           userId={selectedUserId}
           isOpen={isProfileModalOpen}
           onClose={closeProfileModal}
+        />
+      )}
+
+      {/* Product Preview Modal */}
+      {previewProduct && (
+        <ProductPreviewModal
+          product={previewProduct}
+          isOpen={isPreviewModalOpen}
+          onClose={closeProductPreview}
         />
       )}
     </div>

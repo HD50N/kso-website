@@ -2,6 +2,24 @@ import { NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe';
 import { Product, ProductVariant } from '@/types/shop';
 
+// Helper function to get the best variant (white, then black, then any)
+function getBestVariant(variants: any[]): any {
+  if (!variants || variants.length === 0) return null;
+  
+  // Priority order: white, black, any other
+  const colorPriority = ['white', 'black'];
+  
+  for (const priorityColor of colorPriority) {
+    const variant = variants.find(v => {
+      const variantName = v.name.toLowerCase();
+      return variantName.includes(priorityColor.toLowerCase());
+    });
+    if (variant) return variant;
+  }
+  
+  return variants[0];
+}
+
 export async function GET() {
   try {
     // Fetch products from Stripe
@@ -37,6 +55,9 @@ export async function GET() {
     const transformedProducts: Product[] = Array.from(productGroups.values()).map((group) => {
       const baseProduct = group.baseProduct;
       const variants = group.variants;
+      
+      // Get the best variant for display
+      const bestVariant = getBestVariant(variants);
       
       // Use the first variant for base product info
       const firstVariant = variants[0];
@@ -86,7 +107,7 @@ export async function GET() {
           ? baseProduct.name.split(' - ')[0] 
           : baseProduct.name),
         price: basePrice, // Use first variant price as base price
-        image: baseProduct.images[0] || '/placeholder-product.jpg',
+        image: bestVariant?.images?.[0] || baseProduct.images[0] || '/placeholder-product.jpg',
         category: baseProduct.metadata.category || '',
         stripe_product_id: baseProduct.id,
         stripe_price_id: firstVariant.default_price ? (firstVariant.default_price as any).id : '',

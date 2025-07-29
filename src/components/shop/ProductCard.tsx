@@ -1,6 +1,7 @@
 'use client';
 
 import { Product } from '@/types/shop';
+import { getProductDisplayImage } from '@/lib/utils';
 
 interface ProductCardProps {
   product: Product;
@@ -9,6 +10,8 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product, onAddToCart, onOpenModal }: ProductCardProps) {
+  const displayImage = getProductDisplayImage(product);
+
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
       <div className="relative">
@@ -17,7 +20,7 @@ export default function ProductCard({ product, onAddToCart, onOpenModal }: Produ
           onClick={() => onOpenModal(product)}
         >
           <img 
-            src={product.image} 
+            src={displayImage} 
             alt={product.name} 
             className="w-full h-68 object-cover group-hover:scale-105 transition-transform duration-300"
             onError={(e) => {

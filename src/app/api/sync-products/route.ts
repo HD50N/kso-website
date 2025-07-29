@@ -3,7 +3,7 @@ import { syncAllProducts } from '@/lib/printful';
 
 export async function POST() {
   try {
-    console.log('🔄 POST /api/sync-products - Starting sync...');
+    console.log('🔄 POST /api/sync-products - Starting enhanced sync...');
     
     // Check if Printful API key is configured
     if (!process.env.PRINTFUL_API_KEY) {
@@ -14,18 +14,21 @@ export async function POST() {
       );
     }
 
-    console.log('✅ Printful API key configured, starting sync...');
+    console.log('✅ Printful API key configured, starting enhanced sync...');
     
-    // Sync products from Printful to Stripe
-    const syncedProducts = await syncAllProducts();
+    // Sync products from Printful to Stripe with cleanup
+    const syncResult = await syncAllProducts();
 
-    console.log(`✅ Sync completed! Synced ${syncedProducts.length} products`);
-    console.log('Synced products:', syncedProducts);
+    console.log(`✅ Enhanced sync completed!`);
+    console.log(`✅ Synced: ${syncResult.synced.length} products`);
+    console.log(`🗑️ Deleted: ${syncResult.deleted} orphaned products`);
 
     return NextResponse.json({
       success: true,
-      message: `Successfully synced ${syncedProducts.length} products`,
-      products: syncedProducts,
+      message: `Successfully synced ${syncResult.synced.length} products and deleted ${syncResult.deleted} orphaned products`,
+      products: syncResult.synced,
+      deleted: syncResult.deleted,
+      total: syncResult.total,
     });
   } catch (error) {
     console.error('Error syncing products:', error);

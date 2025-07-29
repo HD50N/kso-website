@@ -16,8 +16,15 @@ export default function ProductModal({ product, isOpen, onClose, onAddToCart }: 
   const [quantity, setQuantity] = useState(1);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
-  // Use the product data directly since Stripe now has all variant information
-  const productImages = [product.image]; // Single image for now
+  // Get images based on selected variant or fall back to product image
+  const getProductImages = () => {
+    // For now, use the product's main image
+    // In the future, this could be enhanced to use variant-specific images
+    // when Stripe products include variant-specific image metadata
+    return [product.image];
+  };
+  
+  const productImages = getProductImages();
   
   // Get unique colors and sizes from variants
   const colors = [...new Set(product.variants?.map(v => v.color) || [])];
@@ -56,6 +63,11 @@ export default function ProductModal({ product, isOpen, onClose, onAddToCart }: 
   ) || null;
   
   const currentPrice = selectedVariant ? selectedVariant.price : product.price;
+
+  // Reset image index when variant changes
+  useEffect(() => {
+    setCurrentImageIndex(0);
+  }, [selectedVariant]);
 
   const handleAddToCart = () => {
     onAddToCart(product, selectedVariant || undefined);

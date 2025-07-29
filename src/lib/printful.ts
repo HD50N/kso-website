@@ -521,13 +521,88 @@ export class PrintfulAPI {
   // Helper function to sync all products
   export async function syncAllProducts() {
     const printfulApi = new PrintfulAPI(process.env.PRINTFUL_API_KEY!);
-    const products = await printfulApi.getProducts();
+    const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY!);
     
-    console.log('🔄 Starting sync for', products.length, 'products...');
+    console.log('🔄 Starting enhanced sync with cleanup...');
     
+    // Get current Printful products
+    const printfulProducts = await printfulApi.getProducts();
+    console.log(`📦 Found ${printfulProducts.length} products in Printful`);
+    
+    // Get all Stripe products with printful metadata
+    const stripeProducts = await stripe.products.list({ limit: 100 });
+    const printfulStripeProducts = stripeProducts.data.filter((p: any) => 
+      p.metadata?.printful_product_id || p.metadata?.printful_variant_id || p.metadata?.created_from_printful === 'true'
+    );
+    
+    console.log(`💳 Found ${printfulStripeProducts.length} Printful-synced products in Stripe`);
+    
+    // Get all current Printful variants for comparison
+    const allPrintfulVariants = new Set<string>();
+    const allPrintfulProductIds = new Set<string>();
+    
+    for (const product of printfulProducts) {
+      allPrintfulProductIds.add(product.id.toString());
+      try {
+        const detailedProduct = await printfulApi.getProductDetails(product.id);
+        if (detailedProduct.sync_variants) {
+          for (const variant of detailedProduct.sync_variants) {
+            if (variant.is_enabled !== false) { // Only include enabled variants
+              allPrintfulVariants.add(variant.id.toString());
+            }
+          }
+        }
+      } catch (error) {
+        console.error(`Failed to get variants for product ${product.id}:`, error);
+      }
+    }
+    
+    console.log(`📦 Found ${allPrintfulProductIds.size} products and ${allPrintfulVariants.size} variants in Printful`);
+    
+    // Find products to delete (in Stripe but not in Printful)
+    const productsToDelete = printfulStripeProducts.filter((p: any) => {
+      const printfulProductId = p.metadata?.printful_product_id;
+      const printfulVariantId = p.metadata?.printful_variant_id;
+      
+      // If it's a variant product, check if the variant still exists
+      if (printfulVariantId) {
+        return !allPrintfulVariants.has(printfulVariantId);
+      }
+      
+      // If it's a product-level item, check if the product still exists
+      if (printfulProductId) {
+        return !allPrintfulProductIds.has(printfulProductId);
+      }
+      
+      // If no Printful metadata, don't delete (might be manually created)
+      return false;
+    });
+    
+    console.log(`🗑️ Found ${productsToDelete.length} products to delete from Stripe`);
+    
+    // Delete orphaned Stripe products
+    for (const product of productsToDelete) {
+      try {
+        const printfulProductId = product.metadata?.printful_product_id;
+        const printfulVariantId = product.metadata?.printful_variant_id;
+        
+        if (printfulVariantId) {
+          console.log(`🗑️ Deleting Stripe variant: ${product.name} (Printful Variant ID: ${printfulVariantId})`);
+        } else {
+          console.log(`🗑️ Deleting Stripe product: ${product.name} (Printful Product ID: ${printfulProductId})`);
+        }
+        
+        await stripe.products.del(product.id);
+        console.log(`✅ Deleted: ${product.name}`);
+      } catch (error) {
+        console.error(`❌ Failed to delete ${product.name}:`, error);
+      }
+    }
+    
+    // Sync current Printful products to Stripe
     const syncedProducts = [];
     
-    for (const product of products) {
+    for (const product of printfulProducts) {
       try {
         console.log(`📦 Syncing: ${product.name} (ID: ${product.id})`);
         
@@ -564,8 +639,15 @@ export class PrintfulAPI {
       }
     }
     
-    console.log(`🎉 Sync completed! Synced ${syncedProducts.length} products`);
-    return syncedProducts;
+    console.log(`🎉 Enhanced sync completed!`);
+    console.log(`✅ Synced: ${syncedProducts.length} products`);
+    console.log(`🗑️ Deleted: ${productsToDelete.length} orphaned products`);
+    
+    return {
+      synced: syncedProducts,
+      deleted: productsToDelete.length,
+      total: syncedProducts.length
+    };
   }
 
   // Helper function to create Printful order from Stripe checkout
