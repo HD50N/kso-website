@@ -24,6 +24,7 @@ export interface ProductVariant {
   stripe_price_id: string;
   printful_variant_id: string;
   is_available?: boolean;
+  image?: string; // Variant-specific image URL
 }
 
 export interface CartItem {

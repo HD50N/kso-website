@@ -323,6 +323,19 @@ export class PrintfulAPI {
     // Extract color information if available
     const color = variant.color || variant.color_name || this.extractColorFromName(variantName);
 
+    // Get variant-specific image if available
+    let variantImage = printfulProduct.thumbnail_url; // Default to product thumbnail
+    console.log(`🔍 Debug - variant.files:`, variant.files);
+    if (variant.files && variant.files.length > 0) {
+      // Use the first available image from variant files
+      const firstFile = variant.files[0];
+      console.log(`🔍 Debug - firstFile:`, firstFile);
+      variantImage = firstFile.preview_url || firstFile.url || printfulProduct.thumbnail_url;
+      console.log(`✅ Using variant-specific image: ${variantImage}`);
+    } else {
+      console.log(`📦 No variant files found, using product thumbnail: ${variantImage}`);
+    }
+
     // Check if this specific variant product already exists
     const existingProducts = await stripe.products.list({ limit: 100 });
     const existingProduct = existingProducts.data.find(
@@ -335,33 +348,35 @@ export class PrintfulAPI {
       product = await stripe.products.update(existingProduct.id, {
         name: productName,
         description: `KSO ${productName}`,
-        images: [printfulProduct.thumbnail_url],
-                  metadata: {
-            printful_product_id: printfulProduct.id.toString(),
-            printful_sync_product_id: printfulProduct.id.toString(),
-            printful_variant_id: variantId.toString(),
-            variant_name: variantName,
-            color: color || '',
-            category: 'Apparel',
-            last_synced: new Date().toISOString(),
-          },
+        images: [variantImage],
+        metadata: {
+          printful_product_id: printfulProduct.id.toString(),
+          printful_sync_product_id: printfulProduct.id.toString(),
+          printful_variant_id: variantId.toString(),
+          variant_name: variantName,
+          color: color || '',
+          category: 'Apparel',
+          variant_image: variantImage, // Store variant-specific image URL
+          last_synced: new Date().toISOString(),
+        },
       });
     } else {
       // Create new variant product
       product = await stripe.products.create({
         name: productName,
         description: `KSO ${productName}`,
-        images: [printfulProduct.thumbnail_url],
-                    metadata: {
-              printful_product_id: printfulProduct.id.toString(),
-              printful_sync_product_id: printfulProduct.id.toString(),
-              printful_variant_id: variantId.toString(),
-              variant_name: variantName,
-              color: color || '',
-              category: 'Apparel',
-              created_from_printful: 'true',
-              last_synced: new Date().toISOString(),
-            },
+        images: [variantImage],
+        metadata: {
+          printful_product_id: printfulProduct.id.toString(),
+          printful_sync_product_id: printfulProduct.id.toString(),
+          printful_variant_id: variantId.toString(),
+          variant_name: variantName,
+          color: color || '',
+          category: 'Apparel',
+          variant_image: variantImage, // Store variant-specific image URL
+          created_from_printful: 'true',
+          last_synced: new Date().toISOString(),
+        },
       });
     }
 
@@ -374,7 +389,8 @@ export class PrintfulAPI {
       printful_product_id: printfulProduct.id,
       printful_sync_product_id: printfulProduct.id,
       printful_variant_id: variantId,
-      variant_name: variantName
+      variant_name: variantName,
+      variant_image: variantImage
     };
   }
 

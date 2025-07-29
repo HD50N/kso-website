@@ -94,7 +94,16 @@ export async function GET() {
           stripe_product_id: variant.id,
           stripe_price_id: variant.default_price ? (variant.default_price as any).id : '',
           printful_variant_id: variant.metadata.printful_variant_id || '',
-          is_available: true
+          is_available: true,
+          image: (() => {
+            const variantImage = variant.metadata.variant_image || variant.images?.[0] || null;
+            console.log(`🔍 Debug - variant ${variant.id}:`, {
+              metadata_variant_image: variant.metadata.variant_image,
+              images_0: variant.images?.[0],
+              final_image: variantImage
+            });
+            return variantImage;
+          })() // Include variant-specific image
         };
       });
 

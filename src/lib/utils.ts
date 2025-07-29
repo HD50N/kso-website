@@ -30,11 +30,19 @@ export function getBestVariant(variants: ProductVariant[] | undefined): ProductV
 
 /**
  * Get the best variant image URL for a product
- * For shop products: uses the product's main image (since variants share the same image)
+ * For shop products: uses variant-specific images when available, falls back to main image
  * For admin preview: uses the product's thumbnail_url
  * Falls back to placeholder if no image is available
  */
 export function getProductDisplayImage(product: any): string {
+  // For shop products (from Stripe), try to get the best variant image
+  if (product.variants && product.variants.length > 0) {
+    const bestVariant = getBestVariant(product.variants);
+    if (bestVariant && bestVariant.image) {
+      return bestVariant.image;
+    }
+  }
+  
   // For shop products (from Stripe), use the main product image
   if (product.image) {
     return product.image;

@@ -131,7 +131,22 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       // Create unique ID for product + variant combination
       const uniqueId = variant ? `${product.id}-${variant.id}` : product.id;
       const displayName = variant ? `${product.name} - ${variant.name}` : product.name;
-      const price = variant ? variant.price : product.price;
+      
+      // Ensure we have a valid price with fallbacks
+      let price = 0;
+      if (variant && variant.price) {
+        price = parseFloat(variant.price);
+      } else if (variant && variant.retail_price) {
+        price = parseFloat(variant.retail_price);
+      } else if (product.price) {
+        price = parseFloat(product.price);
+      }
+      
+      // Ensure price is a valid number
+      if (isNaN(price)) {
+        price = 0;
+      }
+      
       const stripePriceId = variant ? variant.stripe_price_id : product.stripe_price_id;
       
       const existingItem = currentItems.find(item => item.id === uniqueId);

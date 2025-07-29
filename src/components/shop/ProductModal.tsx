@@ -15,20 +15,36 @@ export default function ProductModal({ product, isOpen, onClose, onAddToCart }: 
   const [selectedSize, setSelectedSize] = useState<string>('');
   const [quantity, setQuantity] = useState(1);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [variants, setVariants] = useState<any[]>([]);
+  const [loadingVariants, setLoadingVariants] = useState(false);
 
-  // Get images based on selected variant or fall back to product image
-  const getProductImages = () => {
-    // For now, use the product's main image
-    // In the future, this could be enhanced to use variant-specific images
-    // when Stripe products include variant-specific image metadata
-    return [product.image];
+  // Fetch detailed product information including variants
+  useEffect(() => {
+    if (isOpen && product && product.printful_product_id) {
+      fetchProductVariants();
+    }
+  }, [isOpen, product]);
+
+  const fetchProductVariants = async () => {
+    setLoadingVariants(true);
+    try {
+      const response = await fetch(`/api/sync-products/${product.printful_product_id}`);
+      if (response.ok) {
+        const data = await response.json();
+        if (data.sync_variants) {
+          setVariants(data.sync_variants);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching product variants:', error);
+    } finally {
+      setLoadingVariants(false);
+    }
   };
   
-  const productImages = getProductImages();
-  
   // Get unique colors and sizes from variants
-  const colors = [...new Set(product.variants?.map(v => v.color) || [])];
-  const sizes = [...new Set(product.variants?.map(v => v.size) || [])].sort((a, b) => {
+  const colors = [...new Set(variants?.map(v => v.color || v.color_name || 'Default').filter(Boolean))];
+  const sizes = [...new Set(variants?.map(v => v.size || 'Default').filter(Boolean))].sort((a, b) => {
     // Sort sizes from smallest to largest
     const sizeOrder = ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL', '5XL'];
     const aIndex = sizeOrder.indexOf(a.toUpperCase());
@@ -58,11 +74,30 @@ export default function ProductModal({ product, isOpen, onClose, onAddToCart }: 
   }, [colors, sizes, selectedColor, selectedSize]);
   
   // Find the selected variant based on color and size selection
-  const selectedVariant = product.variants?.find(
-    v => v.color === selectedColor && v.size === selectedSize
+  const selectedVariant = variants?.find(
+    v => (v.color || v.color_name) === selectedColor && v.size === selectedSize
   ) || null;
   
-  const currentPrice = selectedVariant ? selectedVariant.price : product.price;
+  // Get images based on selected variant or fall back to product image
+  const getProductImages = () => {
+    // Use variant-specific images if available (like preview modal)
+    if (selectedVariant && selectedVariant.files && selectedVariant.files.length > 0) {
+      const variantImages = selectedVariant.files.map((file: any) => file.preview_url || file.url).filter(Boolean);
+      return variantImages;
+    }
+    // Fall back to product's main image
+    return [product.image];
+  };
+  
+  const productImages = getProductImages();
+  
+  const currentPrice = (() => {
+    if (selectedVariant && selectedVariant.retail_price) {
+      const price = parseFloat(selectedVariant.retail_price);
+      return isNaN(price) ? product.price : price;
+    }
+    return product.price || 0;
+  })();
 
   // Reset image index when variant changes
   useEffect(() => {
@@ -114,7 +149,7 @@ export default function ProductModal({ product, isOpen, onClose, onAddToCart }: 
                 {/* Thumbnail Images */}
                 {productImages.length > 1 && (
                   <div className="flex space-x-2">
-                    {productImages.map((image, index) => (
+                    {productImages.map((image: string, index: number) => (
                       <button
                         key={index}
                         onClick={() => setCurrentImageIndex(index)}
@@ -137,7 +172,7 @@ export default function ProductModal({ product, isOpen, onClose, onAddToCart }: 
               <div className="space-y-6">
                               {/* Price */}
               <div className="text-3xl font-bold text-gray-900">
-                ${currentPrice.toFixed(2)}
+                ${(currentPrice || 0).toFixed(2)}
               </div>
 
               {/* Description */}
@@ -149,7 +184,7 @@ export default function ProductModal({ product, isOpen, onClose, onAddToCart }: 
               </div>
 
               {/* Color and Size Selection */}
-              {product.variants && product.variants.length > 1 && (
+              {variants && variants.length > 1 && (
                 <div className="space-y-4">
                   {/* Color Selection */}
                   {colors.length > 1 && (
@@ -202,7 +237,7 @@ export default function ProductModal({ product, isOpen, onClose, onAddToCart }: 
                         Selected: <span className="font-medium capitalize">{selectedColor}</span> / <span className="font-medium">{selectedSize}</span>
                       </div>
                       <div className="text-lg font-semibold text-gray-900">
-                        ${selectedVariant.price.toFixed(2)}
+                        ${(currentPrice || 0).toFixed(2)}
                       </div>
                     </div>
                   )}
