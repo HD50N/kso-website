@@ -310,6 +310,14 @@ export default function About() {
               >
                 Contact Us
               </a>
+              <a 
+                href="https://linkedin.com/company/uchicago-kso"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="modern-button bg-blue-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-blue-700 hover-lift shadow-lg"
+              >
+                Connect on LinkedIn
+              </a>
               <Link 
                 href="/culture-show"
                 className="modern-button border-2 border-black text-black px-8 py-3 rounded-xl font-semibold hover:bg-black hover:text-white hover-lift"
