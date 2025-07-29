@@ -25,7 +25,12 @@ export default function Navigation() {
         <div className="flex justify-between h-16 relative">
           {/* Left side - Logo */}
           <div className="flex items-center w-32 z-10">
-            <Link href="/" className="flex-shrink-0 flex items-center group">
+            <Link href="/" className="flex-shrink-0 flex items-center group space-x-2">
+              <img 
+                src="/favicon.ico" 
+                alt="KSO Logo" 
+                className="w-8 h-8 object-contain"
+              />
               <span className="font-display text-2xl font-bold text-black group-hover:scale-110 transition-transform">UChicago KSO</span>
             </Link>
           </div>
