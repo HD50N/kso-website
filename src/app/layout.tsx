@@ -5,6 +5,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
 import AuthDebugger from "@/components/AuthDebugger";
 import ThemeScript from "@/components/ThemeScript";
+import { Analytics } from "@vercel/analytics/next";
 
 const inter = Inter({ 
   subsets: ["latin"],
@@ -40,6 +41,7 @@ export default function RootLayout({
             </div>
           </CartProvider>
         </AuthProvider>
+        <Analytics />
       </body>
     </html>
   );
