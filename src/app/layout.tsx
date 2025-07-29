@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter, Poppins } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { CartProvider } from "@/contexts/CartContext";
 import AuthDebugger from "@/components/AuthDebugger";
 
 const inter = Inter({ 
@@ -31,9 +32,11 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.variable} ${poppins.variable} font-sans`}>
         <AuthProvider>
-          <div className="min-h-screen bg-white">
-            {children}
-          </div>
+          <CartProvider>
+            <div className="min-h-screen bg-white">
+              {children}
+            </div>
+          </CartProvider>
         </AuthProvider>
       </body>
     </html>

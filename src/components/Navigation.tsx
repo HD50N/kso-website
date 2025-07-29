@@ -4,11 +4,17 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCart } from '@/contexts/CartContext';
 
-export default function Navigation() {
+interface NavigationProps {
+  onOpenCart?: () => void;
+}
+
+export default function Navigation({ onOpenCart }: NavigationProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const pathname = usePathname();
   const { user, profile } = useAuth();
+  const { cartItemCount } = useCart();
 
   const navItems = [
     { name: 'Home', href: '/' },
@@ -61,6 +67,38 @@ export default function Navigation() {
           <div className="flex items-center w-32 justify-end z-10">
             {/* Auth buttons - Desktop */}
             <div className="hidden lg:flex items-center space-x-3">
+              {/* Cart Icon */}
+              {onOpenCart ? (
+                <button
+                  onClick={onOpenCart}
+                  className="relative p-2 text-gray-700 hover:text-black hover:bg-gray-50 rounded-lg transition-all duration-300 cursor-pointer"
+                  title="Shopping Cart"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                  </svg>
+                  {cartItemCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                      {cartItemCount > 99 ? '99+' : cartItemCount}
+                    </span>
+                  )}
+                </button>
+              ) : (
+                <Link 
+                  href="/shop"
+                  className="relative p-2 text-gray-700 hover:text-black hover:bg-gray-50 rounded-lg transition-all duration-300"
+                  title="Shopping Cart"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                  </svg>
+                  {cartItemCount > 0 && (
+                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                      {cartItemCount > 99 ? '99+' : cartItemCount}
+                    </span>
+                  )}
+                </Link>
+              )}
               {user ? (
                 <>
                   <Link 
@@ -135,6 +173,50 @@ export default function Navigation() {
             
             {/* Mobile Auth buttons */}
             <div className="pt-4 border-t border-gray-100 space-y-2">
+              {/* Mobile Cart Link */}
+              {onOpenCart ? (
+                <button
+                  onClick={() => {
+                    onOpenCart();
+                    setIsMenuOpen(false);
+                  }}
+                  className="font-body-bold block w-full text-left px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:text-black hover:bg-gray-50 transition-colors cursor-pointer"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                      </svg>
+                      Cart
+                    </div>
+                    {cartItemCount > 0 && (
+                      <span className="bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                        {cartItemCount > 99 ? '99+' : cartItemCount}
+                      </span>
+                    )}
+                  </div>
+                </button>
+              ) : (
+                <Link 
+                  href="/shop"
+                  className="font-body-bold block w-full text-left px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:text-black hover:bg-gray-50 transition-colors"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center">
+                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                      </svg>
+                      Shop
+                    </div>
+                    {cartItemCount > 0 && (
+                      <span className="bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                        {cartItemCount > 99 ? '99+' : cartItemCount}
+                      </span>
+                    )}
+                  </div>
+                </Link>
+              )}
               {user ? (
                 <>
                   <Link 

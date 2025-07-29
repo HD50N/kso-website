@@ -8,6 +8,7 @@ interface ShoppingCartProps {
   onRemove: (itemId: string) => void;
   onUpdateQuantity: (itemId: string, quantity: number) => void;
   onCheckout: (customerEmail: string) => void;
+  onClearCart: () => void;
   isOpen: boolean;
   onClose: () => void;
 }
@@ -17,6 +18,7 @@ export default function ShoppingCart({
   onRemove, 
   onUpdateQuantity, 
   onCheckout, 
+  onClearCart,
   isOpen, 
   onClose 
 }: ShoppingCartProps) {
@@ -50,7 +52,7 @@ export default function ShoppingCart({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div className="fixed inset-0 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
       <div className="bg-white rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
         <div className="p-6">
           <div className="flex justify-between items-center mb-4">
@@ -146,17 +148,30 @@ export default function ShoppingCart({
                   </div>
                 </div>
 
-                <button
-                  onClick={handleCheckout}
-                  disabled={isCheckingOut || items.length === 0}
-                  className={`w-full py-3 px-4 rounded-md font-medium transition-colors duration-200 ${
-                    isCheckingOut || items.length === 0
-                      ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                      : 'bg-black text-white hover:bg-gray-800'
-                  }`}
-                >
-                  {isCheckingOut ? 'Processing...' : 'Proceed to Checkout'}
-                </button>
+                <div className="flex space-x-3">
+                  <button
+                    onClick={onClearCart}
+                    disabled={items.length === 0}
+                    className={`flex-1 py-3 px-4 rounded-md font-medium transition-colors duration-200 ${
+                      items.length === 0
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        : 'bg-red-600 text-white hover:bg-red-700'
+                    }`}
+                  >
+                    Clear Cart
+                  </button>
+                  <button
+                    onClick={handleCheckout}
+                    disabled={isCheckingOut || items.length === 0}
+                    className={`flex-1 py-3 px-4 rounded-md font-medium transition-colors duration-200 ${
+                      isCheckingOut || items.length === 0
+                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                        : 'bg-black text-white hover:bg-gray-800'
+                    }`}
+                  >
+                    {isCheckingOut ? 'Processing...' : 'Checkout'}
+                  </button>
+                </div>
               </div>
             </>
           )}

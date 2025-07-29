@@ -6,16 +6,18 @@ import Footer from '@/components/Footer';
 import ProductCard from '@/components/shop/ProductCard';
 import ShoppingCart from '@/components/shop/ShoppingCart';
 import ProductModal from '@/components/shop/ProductModal';
-import { Product, CartItem, ProductVariant } from '@/types/shop';
+import { Product, ProductVariant } from '@/types/shop';
+import { useCart } from '@/contexts/CartContext';
 
 export default function ShopPage() {
   const [products, setProducts] = useState<Product[]>([]);
-  const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  
+  const { cartItems, addToCart, removeFromCart, updateQuantity, clearCart, cartItemCount } = useCart();
 
   // Fetch products from API
   useEffect(() => {
@@ -38,34 +40,7 @@ export default function ShopPage() {
     fetchProducts();
   }, []);
 
-  // Add item to cart
-  const addToCart = (product: Product, variant?: ProductVariant) => {
-    setCartItems(prevItems => {
-      // Create unique ID for product + variant combination
-      const uniqueId = variant ? `${product.id}-${variant.id}` : product.id;
-      const displayName = variant ? `${product.name} - ${variant.name}` : product.name;
-      const price = variant ? variant.price : product.price;
-      const stripePriceId = variant ? variant.stripe_price_id : product.stripe_price_id;
-      
-      const existingItem = prevItems.find(item => item.id === uniqueId);
-      if (existingItem) {
-        return prevItems.map(item =>
-          item.id === uniqueId
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-      } else {
-        return [...prevItems, {
-          id: uniqueId,
-          name: displayName,
-          price: price,
-          image: product.image,
-          quantity: 1,
-          stripe_price_id: stripePriceId,
-        }];
-      }
-    });
-  };
+
 
   // Open product modal
   const openProductModal = (product: Product) => {
@@ -79,23 +54,7 @@ export default function ShopPage() {
     setSelectedProduct(null);
   };
 
-  // Remove item from cart
-  const removeFromCart = (itemId: string) => {
-    setCartItems(prevItems => prevItems.filter(item => item.id !== itemId));
-  };
 
-  // Update item quantity
-  const updateQuantity = (itemId: string, quantity: number) => {
-    if (quantity === 0) {
-      removeFromCart(itemId);
-    } else {
-      setCartItems(prevItems =>
-        prevItems.map(item =>
-          item.id === itemId ? { ...item, quantity } : item
-        )
-      );
-    }
-  };
 
   // Handle checkout
   const handleCheckout = async (customerEmail: string) => {
@@ -125,11 +84,11 @@ export default function ShopPage() {
     }
   };
 
-  const cartItemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+
 
   return (
     <div className="min-h-screen">
-      <Navigation />
+      <Navigation onOpenCart={() => setIsCartOpen(true)} />
       
       {/* Hero Section */}
       <section className="bg-white text-black py-16 sm:py-20 lg:py-24">
@@ -153,7 +112,7 @@ export default function ShopPage() {
           <div className="flex justify-end mb-8">
             <button
               onClick={() => setIsCartOpen(true)}
-              className="bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-colors flex items-center space-x-2"
+              className="bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-colors flex items-center space-x-2 cursor-pointer"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
@@ -210,6 +169,7 @@ export default function ShopPage() {
         onRemove={removeFromCart}
         onUpdateQuantity={updateQuantity}
         onCheckout={handleCheckout}
+        onClearCart={clearCart}
         isOpen={isCartOpen}
         onClose={() => setIsCartOpen(false)}
       />
