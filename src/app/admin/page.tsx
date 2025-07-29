@@ -25,13 +25,23 @@ export default function AdminPage() {
   const [filterType, setFilterType] = useState<string>('all');
   const [updatingUser, setUpdatingUser] = useState<string | null>(null);
   const [updatingPosition, setUpdatingPosition] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<'users' | 'board'>('users');
+  const [activeTab, setActiveTab] = useState<'users' | 'board' | 'sync' | 'orders'>('users');
   const [newPosition, setNewPosition] = useState({ role: '', display_order: 0 });
   const [addingPosition, setAddingPosition] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [savingChanges, setSavingChanges] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  
+  // Sync products state
+  const [syncProducts, setSyncProducts] = useState<any[]>([]);
+  const [syncedProducts, setSyncedProducts] = useState<any[]>([]);
+  const [syncLoading, setSyncLoading] = useState(false);
+  const [syncError, setSyncError] = useState('');
+  
+  // Orders state
+  const [orders, setOrders] = useState<any[]>([]);
+  const [ordersLoading, setOrdersLoading] = useState(false);
 
   const fetchUsers = useCallback(async () => {
     try {
@@ -275,6 +285,67 @@ export default function AdminPage() {
   const closeProfileModal = () => {
     setIsProfileModalOpen(false);
     setSelectedUserId(null);
+  };
+
+  // Sync products functions
+  const fetchProductsFromPrintful = async () => {
+    setSyncLoading(true);
+    setSyncError('');
+    setSyncProducts([]);
+    setSyncedProducts([]);
+
+    try {
+      console.log('🔄 Fetching products from Printful...');
+      const response = await fetch('/api/sync-products', {
+        method: 'GET',
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('❌ API Error Details:', errorData);
+        throw new Error(errorData.error || errorData.details || 'Failed to fetch products');
+      }
+
+      const data = await response.json();
+      console.log('📦 Products fetched:', data.products);
+      setSyncProducts(data.products || []);
+    } catch (err) {
+      setSyncError(err instanceof Error ? err.message : 'Failed to fetch products');
+      console.error('❌ Error fetching products:', err);
+    } finally {
+      setSyncLoading(false);
+    }
+  };
+
+  const syncProductsToStripe = async () => {
+    if (syncProducts.length === 0) {
+      setSyncError('No products to sync. Please fetch products first.');
+      return;
+    }
+
+    setSyncLoading(true);
+    setSyncError('');
+    setSyncedProducts([]);
+
+    try {
+      console.log('🔄 Syncing products to Stripe...');
+      const response = await fetch('/api/sync-products', {
+        method: 'POST',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to sync products');
+      }
+
+      const data = await response.json();
+      console.log('✅ Sync completed:', data);
+      setSyncedProducts(data.products || []);
+    } catch (err) {
+      setSyncError(err instanceof Error ? err.message : 'Failed to sync products');
+      console.error('❌ Error syncing products:', err);
+    } finally {
+      setSyncLoading(false);
+    }
   };
 
   const saveAllChanges = async () => {
@@ -536,6 +607,26 @@ export default function AdminPage() {
                             }`}
                           >
                             Board Configuration
+                          </button>
+                          <button
+                            onClick={() => setActiveTab('sync')}
+                            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                              activeTab === 'sync'
+                                ? 'border-black text-black'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                            }`}
+                          >
+                            Sync Products
+                          </button>
+                          <button
+                            onClick={() => setActiveTab('orders')}
+                            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                              activeTab === 'orders'
+                                ? 'border-black text-black'
+                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                            }`}
+                          >
+                            Orders
                           </button>
                         </nav>
                       </div>
@@ -984,6 +1075,277 @@ export default function AdminPage() {
                                 )}
                               </>
                                                             )}
+                          </>
+                        )}
+
+                        {/* Sync Products Tab */}
+                        {activeTab === 'sync' && (
+                          <>
+                            <div className="mb-6">
+                              <h2 className="text-xl font-semibold text-black mb-4">Product Management</h2>
+                              <p className="text-gray-600 mb-4">
+                                Import products from Printful to your shop by syncing them to Stripe.
+                              </p>
+                              
+                              {syncError && (
+                                <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
+                                  <p className="text-red-600 text-sm">{syncError}</p>
+                                </div>
+                              )}
+
+                              {/* Instructions */}
+                              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                                <h3 className="font-semibold text-blue-900 mb-2">How it works:</h3>
+                                <ul className="text-blue-800 space-y-1 text-sm">
+                                  <li>• <strong>Step 1:</strong> Fetch products from Printful</li>
+                                  <li>• <strong>Step 2:</strong> Review the products and prices</li>
+                                  <li>• <strong>Step 3:</strong> Sync to Stripe to add them to your shop</li>
+                                </ul>
+                              </div>
+
+                              {/* Action Buttons */}
+                              <div className="flex flex-col sm:flex-row gap-4 mb-8">
+                                <button
+                                  onClick={fetchProductsFromPrintful}
+                                  disabled={syncLoading}
+                                  className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                                >
+                                  {syncLoading ? 'Loading...' : '📦 Fetch Products from Printful'}
+                                </button>
+                                
+                                <button
+                                  onClick={syncProductsToStripe}
+                                  disabled={syncLoading || syncProducts.length === 0}
+                                  className="flex-1 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                                >
+                                  {syncLoading ? 'Syncing...' : '🔄 Sync to Stripe'}
+                                </button>
+                              </div>
+                            </div>
+
+                            {/* Products from Printful */}
+                            {syncProducts.length > 0 && (
+                              <div className="mb-8">
+                                <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                                  📦 Products from Printful ({syncProducts.length})
+                                </h3>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                  {syncProducts.map((product, index) => (
+                                    <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden">
+                                      {/* Product Image */}
+                                      <div className="h-48 bg-gray-100 flex items-center justify-center">
+                                        {product.thumbnail_url ? (
+                                          <img 
+                                            src={product.thumbnail_url} 
+                                            alt={product.name} 
+                                            className="w-full h-full object-cover"
+                                          />
+                                        ) : (
+                                          <div className="text-gray-500 text-center p-4">
+                                            <div className="text-2xl mb-2">🖼️</div>
+                                            <p className="text-sm">No Image</p>
+                                          </div>
+                                        )}
+                                      </div>
+                                      
+                                      {/* Product Details */}
+                                      <div className="p-4">
+                                        <h4 className="font-semibold text-gray-900 mb-2">
+                                          {product.name}
+                                        </h4>
+                                        <div className="space-y-1 text-sm text-gray-600">
+                                          <p>ID: {product.id}</p>
+                                          <p>Variants: {product.variants}</p>
+                                          <p>Synced: {product.synced}</p>
+                                        </div>
+                                        <div className="mt-3 pt-3 border-t border-gray-200">
+                                          <div className="flex justify-between items-center">
+                                            <span className="font-bold text-lg text-gray-900">
+                                              ${product.retail_price ? product.retail_price.toFixed(2) : 'N/A'}
+                                            </span>
+                                            <span className="text-xs text-gray-500">
+                                              {product.is_ignored ? 'Ignored' : 'Active'}
+                                            </span>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Synced Products */}
+                            {syncedProducts.length > 0 && (
+                              <div>
+                                <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                                  ✅ Synced to Stripe ({syncedProducts.length})
+                                </h3>
+                                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                                  <div className="space-y-2">
+                                    {syncedProducts.map((item, index) => (
+                                      <div key={index} className="flex justify-between items-center">
+                                        <span className="font-medium text-green-900">
+                                          {item.product?.name || 'Product'}
+                                        </span>
+                                        <span className="text-green-700">
+                                          ${item.priceDetails?.amount ? item.priceDetails.amount.toFixed(2) : 'N/A'}
+                                        </span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                  <p className="text-green-700 text-sm mt-3">
+                                    ✅ Products have been successfully synced to your shop!
+                                  </p>
+                                </div>
+                              </div>
+                            )}
+
+                            {/* Debug Info */}
+                            {process.env.NODE_ENV === 'development' && (
+                              <details className="mt-6">
+                                <summary className="cursor-pointer text-gray-700 font-medium">🔧 Debug Information</summary>
+                                <div className="mt-2 space-y-4">
+                                  {syncProducts.length > 0 && (
+                                    <div>
+                                      <h4 className="font-medium text-gray-900 mb-2">Raw Products Data:</h4>
+                                      <pre className="text-xs bg-gray-100 p-2 rounded overflow-auto max-h-40">
+                                        {JSON.stringify(syncProducts, null, 2)}
+                                      </pre>
+                                    </div>
+                                  )}
+                                  {syncedProducts.length > 0 && (
+                                    <div>
+                                      <h4 className="font-medium text-gray-900 mb-2">Sync Results:</h4>
+                                      <pre className="text-xs bg-gray-100 p-2 rounded overflow-auto max-h-40">
+                                        {JSON.stringify(syncedProducts, null, 2)}
+                                      </pre>
+                                    </div>
+                                  )}
+                                </div>
+                              </details>
+                                                         )}
+                           </>
+                         )}
+
+                        {/* Orders Tab */}
+                        {activeTab === 'orders' && (
+                          <>
+                            <div className="mb-6">
+                              <h2 className="text-xl font-semibold text-black mb-4">Order Management</h2>
+                              <p className="text-gray-600 mb-4">
+                                View and manage customer orders and fulfillment status.
+                              </p>
+                            </div>
+
+                            {/* Orders Table */}
+                            <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+                              <div className="overflow-x-auto">
+                                <table className="w-full">
+                                  <thead className="bg-gray-50">
+                                    <tr>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Order ID
+                                      </th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Customer
+                                      </th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Total
+                                      </th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Status
+                                      </th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Date
+                                      </th>
+                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Actions
+                                      </th>
+                                    </tr>
+                                  </thead>
+                                  <tbody className="bg-white divide-y divide-gray-200">
+                                    {ordersLoading ? (
+                                      // Loading skeletons
+                                      [...Array(3)].map((_, index) => (
+                                        <tr key={index} className="animate-pulse">
+                                          <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="h-4 bg-gray-200 rounded w-24"></div>
+                                          </td>
+                                          <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="h-4 bg-gray-200 rounded w-32"></div>
+                                          </td>
+                                          <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="h-4 bg-gray-200 rounded w-16"></div>
+                                          </td>
+                                          <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="h-6 bg-gray-200 rounded w-20"></div>
+                                          </td>
+                                          <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="h-4 bg-gray-200 rounded w-20"></div>
+                                          </td>
+                                          <td className="px-6 py-4 whitespace-nowrap">
+                                            <div className="h-6 bg-gray-200 rounded w-16"></div>
+                                          </td>
+                                        </tr>
+                                      ))
+                                    ) : orders.length === 0 ? (
+                                      <tr>
+                                        <td colSpan={6} className="px-6 py-12 text-center">
+                                          <div className="text-gray-500">
+                                            <div className="text-4xl mb-4">📦</div>
+                                            <p className="text-lg font-medium">No orders yet</p>
+                                            <p className="text-sm">Orders will appear here once customers make purchases.</p>
+                                          </div>
+                                        </td>
+                                      </tr>
+                                    ) : (
+                                      orders.map((order) => (
+                                        <tr key={order.id} className="hover:bg-gray-50">
+                                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                            {order.stripe_session_id.slice(-8)}
+                                          </td>
+                                          <td className="px-6 py-4 whitespace-nowrap">
+                                            <div>
+                                              <div className="text-sm font-medium text-gray-900">
+                                                {order.customer_name || 'N/A'}
+                                              </div>
+                                              <div className="text-sm text-gray-500">
+                                                {order.customer_email}
+                                              </div>
+                                            </div>
+                                          </td>
+                                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                            ${order.total_amount.toFixed(2)}
+                                          </td>
+                                          <td className="px-6 py-4 whitespace-nowrap">
+                                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
+                                              order.status === 'fulfilled' ? 'bg-green-100 text-green-800' :
+                                              order.status === 'processing' ? 'bg-blue-100 text-blue-800' :
+                                              order.status === 'paid' ? 'bg-yellow-100 text-yellow-800' :
+                                              'bg-gray-100 text-gray-800'
+                                            }`}>
+                                              {order.status}
+                                            </span>
+                                          </td>
+                                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                            {new Date(order.created_at).toLocaleDateString()}
+                                          </td>
+                                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            <button
+                                              onClick={() => {/* TODO: View order details */}}
+                                              className="text-blue-600 hover:text-blue-900"
+                                            >
+                                              View Details
+                                            </button>
+                                          </td>
+                                        </tr>
+                                      ))
+                                    )}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
                           </>
                         )}
         </div>

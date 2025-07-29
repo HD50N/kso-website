@@ -17,7 +17,6 @@ export default function Navigation() {
     { name: 'Network', href: '/alumni' },
     { name: 'Culture Show', href: '/culture-show' },
     { name: 'Shop', href: '/shop' },
-    ...(profile?.is_admin ? [{ name: 'Admin', href: '/admin' }] : []),
   ];
 
   return (
@@ -58,12 +57,26 @@ export default function Navigation() {
             {/* Auth buttons - Desktop */}
             <div className="hidden lg:flex items-center space-x-3">
               {user ? (
-                <Link 
-                  href="/profile"
-                  className="font-body-bold px-4 py-2 text-sm text-gray-700 hover:text-black hover:bg-gray-50 rounded-xl transition-all duration-300"
-                >
-                  Profile
-                </Link>
+                <>
+                  <Link 
+                    href="/profile"
+                    className="font-body-bold px-4 py-2 text-sm text-gray-700 hover:text-black hover:bg-gray-50 rounded-xl transition-all duration-300"
+                  >
+                    Profile
+                  </Link>
+                  {profile?.is_admin && (
+                    <Link 
+                      href="/admin"
+                      className="p-2 text-gray-700 hover:text-black hover:bg-gray-50 rounded-lg transition-all duration-300"
+                      title="Admin Panel"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                    </Link>
+                  )}
+                </>
               ) : (
                 <Link 
                   href="/auth"
@@ -118,13 +131,30 @@ export default function Navigation() {
             {/* Mobile Auth buttons */}
             <div className="pt-4 border-t border-gray-100 space-y-2">
               {user ? (
-                <Link 
-                  href="/profile"
-                  className="font-body-bold block w-full text-left px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:text-black hover:bg-gray-50 transition-colors"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  Profile
-                </Link>
+                <>
+                  <Link 
+                    href="/profile"
+                    className="font-body-bold block w-full text-left px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:text-black hover:bg-gray-50 transition-colors"
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    Profile
+                  </Link>
+                  {profile?.is_admin && (
+                    <Link 
+                      href="/admin"
+                      className="font-body-bold block w-full text-left px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:text-black hover:bg-gray-50 transition-colors"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <div className="flex items-center">
+                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                        Admin Panel
+                      </div>
+                    </Link>
+                  )}
+                </>
               ) : (
                 <Link 
                   href="/auth"
