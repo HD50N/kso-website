@@ -3,10 +3,11 @@ import { PrintfulAPI } from '@/lib/printful';
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const productId = parseInt(params.id);
+    const { id } = await params;
+    const productId = parseInt(id);
     
     if (!process.env.PRINTFUL_API_KEY) {
       return NextResponse.json(
