@@ -5,7 +5,8 @@ import { CartItem } from '@/types/shop';
 
 // Helper function to get authenticated user
 async function getAuthenticatedUser(request?: NextRequest) {
-  const supabase = createRouteHandlerClient({ cookies });
+  const cookieStore = await cookies();
+  const supabase = createRouteHandlerClient({ cookies: () => Promise.resolve(cookieStore) });
   
   const { data: { user }, error } = await supabase.auth.getUser();
   
@@ -20,8 +21,6 @@ async function getAuthenticatedUser(request?: NextRequest) {
   
   return { user, error };
 }
-
-
 
 export async function GET(request: NextRequest) {
   try {
@@ -41,7 +40,8 @@ export async function GET(request: NextRequest) {
     }
 
     // Create supabase client for database operations
-    const supabase = createRouteHandlerClient({ cookies });
+    const cookieStore = await cookies();
+    const supabase = createRouteHandlerClient({ cookies: () => Promise.resolve(cookieStore) });
 
     // Fetch cart items for the user
     const { data: cartItems, error } = await supabase
@@ -95,7 +95,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Create supabase client for database operations
-    const supabase = createRouteHandlerClient({ cookies });
+    const cookieStore = await cookies();
+    const supabase = createRouteHandlerClient({ cookies: () => Promise.resolve(cookieStore) });
 
     const body = await request.json();
     const { items }: { items: CartItem[] } = body;
@@ -188,7 +189,8 @@ export async function DELETE(request: NextRequest) {
     }
 
     // Create supabase client for database operations
-    const supabase = createRouteHandlerClient({ cookies });
+    const cookieStore = await cookies();
+    const supabase = createRouteHandlerClient({ cookies: () => Promise.resolve(cookieStore) });
 
     // Clear all cart items for the user
     const { error } = await supabase

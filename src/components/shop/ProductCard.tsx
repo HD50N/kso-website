@@ -80,7 +80,7 @@ export default function ProductCard({ product, onAddToCart, onOpenModal }: Produ
           {product.variants && product.variants.length > 1 ? (
             <button
               onClick={() => onOpenModal(product)}
-              className="px-4 py-2 rounded font-medium transition-colors duration-200 bg-black text-white hover:bg-gray-800"
+              className="px-2 py-1 sm:px-4 sm:py-2 rounded font-medium transition-colors duration-200 bg-black text-white hover:bg-gray-800 text-sm sm:text-base"
             >
               Choose Options
             </button>
@@ -88,7 +88,7 @@ export default function ProductCard({ product, onAddToCart, onOpenModal }: Produ
             <button
               onClick={() => onAddToCart(product)}
               disabled={product.inventory_count === 0}
-              className={`px-4 py-2 rounded font-medium transition-colors duration-200 ${
+              className={`px-2 py-1 sm:px-4 sm:py-2 rounded font-medium transition-colors duration-200 text-sm sm:text-base ${
                 product.inventory_count === 0
                   ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                   : 'bg-black text-white hover:bg-gray-800'

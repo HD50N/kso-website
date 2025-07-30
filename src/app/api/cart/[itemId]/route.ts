@@ -4,7 +4,8 @@ import { cookies } from 'next/headers';
 
 // Helper function to get authenticated user
 async function getAuthenticatedUser(request?: NextRequest) {
-  const supabase = createRouteHandlerClient({ cookies });
+  const cookieStore = await cookies();
+  const supabase = createRouteHandlerClient({ cookies: () => Promise.resolve(cookieStore) });
   
   const { data: { user }, error } = await supabase.auth.getUser();
   
@@ -46,7 +47,8 @@ export async function DELETE(
     console.log('Cart API DELETE item: Deleting item:', itemId, 'for user:', user.id);
 
     // Create supabase client for database operations
-    const supabase = createRouteHandlerClient({ cookies });
+    const cookieStore = await cookies();
+    const supabase = createRouteHandlerClient({ cookies: () => Promise.resolve(cookieStore) });
 
     // Parse the item ID to get product_id and variant_id
     const parts = itemId.split('-');

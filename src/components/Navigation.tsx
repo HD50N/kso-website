@@ -43,7 +43,7 @@ export default function Navigation({ onOpenCart }: NavigationProps) {
                 alt="KSO Logo" 
                 className="w-8 h-8 object-contain"
               />
-              <span className="font-display text-2xl font-bold text-black group-hover:scale-110 transition-transform">UChicago KSO</span>
+              <span className="font-display text-lg sm:text-xl lg:text-2xl font-bold text-black group-hover:scale-110 transition-transform">UChicago KSO</span>
             </Link>
           </div>
           
@@ -152,7 +152,8 @@ export default function Navigation({ onOpenCart }: NavigationProps) {
               
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
-                className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-black hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-gray-500"
+                className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-black hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-gray-500 transition-all duration-300"
+                aria-label="Toggle mobile menu"
               >
                 <span className="sr-only">Open main menu</span>
                 {!isMenuOpen ? (
@@ -173,32 +174,14 @@ export default function Navigation({ onOpenCart }: NavigationProps) {
       {/* Mobile Navigation */}
       {isMenuOpen && (
         <div className="lg:hidden">
-          <div className="px-3 pt-3 pb-4 space-y-1 bg-white border-t shadow-lg">
-            {navItems.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={`font-body-bold block px-3 py-2.5 rounded-lg text-sm transition-colors ${
-                  pathname === item.href
-                    ? 'text-black bg-gray-50'
-                    : 'text-gray-700 hover:text-black hover:bg-gray-50'
-                }`}
-                onClick={() => setIsMenuOpen(false)}
-              >
-                {item.name}
-              </Link>
-            ))}
-            
-            {/* Big Events Section */}
-            <div className="pt-2 pb-2">
-              <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                Big Events
-              </div>
-              {bigEventsItems.map((item) => (
+          <div className="px-4 pt-2 pb-6 space-y-2 bg-white border-t shadow-lg">
+            {/* Main Navigation Items */}
+            <div className="space-y-1">
+              {navItems.map((item) => (
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`font-body-bold block px-6 py-2.5 rounded-lg text-sm transition-colors ${
+                  className={`font-body-bold block px-4 py-3 rounded-lg text-base transition-colors ${
                     pathname === item.href
                       ? 'text-black bg-gray-50'
                       : 'text-gray-700 hover:text-black hover:bg-gray-50'
@@ -210,6 +193,29 @@ export default function Navigation({ onOpenCart }: NavigationProps) {
               ))}
             </div>
             
+            {/* Big Events Section */}
+            <div className="pt-2 pb-2">
+              <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                Big Events
+              </div>
+              <div className="space-y-1">
+                {bigEventsItems.map((item) => (
+                  <Link
+                    key={item.name}
+                    href={item.href}
+                    className={`font-body-bold block px-6 py-3 rounded-lg text-base transition-colors ${
+                      pathname === item.href
+                        ? 'text-black bg-gray-50'
+                        : 'text-gray-700 hover:text-black hover:bg-gray-50'
+                    }`}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {item.name}
+                  </Link>
+                ))}
+              </div>
+            </div>
+            
             {/* Mobile Auth buttons */}
             <div className="pt-4 border-t border-gray-100 space-y-2">
               {/* Mobile Cart Link */}
@@ -219,17 +225,17 @@ export default function Navigation({ onOpenCart }: NavigationProps) {
                     onOpenCart();
                     setIsMenuOpen(false);
                   }}
-                  className="font-body-bold block w-full text-left px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:text-black hover:bg-gray-50 transition-colors cursor-pointer"
+                  className="font-body-bold block w-full text-left px-4 py-3 rounded-lg text-base text-gray-700 hover:text-black hover:bg-gray-50 transition-colors cursor-pointer"
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
-                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                       </svg>
                       Cart
                     </div>
                     {cartItemCount > 0 && (
-                      <span className="bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                      <span className="bg-red-500 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold">
                         {cartItemCount > 99 ? '99+' : cartItemCount}
                       </span>
                     )}
@@ -238,29 +244,31 @@ export default function Navigation({ onOpenCart }: NavigationProps) {
               ) : (
                 <Link 
                   href="/shop"
-                  className="font-body-bold block w-full text-left px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:text-black hover:bg-gray-50 transition-colors"
+                  className="font-body-bold block w-full text-left px-4 py-3 rounded-lg text-base text-gray-700 hover:text-black hover:bg-gray-50 transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center">
-                      <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                       </svg>
                       Shop
                     </div>
                     {cartItemCount > 0 && (
-                      <span className="bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
+                      <span className="bg-red-500 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold">
                         {cartItemCount > 99 ? '99+' : cartItemCount}
                       </span>
                     )}
                   </div>
                 </Link>
               )}
+              
+              {/* User-specific links */}
               {user ? (
-                <>
+                <div className="space-y-1">
                   <Link 
                     href="/profile"
-                    className="font-body-bold block w-full text-left px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:text-black hover:bg-gray-50 transition-colors"
+                    className="font-body-bold block w-full text-left px-4 py-3 rounded-lg text-base text-gray-700 hover:text-black hover:bg-gray-50 transition-colors"
                     onClick={() => setIsMenuOpen(false)}
                   >
                     Profile
@@ -268,11 +276,11 @@ export default function Navigation({ onOpenCart }: NavigationProps) {
                   {profile?.is_admin && (
                     <Link 
                       href="/admin"
-                      className="font-body-bold block w-full text-left px-3 py-2.5 rounded-lg text-sm text-gray-700 hover:text-black hover:bg-gray-50 transition-colors"
+                      className="font-body-bold block w-full text-left px-4 py-3 rounded-lg text-base text-gray-700 hover:text-black hover:bg-gray-50 transition-colors"
                       onClick={() => setIsMenuOpen(false)}
                     >
                       <div className="flex items-center">
-                        <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
@@ -280,11 +288,11 @@ export default function Navigation({ onOpenCart }: NavigationProps) {
                       </div>
                     </Link>
                   )}
-                </>
+                </div>
               ) : (
                 <Link 
                   href="/auth"
-                  className="font-body-bold block w-full text-left px-3 py-2.5 rounded-lg text-sm bg-black text-white hover:bg-gray-800 transition-colors"
+                  className="font-body-bold block w-full text-left px-4 py-3 rounded-lg text-base bg-black text-white hover:bg-gray-800 transition-colors"
                   onClick={() => setIsMenuOpen(false)}
                 >
                   Login

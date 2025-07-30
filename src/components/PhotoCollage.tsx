@@ -80,9 +80,10 @@ export default function PhotoCollage() {
       {/* Photo collage positioned around the mission statement */}
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="relative w-full max-w-6xl">
-          {/* Top left - Polaroid style */}
+          {/* Top left - Polaroid style - Above text on mobile, left on desktop */}
           <div 
-            className="absolute -top-20 -left-8 sm:-top-40 sm:-left-20 md:-top-60 md:-left-32 lg:-top-80 lg:-left-40 w-24 h-32 sm:w-32 sm:h-40 md:w-40 md:h-48 lg:w-48 lg:h-56 xl:w-64 xl:h-72 bg-white rounded-lg shadow-xl"
+            className="absolute -top-20 -left-8 sm:-top-40 sm:-left-20 md:-top-60 md:-left-32 lg:-top-80 lg:-left-40 w-24 h-32 sm:w-32 sm:h-40 md:w-40 md:h-48 lg:w-48 lg:h-56 xl:w-64 xl:h-72 bg-white rounded-lg shadow-xl
+                     lg:block hidden"
             style={{
               opacity: getPhotoAnimation(0).opacity,
               transform: getPhotoAnimation(0).transform,
@@ -101,9 +102,10 @@ export default function PhotoCollage() {
             </div>
           </div>
 
-          {/* Top right - Polaroid style */}
+          {/* Top right - Polaroid style - Above text on mobile, right on desktop */}
           <div 
-            className="absolute -top-16 -right-6 sm:-top-32 sm:-right-16 md:-top-48 md:-right-24 lg:-top-72 lg:-right-40 w-20 h-28 sm:w-28 sm:h-36 md:w-36 md:h-44 lg:w-44 lg:h-52 xl:w-60 xl:h-68 bg-white rounded-lg shadow-xl"
+            className="absolute -top-16 -right-6 sm:-top-32 sm:-right-16 md:-top-48 md:-right-24 lg:-top-72 lg:-right-40 w-20 h-28 sm:w-28 sm:h-36 md:w-36 md:h-44 lg:w-44 lg:h-52 xl:w-60 xl:h-68 bg-white rounded-lg shadow-xl
+                     lg:block hidden"
             style={{
               opacity: getPhotoAnimation(1).opacity,
               transform: getPhotoAnimation(1).transform,
@@ -122,9 +124,10 @@ export default function PhotoCollage() {
             </div>
           </div>
 
-          {/* Bottom left - Polaroid style */}
+          {/* Bottom left - Polaroid style - Below text on mobile, left on desktop */}
           <div 
-            className="absolute -bottom-16 -left-6 sm:-bottom-32 sm:-left-16 md:-bottom-48 md:-left-24 lg:-bottom-72 lg:-left-40 w-20 h-28 sm:w-28 sm:h-36 md:w-36 md:h-44 lg:w-44 lg:h-52 xl:w-60 xl:h-68 bg-white rounded-lg shadow-xl"
+            className="absolute -bottom-16 -left-6 sm:-bottom-32 sm:-left-16 md:-bottom-48 md:-left-24 lg:-bottom-72 lg:-left-40 w-20 h-28 sm:w-28 sm:h-36 md:w-36 md:h-44 lg:w-44 lg:h-52 xl:w-60 xl:h-68 bg-white rounded-lg shadow-xl
+                     lg:block hidden"
             style={{
               opacity: getPhotoAnimation(2).opacity,
               transform: getPhotoAnimation(2).transform,
@@ -143,9 +146,10 @@ export default function PhotoCollage() {
             </div>
           </div>
 
-          {/* Bottom right - Polaroid style */}
+          {/* Bottom right - Polaroid style - Below text on mobile, right on desktop */}
           <div 
-            className="absolute -bottom-20 -right-8 sm:-bottom-40 sm:-right-20 md:-bottom-60 md:-right-32 lg:-bottom-80 lg:-right-40 w-24 h-32 sm:w-32 sm:h-40 md:w-40 md:h-48 lg:w-48 lg:h-56 xl:w-64 xl:h-72 bg-white rounded-lg shadow-xl"
+            className="absolute -bottom-20 -right-8 sm:-bottom-40 sm:-right-20 md:-bottom-60 md:-right-32 lg:-bottom-80 lg:-right-40 w-24 h-32 sm:w-32 sm:h-40 md:w-40 md:h-48 lg:w-48 lg:h-56 xl:w-64 xl:h-72 bg-white rounded-lg shadow-xl
+                     lg:block hidden"
             style={{
               opacity: getPhotoAnimation(3).opacity,
               transform: getPhotoAnimation(3).transform,
@@ -164,9 +168,10 @@ export default function PhotoCollage() {
             </div>
           </div>
 
-          {/* Center left - Polaroid style */}
+          {/* Center left - Polaroid style - Hidden on mobile, left on desktop */}
           <div 
-            className="absolute top-1/2 -left-12 sm:-left-24 md:-left-32 lg:-left-48 transform -translate-y-1/2 w-16 h-24 sm:w-24 sm:h-32 md:w-32 md:h-40 lg:w-40 lg:h-48 xl:w-56 xl:h-64 bg-white rounded-lg shadow-xl"
+            className="absolute top-1/2 -left-12 sm:-left-24 md:-left-32 lg:-left-48 transform -translate-y-1/2 w-16 h-24 sm:w-24 sm:h-32 md:w-32 md:h-40 lg:w-40 lg:h-48 xl:w-56 xl:h-64 bg-white rounded-lg shadow-xl
+                     lg:block hidden"
             style={{
               opacity: getPhotoAnimation(4).opacity,
               transform: getPhotoAnimation(4).transform,
@@ -185,9 +190,139 @@ export default function PhotoCollage() {
             </div>
           </div>
 
-          {/* Center right - Polaroid style */}
+          {/* Center right - Polaroid style - Hidden on mobile, right on desktop */}
           <div 
-            className="absolute top-1/2 -right-12 sm:-right-24 md:-right-32 lg:-right-48 transform -translate-y-1/2 w-16 h-24 sm:w-24 sm:h-32 md:w-32 md:h-40 lg:w-40 lg:h-48 xl:w-56 xl:h-64 bg-white rounded-lg shadow-xl"
+            className="absolute top-1/2 -right-12 sm:-right-24 md:-right-32 lg:-right-48 transform -translate-y-1/2 w-16 h-24 sm:w-24 sm:h-32 md:w-32 md:h-40 lg:w-40 lg:h-48 xl:w-56 xl:h-64 bg-white rounded-lg shadow-xl
+                     lg:block hidden"
+            style={{
+              opacity: getPhotoAnimation(5).opacity,
+              transform: getPhotoAnimation(5).transform,
+              transition: 'opacity 0.1s ease-out, transform 0.1s ease-out'
+            }}
+          >
+            <div className="w-full h-4/5 rounded-t-lg overflow-hidden">
+              <img 
+                src={photos[5].src} 
+                alt={photos[5].alt} 
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="h-1/5 bg-white rounded-b-lg flex items-center justify-center">
+              <span className="text-gray-600 text-xs font-light">Together</span>
+            </div>
+          </div>
+
+          {/* Mobile-specific photos - Above and below text */}
+          {/* Above text - Mobile only - Row 1 */}
+          <div 
+            className="absolute -top-64 -left-4 w-28 h-36 sm:w-36 sm:h-44 bg-white rounded-lg shadow-xl
+                     block lg:hidden"
+            style={{
+              opacity: getPhotoAnimation(0).opacity,
+              transform: getPhotoAnimation(0).transform,
+              transition: 'opacity 0.1s ease-out, transform 0.1s ease-out'
+            }}
+          >
+            <div className="w-full h-4/5 rounded-t-lg overflow-hidden">
+              <img 
+                src={photos[0].src} 
+                alt={photos[0].alt} 
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="h-1/5 bg-white rounded-b-lg flex items-center justify-center">
+              <span className="text-gray-600 text-xs font-light">Board</span>
+            </div>
+          </div>
+
+          <div 
+            className="absolute -top-64 -right-4 w-28 h-36 sm:w-36 sm:h-44 bg-white rounded-lg shadow-xl
+                     block lg:hidden"
+            style={{
+              opacity: getPhotoAnimation(1).opacity,
+              transform: getPhotoAnimation(1).transform,
+              transition: 'opacity 0.1s ease-out, transform 0.1s ease-out'
+            }}
+          >
+            <div className="w-full h-4/5 rounded-t-lg overflow-hidden">
+              <img 
+                src={photos[1].src} 
+                alt={photos[1].alt} 
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="h-1/5 bg-white rounded-b-lg flex items-center justify-center">
+              <span className="text-gray-600 text-xs font-light">Love</span>
+            </div>
+          </div>
+
+          <div 
+            className="absolute -top-64 left-1/2 transform -translate-x-1/2 w-28 h-36 sm:w-36 sm:h-44 bg-white rounded-lg shadow-xl
+                     block lg:hidden"
+            style={{
+              opacity: getPhotoAnimation(2).opacity,
+              transform: getPhotoAnimation(2).transform,
+              transition: 'opacity 0.1s ease-out, transform 0.1s ease-out'
+            }}
+          >
+            <div className="w-full h-4/5 rounded-t-lg overflow-hidden">
+              <img 
+                src={photos[2].src} 
+                alt={photos[2].alt} 
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="h-1/5 bg-white rounded-b-lg flex items-center justify-center">
+              <span className="text-gray-600 text-xs font-light">&lt;3</span>
+            </div>
+          </div>
+
+          {/* Below text - Mobile only - Row 2 */}
+          <div 
+            className="absolute -bottom-64 -left-4 w-28 h-36 sm:w-36 sm:h-44 bg-white rounded-lg shadow-xl
+                     block lg:hidden"
+            style={{
+              opacity: getPhotoAnimation(3).opacity,
+              transform: getPhotoAnimation(3).transform,
+              transition: 'opacity 0.1s ease-out, transform 0.1s ease-out'
+            }}
+          >
+            <div className="w-full h-4/5 rounded-t-lg overflow-hidden">
+              <img 
+                src={photos[3].src} 
+                alt={photos[3].alt} 
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="h-1/5 bg-white rounded-b-lg flex items-center justify-center">
+              <span className="text-gray-600 text-xs font-light">Culture Show</span>
+            </div>
+          </div>
+
+          <div 
+            className="absolute -bottom-64 -right-4 w-28 h-36 sm:w-36 sm:h-44 bg-white rounded-lg shadow-xl
+                     block lg:hidden"
+            style={{
+              opacity: getPhotoAnimation(4).opacity,
+              transform: getPhotoAnimation(4).transform,
+              transition: 'opacity 0.1s ease-out, transform 0.1s ease-out'
+            }}
+          >
+            <div className="w-full h-4/5 rounded-t-lg overflow-hidden">
+              <img 
+                src={photos[4].src} 
+                alt={photos[4].alt} 
+                className="w-full h-full object-cover"
+              />
+            </div>
+            <div className="h-1/5 bg-white rounded-b-lg flex items-center justify-center">
+              <span className="text-gray-600 text-xs font-light">Community</span>
+            </div>
+          </div>
+
+          <div 
+            className="absolute -bottom-64 left-1/2 transform -translate-x-1/2 w-28 h-36 sm:w-36 sm:h-44 bg-white rounded-lg shadow-xl
+                     block lg:hidden"
             style={{
               opacity: getPhotoAnimation(5).opacity,
               transform: getPhotoAnimation(5).transform,

@@ -4,7 +4,8 @@ import { cookies } from 'next/headers';
 
 export async function GET() {
   try {
-    const supabase = createRouteHandlerClient({ cookies });
+    const cookieStore = await cookies();
+    const supabase = createRouteHandlerClient({ cookies: () => Promise.resolve(cookieStore) });
     
     // Test if cart_items table exists
     const { data, error } = await supabase

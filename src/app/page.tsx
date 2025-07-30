@@ -128,54 +128,95 @@ export default function Home() {
       <Navigation />
       
       {/* Hero Section */}
-      <section className="relative bg-white overflow-hidden min-h-screen flex items-center justify-center">
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
+      <section className="relative bg-white overflow-hidden min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
+        <div className="relative max-w-7xl mx-auto py-8 sm:py-12 lg:py-16">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             {/* Left side - Content */}
-            <div className="text-center lg:text-left">
+            <div className="text-center lg:text-left order-2 lg:order-1">
               {/* Title */}
               <ScrollAnimation>
-                <h1 className="hero-title text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl mb-4 sm:mb-6 animate-bounce-in text-black">
+                <h1 className="hero-title text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl mb-4 sm:mb-6 animate-bounce-in text-black leading-tight">
                   Korean Students Organization
                 </h1>
               </ScrollAnimation>
               
               {/* Subtitle */}
               <ScrollAnimation>
-                <p className="hero-subtitle text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl mb-6 sm:mb-8 text-gray-700 animate-slide-in-up stagger-1">
+                <p className="hero-subtitle text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl mb-2 sm:mb-8 text-gray-700 animate-slide-in-up stagger-1">
                   University of Chicago
                 </p>
               </ScrollAnimation>
               
+              {/* ASCII Component - Mobile Only */}
+              <ScrollAnimation className="flex justify-center lg:hidden mb-0">
+                <div className="animate-fade-in stagger-2 relative h-75 w-full max-w-xs flex items-center justify-center">
+                  <div 
+                    className={`transition-all duration-1500 ease-in-out ${
+                      currentAnimation === 'flag' 
+                        ? 'opacity-100 transform scale-100' 
+                        : 'opacity-0 transform scale-95 absolute top-0 left-0'
+                    }`}
+                  >
+                    <AnimatedFlag />
+                  </div>
+                  <div 
+                    className={`transition-all duration-1500 ease-in-out ${
+                      currentAnimation === 'fan' 
+                        ? 'opacity-100 transform scale-100' 
+                        : 'opacity-0 transform scale-95 absolute top-0 left-0'
+                    }`}
+                  >
+                    <AnimatedFan />
+                  </div>
+                  <div 
+                    className={`transition-all duration-1500 ease-in-out ${
+                      currentAnimation === 'mask' 
+                        ? 'opacity-100 transform scale-100' 
+                        : 'opacity-0 transform scale-95 absolute top-0 left-0'
+                    }`}
+                  >
+                    <AnimatedMask />
+                  </div>
+                  <div 
+                    className={`transition-all duration-1500 ease-in-out ${
+                      currentAnimation === 'palace' 
+                        ? 'opacity-100 transform scale-100' 
+                        : 'opacity-0 transform scale-95 absolute top-0 left-0'
+                    }`}
+                  >
+                    <AnimatedPalace />
+                  </div>
+                </div>
+              </ScrollAnimation>
+              
               {/* Description */}
               <ScrollAnimation>
-                <p className="font-body text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl mb-8 sm:mb-12 max-w-2xl sm:max-w-3xl lg:max-w-4xl mx-auto lg:mx-0 text-gray-600 animate-fade-in stagger-2 px-4 lg:px-0">
+                <p className="font-body text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl mb-8 sm:mb-12 max-w-2xl sm:max-w-3xl lg:max-w-4xl mx-auto lg:mx-0 text-gray-600 animate-fade-in stagger-2 px-4 lg:px-0 leading-relaxed">
                   Representing the Korean community and strengthening its voice on campus and beyond
                 </p>
               </ScrollAnimation>
               
               {/* Buttons */}
-                                        <ScrollAnimation>
-                            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start animate-scale-in stagger-3 px-4 lg:px-0">
-                              <a 
-                                href="#fall-events"
-                                className="modern-button bg-black text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold hover:bg-gray-800 hover-lift shadow-lg text-sm sm:text-base animate-float-slow"
-                              >
-                                Fall 2025-2026
-                              </a>
-
-                            </div>
-                          </ScrollAnimation>
+              <ScrollAnimation>
+                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start animate-scale-in stagger-3 px-4 lg:px-0">
+                  <a 
+                    href="#fall-events"
+                    className="modern-button bg-black text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold hover:bg-gray-800 hover-lift shadow-lg text-sm sm:text-base animate-float-slow transition-all duration-300"
+                  >
+                    Fall 2025-2026
+                  </a>
+                </div>
+              </ScrollAnimation>
             </div>
             
-                                  {/* Right side - Alternating Flag, Fan, Mask, and Palace */}
-            <ScrollAnimation className="flex justify-center lg:justify-end">
-              <div className="animate-fade-in stagger-2 relative h-96">
+            {/* Right side - Alternating Flag, Fan, Mask, and Palace - Desktop Only */}
+            <ScrollAnimation className="hidden lg:flex lg:justify-end order-1 lg:order-2">
+              <div className="animate-fade-in stagger-2 relative h-96 w-full max-w-md flex items-center justify-end">
                 <div 
                   className={`transition-all duration-1500 ease-in-out ${
                     currentAnimation === 'flag' 
                       ? 'opacity-100 transform scale-100' 
-                      : 'opacity-0 transform scale-95 absolute inset-0'
+                      : 'opacity-0 transform scale-95 absolute top-0 left-0'
                   }`}
                 >
                   <AnimatedFlag />
@@ -184,8 +225,9 @@ export default function Home() {
                   className={`transition-all duration-1500 ease-in-out ${
                     currentAnimation === 'fan' 
                       ? 'opacity-100 transform scale-100' 
-                      : 'opacity-0 transform scale-95 absolute inset-0'
+                      : 'opacity-0 transform scale-95 absolute top-0 left-0'
                   }`}
+                  style={{ transform: 'translateX(-10rem)' }}
                 >
                   <AnimatedFan />
                 </div>
@@ -193,8 +235,9 @@ export default function Home() {
                   className={`transition-all duration-1500 ease-in-out ${
                     currentAnimation === 'mask' 
                       ? 'opacity-100 transform scale-100' 
-                      : 'opacity-0 transform scale-95 absolute inset-0'
+                      : 'opacity-0 transform scale-95 absolute top-0 left-0'
                   }`}
+                  style={{ transform: 'translateX(-10rem)' }}
                 >
                   <AnimatedMask />
                 </div>
@@ -202,16 +245,17 @@ export default function Home() {
                   className={`transition-all duration-1500 ease-in-out ${
                     currentAnimation === 'palace' 
                       ? 'opacity-100 transform scale-100' 
-                      : 'opacity-0 transform scale-95 absolute inset-0'
+                      : 'opacity-0 transform scale-95 absolute top-0 left-0'
                   }`}
+                  style={{ transform: 'translateX(-10rem)' }}
                 >
                   <AnimatedPalace />
                 </div>
               </div>
             </ScrollAnimation>
+          </div>
         </div>
-      </div>
-          </section>
+      </section>
 
       {/* Horizontal separator line */}
       <ScrollAnimation>
@@ -221,10 +265,10 @@ export default function Home() {
       </ScrollAnimation>
 
       {/* Mission Statement */}
-      <section className="min-h-screen bg-white flex items-center justify-center relative overflow-hidden">
+      <section className="min-h-screen bg-white flex items-center justify-center relative overflow-hidden px-4 sm:px-6 lg:px-8">
         <PhotoCollage />
-        <ScrollAnimation className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-          <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-light text-black leading-relaxed max-w-4xl mx-auto">
+        <ScrollAnimation className="max-w-5xl mx-auto text-center relative z-10">
+          <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-light text-black leading-relaxed max-w-4xl mx-auto px-4">
             Our mission is to represent the Korean community and strengthen its voice on (and beyond) campus 
             and to bring together those who have a common interest in Korean culture through social activities and events
           </p>
@@ -239,8 +283,8 @@ export default function Home() {
       </ScrollAnimation>
 
       {/* Sponsors */}
-      <section className="section-padding bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="section-padding bg-white px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
           <ScrollAnimation className="text-center mb-8 sm:mb-12">
             <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-black mb-4">Sponsors</h2>
             <p className="text-gray-600 text-xs sm:text-sm md:text-base max-w-2xl mx-auto px-4">
@@ -248,39 +292,39 @@ export default function Home() {
             </p>
           </ScrollAnimation>
           
-                      <ScrollAnimation>
-                        <div className="flex flex-wrap justify-center gap-4 sm:gap-6 lg:gap-8">
-                          {/* Weee! Sponsor */}
-                          <div className="modern-card hover-lift shadow-lg p-4 sm:p-6 lg:p-8 bg-white rounded-xl border border-gray-100 transition-all duration-300 hover:shadow-xl">
-                            <div className="text-center">
-                              <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 bg-white rounded-xl mx-auto mb-4 flex items-center justify-center p-3 shadow-sm border border-gray-100">
-                                <img 
-                                  src="/weee!.jpg" 
-                                  alt="Weee! Sponsor Logo" 
-                                  className="w-full h-full object-contain"
-                                />
-                              </div>
-                              <h3 className="text-base sm:text-lg font-bold text-black mb-2">Weee!</h3>
-                              <p className="text-xs sm:text-sm text-gray-600">Food & Grocery Sponsor</p>
-                            </div>
-                          </div>
-                          
-                          {/* The Face Shop Sponsor */}
-                          <div className="modern-card hover-lift shadow-lg p-4 sm:p-6 lg:p-8 bg-white rounded-xl border border-gray-100 transition-all duration-300 hover:shadow-xl">
-                            <div className="text-center">
-                              <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 bg-white rounded-xl mx-auto mb-4 flex items-center justify-center p-3 shadow-sm border border-gray-100">
-                                <img 
-                                  src="/thefaceshop.jpg" 
-                                  alt="The Face Shop Sponsor Logo" 
-                                  className="w-full h-full object-contain"
-                                />
-                              </div>
-                              <h3 className="text-base sm:text-lg font-bold text-black mb-2">The Face Shop</h3>
-                              <p className="text-xs sm:text-sm text-gray-600">Clean Beauty Sponsor</p>
-                            </div>
-                          </div>
-                        </div>
-                      </ScrollAnimation>
+          <ScrollAnimation>
+            <div className="flex flex-nowrap overflow-x-auto gap-4 sm:gap-6 lg:gap-8 pb-4 sm:pb-0 sm:flex-wrap sm:justify-center scrollbar-hide justify-center">
+              {/* Weee! Sponsor */}
+              <div className="modern-card hover-lift shadow-lg p-3 sm:p-6 lg:p-8 bg-white rounded-xl border border-gray-100 transition-all duration-300 hover:shadow-xl flex-shrink-0 w-48 sm:w-full sm:max-w-xs">
+                <div className="text-center">
+                  <div className="w-12 h-12 sm:w-20 sm:h-20 lg:w-24 lg:h-24 bg-white rounded-xl mx-auto mb-3 sm:mb-4 flex items-center justify-center p-2 sm:p-3 shadow-sm border border-gray-100">
+                    <img 
+                      src="/weee!.jpg" 
+                      alt="Weee! Sponsor Logo" 
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                  <h3 className="text-sm sm:text-lg font-bold text-black mb-1 sm:mb-2">Weee!</h3>
+                  <p className="text-xs sm:text-sm text-gray-600">Food & Grocery Sponsor</p>
+                </div>
+              </div>
+              
+              {/* The Face Shop Sponsor */}
+              <div className="modern-card hover-lift shadow-lg p-3 sm:p-6 lg:p-8 bg-white rounded-xl border border-gray-100 transition-all duration-300 hover:shadow-xl flex-shrink-0 w-48 sm:w-full sm:max-w-xs">
+                <div className="text-center">
+                  <div className="w-12 h-12 sm:w-20 sm:h-20 lg:w-24 lg:h-24 bg-white rounded-xl mx-auto mb-3 sm:mb-4 flex items-center justify-center p-2 sm:p-3 shadow-sm border border-gray-100">
+                    <img 
+                      src="/thefaceshop.jpg" 
+                      alt="The Face Shop Sponsor Logo" 
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                  <h3 className="text-sm sm:text-lg font-bold text-black mb-1 sm:mb-2">The Face Shop</h3>
+                  <p className="text-xs sm:text-sm text-gray-600">Clean Beauty Sponsor</p>
+                </div>
+              </div>
+            </div>
+          </ScrollAnimation>
         </div>
       </section>
 
@@ -291,16 +335,9 @@ export default function Home() {
         </div>
       </ScrollAnimation>
 
-      {/* Horizontal separator line */}
-      <ScrollAnimation>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="border-t border-gray-300"></div>
-        </div>
-      </ScrollAnimation>
-
       {/* Upcoming Events */}
-      <section id="fall-events" className="section-padding">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section id="fall-events" className="section-padding px-6 sm:px-6 lg:px-8 p-4 sm:p-0">
+        <div className="max-w-sm sm:max-w-7xl mx-auto">
           <ScrollAnimation className="text-center mb-8 sm:mb-12 lg:mb-16">
             <h2 className="section-title text-xl sm:text-2xl md:text-3xl lg:text-4xl text-black mb-3 sm:mb-4">Fall 2025-2026</h2>
             <p className="font-body text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl text-gray-600 max-w-2xl mx-auto px-4">Check out our latest events and stay connected with the Korean community</p>
@@ -316,7 +353,7 @@ export default function Home() {
                 <ScrollAnimation key={index} className={`stagger-${index + 1} relative mb-8`}>
                   <div className="flex items-start">
                     {/* Timeline bubble */}
-                    <div className="flex-shrink-0 w-12 h-12 bg-black rounded-full flex items-center justify-center mr-4 relative z-10 shadow-lg" style={{ marginLeft: '0px', marginTop: '0px' }}>
+                    <div className="flex-shrink-0 w-12 h-12 bg-black rounded-full flex items-center justify-center mr-4 relative z-10 shadow-lg">
                       <div className="text-center px-1">
                         <span className="text-white text-xs font-bold block leading-tight">
                           {event.date.split(' ').slice(-1)[0]}
@@ -389,8 +426,8 @@ export default function Home() {
       </ScrollAnimation>
 
       {/* Quick Stats */}
-      <section className="section-padding bg-white relative overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="section-padding bg-white relative overflow-hidden px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
           <ScrollAnimation className="text-center mb-6 sm:mb-8 lg:mb-12">
             <h2 className="section-title text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl mb-3 sm:mb-4 text-black">Our Impact</h2>
             <p className="font-body text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto px-4">Celebrating community building and cultural celebration</p>
@@ -398,16 +435,16 @@ export default function Home() {
           
           {/* Mobile: Compact Horizontal Scroll */}
           <div className="block sm:hidden">
-            <div className="flex space-x-3 overflow-x-auto pb-2 scrollbar-hide">
+            <div className="grid grid-cols-2 gap-3">
               {[
                 { number: "KSO", label: "Community" },
                 { number: "Culture", label: "Show" },
                 { number: "Coed IM", label: "Soccer" },
                 { number: "AAPI", label: "Events" }
               ].map((stat, index) => (
-                <ScrollAnimation key={index} className={`stagger-${index + 1} flex-shrink-0`}>
-                  <div className="modern-card rounded-lg p-4 hover-lift min-w-[120px] shadow-lg">
-                    <div className="text-2xl font-bold mb-1 text-black">{stat.number}</div>
+                <ScrollAnimation key={index} className={`stagger-${index + 1}`}>
+                  <div className="modern-card rounded-lg p-3 hover-lift shadow-lg text-center">
+                    <div className="text-lg font-bold mb-1 text-black">{stat.number}</div>
                     <div className="text-gray-700 text-xs font-medium">{stat.label}</div>
                   </div>
                 </ScrollAnimation>
@@ -442,8 +479,8 @@ export default function Home() {
       </ScrollAnimation>
 
       {/* Social Media & Contact */}
-      <section className="section-padding bg-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <section className="section-padding bg-white px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto text-center">
           <ScrollAnimation>
             <h2 className="section-title text-xl sm:text-2xl md:text-3xl lg:text-4xl text-black mb-4 sm:mb-6 lg:mb-8">Connect With Us</h2>
             <p className="font-body text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 mb-6 sm:mb-8 lg:mb-12 max-w-2xl mx-auto px-4">
@@ -453,7 +490,7 @@ export default function Home() {
           
           {/* Mobile: Compact Horizontal Scroll */}
           <div className="block sm:hidden mb-6">
-            <div className="flex space-x-3 overflow-x-auto pb-2 scrollbar-hide">
+            <div className="flex justify-center space-x-3 overflow-x-auto pb-2 scrollbar-hide">
               {socialLinks.map((link, index) => (
                 <ScrollAnimation key={link.name} className={`stagger-${index + 1} flex-shrink-0`}>
                   <a

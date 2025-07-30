@@ -53,8 +53,8 @@ export default function AnimatedFan() {
   if (!isVisible) return null;
 
   return (
-    <div className="font-mono text-xs leading-none overflow-visible select-none h-96">
-      <div className="animate-fade-in flex items-center justify-center h-full" style={{ transform: 'translateX(-5rem)' }}>
+    <div className="font-mono text-xs leading-none overflow-visible select-none h-48 lg:h-96">
+      <div className="animate-fade-in flex items-center justify-center h-full">
         {/* Mobile version (hidden on lg screens and up) */}
         <div className="block lg:hidden">
           {fanLines.map((line, index) => (

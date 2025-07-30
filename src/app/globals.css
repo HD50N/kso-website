@@ -350,6 +350,124 @@ section {
   overflow-x: hidden;
 }
 
+/* Mobile-specific improvements */
+@media (max-width: 640px) {
+  /* Improve touch targets */
+  button, a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Better text readability on mobile */
+  .text-sm {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+  
+  /* Improve spacing on mobile */
+  .space-y-4 > * + * {
+    margin-top: 1rem;
+  }
+  
+  .space-y-6 > * + * {
+    margin-top: 1.5rem;
+  }
+  
+  /* Better mobile navigation */
+  nav {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  /* Improve mobile cards */
+  .modern-card {
+    border-radius: 0.75rem;
+    padding: 1rem;
+  }
+  
+  /* Better mobile buttons */
+  .modern-button {
+    padding: 0.75rem 1.5rem;
+    font-size: 0.875rem;
+    border-radius: 0.75rem;
+  }
+  
+  /* Improve mobile text sizing */
+  .hero-title {
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.125rem;
+    line-height: 1.75rem;
+  }
+  
+  .section-title {
+    font-size: 1.5rem;
+    line-height: 2rem;
+  }
+  
+  /* Better mobile spacing */
+  .section-padding {
+    padding: 3rem 0;
+  }
+  
+  /* Improve mobile grid layouts */
+  .grid {
+    gap: 1rem;
+  }
+  
+  /* Better mobile shadows */
+  .shadow-lg {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  }
+  
+  /* Improve mobile animations */
+  .animate-float {
+    animation-duration: 4s;
+  }
+  
+  .animate-pulse {
+    animation-duration: 3s;
+  }
+}
+
+/* Tablet improvements */
+@media (min-width: 641px) and (max-width: 1024px) {
+  /* Better tablet spacing */
+  .section-padding {
+    padding: 4rem 0;
+  }
+  
+  /* Improve tablet text sizing */
+  .hero-title {
+    font-size: 2.25rem;
+    line-height: 2.5rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.25rem;
+    line-height: 1.75rem;
+  }
+  
+  .section-title {
+    font-size: 1.875rem;
+    line-height: 2.25rem;
+  }
+  
+  /* Better tablet cards */
+  .modern-card {
+    padding: 1.5rem;
+  }
+  
+  /* Improve tablet buttons */
+  .modern-button {
+    padding: 1rem 2rem;
+    font-size: 1rem;
+  }
+}
+
 /* Typography system */
 .font-display {
   font-family: var(--font-poppins);
