@@ -142,7 +142,12 @@ export default function Footer() {
               © 2024 Korean Students Organization. All rights reserved.
             </p>
             <p className="text-gray-500 text-xs">
-              Website designed and developed by <span className="text-red-400 font-medium">Hudson Chung</span>
+              Website designed and developed by <a 
+                href="https://www.linkedin.com/in/hudson-chung/" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-red-400 font-medium hover:underline transition-colors"
+              >Hudson Chung</a>
             </p>
           </div>
         </div>

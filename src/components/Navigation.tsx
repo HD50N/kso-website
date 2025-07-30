@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
 import ThemeToggle from './ThemeToggle';
+import DropdownNav from './DropdownNav';
 
 interface NavigationProps {
   onOpenCart?: () => void;
@@ -22,8 +23,12 @@ export default function Navigation({ onOpenCart }: NavigationProps) {
     { name: 'About Us', href: '/about' },
     { name: 'Executive Board', href: '/board' },
     { name: 'Network', href: '/alumni' },
-    { name: 'Culture Show', href: '/culture-show' },
     { name: 'Shop', href: '/shop' },
+  ];
+
+  const bigEventsItems = [
+    { name: 'Culture Show', href: '/culture-show' },
+    { name: 'Formal', href: '/formal' },
   ];
 
   return (
@@ -61,6 +66,12 @@ export default function Navigation({ onOpenCart }: NavigationProps) {
                   }`}></span>
                 </Link>
               ))}
+              
+              {/* Big Events Dropdown */}
+              <DropdownNav 
+                label="Big Events" 
+                items={bigEventsItems}
+              />
             </div>
           </div>
 
@@ -177,6 +188,27 @@ export default function Navigation({ onOpenCart }: NavigationProps) {
                 {item.name}
               </Link>
             ))}
+            
+            {/* Big Events Section */}
+            <div className="pt-2 pb-2">
+              <div className="px-3 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                Big Events
+              </div>
+              {bigEventsItems.map((item) => (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={`font-body-bold block px-6 py-2.5 rounded-lg text-sm transition-colors ${
+                    pathname === item.href
+                      ? 'text-black bg-gray-50'
+                      : 'text-gray-700 hover:text-black hover:bg-gray-50'
+                  }`}
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  {item.name}
+                </Link>
+              ))}
+            </div>
             
             {/* Mobile Auth buttons */}
             <div className="pt-4 border-t border-gray-100 space-y-2">

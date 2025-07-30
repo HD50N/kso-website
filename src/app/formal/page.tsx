@@ -4,7 +4,7 @@ import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import ScrollAnimation from '@/components/ScrollAnimation';
 
-export default function CultureShow() {
+export default function Formal() {
   return (
     <div className="min-h-screen">
       <Navigation />
@@ -15,10 +15,10 @@ export default function CultureShow() {
           <ScrollAnimation>
             <div className="mb-8">
               <div className="w-24 h-24 bg-gray-100 rounded-full mx-auto mb-6 flex items-center justify-center">
-                <span className="text-4xl">🎭</span>
+                <span className="text-4xl">🎩</span>
               </div>
               <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-black mb-4">
-                KSO Culture Show
+                KSO Formal
               </h1>
               <p className="text-xl sm:text-2xl text-gray-600 mb-8">
                 Date TBD
@@ -32,10 +32,10 @@ export default function CultureShow() {
                 Coming Soon
               </h2>
               <p className="text-gray-600 mb-6">
-                We're currently planning our next Culture Show. Check back soon for updates on dates, performers, and ticket information.
+                We're currently planning our next Formal event. Check back soon for updates on dates, venue, and ticket information.
               </p>
               <div className="text-sm text-gray-500">
-                <p>For questions about the Culture Show, please DM us on Instagram:</p>
+                <p>For questions about the Formal, please DM us on Instagram:</p>
                 <a 
                   href="https://instagram.com/uchicagokso" 
                   target="_blank"
