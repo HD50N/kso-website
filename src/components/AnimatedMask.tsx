@@ -59,7 +59,7 @@ export default function AnimatedMask() {
               key={`mobile-${index}`}
               className="whitespace-pre"
               style={{
-                transform: `rotateY(${rotation}deg)`,
+                transform: `rotate(${rotation}deg)`,
                 transformOrigin: 'center center',
                 transition: 'transform 0.05s linear'
               }}
@@ -76,7 +76,7 @@ export default function AnimatedMask() {
               key={`desktop-${index}`}
               className="whitespace-pre"
               style={{
-                transform: `rotateY(${rotation}deg)`,
+                transform: `rotate(${rotation}deg)`,
                 transformOrigin: 'center center',
                 transition: 'transform 0.05s linear'
               }}
