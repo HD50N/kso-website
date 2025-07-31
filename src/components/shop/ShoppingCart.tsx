@@ -121,29 +121,14 @@ export default function ShoppingCart({
               </div>
 
               <div className="space-y-4">
-                <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    value={customerEmail}
-                    onChange={(e) => setCustomerEmail(e.target.value)}
-                    placeholder="Enter your email"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
-                    required
-                  />
-                </div>
-                
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
                   <div className="flex items-start">
                     <svg className="w-5 h-5 text-blue-600 mt-0.5 mr-2 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <div className="text-sm text-blue-800">
-                      <p className="font-medium">Shipping Information</p>
-                      <p>You'll be asked to provide your shipping address during checkout.</p>
+                      <p className="font-medium">Checkout Temporarily Disabled</p>
+                      <p>You can still add items to your cart, but checkout is currently unavailable.</p>
                     </div>
                   </div>
                 </div>
@@ -161,15 +146,10 @@ export default function ShoppingCart({
                     Clear Cart
                   </button>
                   <button
-                    onClick={handleCheckout}
-                    disabled={isCheckingOut || items.length === 0}
-                    className={`flex-1 py-3 px-4 rounded-md font-medium transition-colors duration-200 ${
-                      isCheckingOut || items.length === 0
-                        ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                        : 'bg-black text-white hover:bg-gray-800'
-                    }`}
+                    disabled={true}
+                    className="flex-1 py-3 px-4 rounded-md font-medium transition-colors duration-200 bg-gray-300 text-gray-500 cursor-not-allowed"
                   >
-                    {isCheckingOut ? 'Processing...' : 'Checkout'}
+                    Checkout (Coming Soon)
                   </button>
                 </div>
               </div>
