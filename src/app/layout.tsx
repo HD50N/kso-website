@@ -6,6 +6,7 @@ import { CartProvider } from "@/contexts/CartContext";
 import AuthDebugger from "@/components/AuthDebugger";
 import ThemeScript from "@/components/ThemeScript";
 import { Analytics } from "@vercel/analytics/next";
+import { Providers } from "./providers";
 
 const inter = Inter({ 
   subsets: ["latin"],
@@ -33,15 +34,17 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} ${poppins.variable} font-sans`}>
-        <ThemeScript />
-        <AuthProvider>
-          <CartProvider>
-            <div className="min-h-screen bg-white dark-mode:bg-gray-900 transition-colors duration-300">
-              {children}
-            </div>
-          </CartProvider>
-        </AuthProvider>
-        <Analytics />
+        <Providers>
+          <ThemeScript />
+          <AuthProvider>
+            <CartProvider>
+              <div className="min-h-screen bg-white dark-mode:bg-gray-900 transition-colors duration-300">
+                {children}
+              </div>
+            </CartProvider>
+          </AuthProvider>
+          <Analytics />
+        </Providers>
       </body>
     </html>
   );
