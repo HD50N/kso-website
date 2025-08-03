@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { Profile } from '@/lib/supabase';
+import { identifyUser } from 'humanbehavior-js';
 
 interface AuthContextType {
   user: User | null;
@@ -50,6 +51,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       if (session?.user) {
         await fetchProfile(session.user.id);
+        
+        // Identify user with HumanBehavior
+        try {
+          await identifyUser(
+            session.user.id, // Database user ID
+            {
+              email: session.user.email || '',
+              name: session.user.user_metadata?.full_name || session.user.email || 'Unknown User',
+              provider: 'supabase'
+            },
+            process.env.NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY!
+          );
+          console.log('AuthContext: User identified with HumanBehavior');
+        } catch (error) {
+          console.error('AuthContext: Error identifying user with HumanBehavior:', error);
+        }
       } else {
         setProfile(null);
       }
@@ -122,11 +139,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
+    const { data, error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
     if (error) throw error;
+    
+    // Identify user after successful sign in
+    if (data.user) {
+      try {
+        await identifyUser(
+          data.user.id,
+          {
+            email: data.user.email || '',
+            name: data.user.user_metadata?.full_name || data.user.email || 'Unknown User',
+            provider: 'supabase'
+          },
+          process.env.NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY!
+        );
+        console.log('AuthContext: User identified after sign in');
+      } catch (error) {
+        console.error('AuthContext: Error identifying user after sign in:', error);
+      }
+    }
   };
 
   const signUp = async (email: string, password: string, fullName: string, username: string) => {
@@ -154,20 +189,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (data.user) {
         console.log('Creating profile for user:', data.user.id);
         
-                            const { error: profileError } = await supabase
-                      .from('profiles')
-                      .insert({
-                        user_id: data.user.id,
-                        full_name: fullName,
-                        username: username,
-                        is_admin: false,
-                      });
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert({
+            user_id: data.user.id,
+            full_name: fullName,
+            username: username,
+            is_admin: false,
+          });
         
         if (profileError) {
           console.error('Error creating profile:', profileError);
           // Don't throw error here as user is already created
         } else {
           console.log('Profile created successfully');
+        }
+        
+        // Identify user after successful sign up
+        try {
+          await identifyUser(
+            data.user.id,
+            {
+              email: data.user.email || '',
+              name: fullName,
+              provider: 'supabase'
+            },
+            process.env.NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY!
+          );
+          console.log('AuthContext: User identified after sign up');
+        } catch (error) {
+          console.error('AuthContext: Error identifying user after sign up:', error);
         }
       }
     } catch (error) {
