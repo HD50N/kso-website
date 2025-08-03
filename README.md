@@ -153,11 +153,11 @@ The primary color scheme uses red tones. To customize:
 
 ## 📧 Contact Information
 
-- **Email**: kso@uchicago.edu
-- **Instagram**: @kso_uchicago
+- **Email**: ksouchicago@gmail.com
+- **Instagram**: @uchicagokso
 - **Location**: University of Chicago, Chicago, IL 60637
 
-## 🤝 Contributing
+## 🤝 Contributing for future Webmasters
 
 1. Fork the repository
 2. Create a feature branch
