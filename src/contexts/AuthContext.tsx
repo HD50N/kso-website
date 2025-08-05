@@ -4,7 +4,7 @@ import { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { Profile } from '@/lib/supabase';
-import { identifyUser } from 'humanbehavior-js';
+import { HumanBehaviorTracker } from 'humanbehavior-js';
 
 interface AuthContextType {
   user: User | null;
@@ -54,15 +54,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         // Identify user with HumanBehavior
         try {
-          await identifyUser(
-            session.user.id, // Database user ID
-            {
+          const tracker = HumanBehaviorTracker.init(process.env.NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY!);
+          await tracker.identifyUser({
+            userProperties: {
               email: session.user.email || '',
               name: session.user.user_metadata?.full_name || session.user.email || 'Unknown User',
+              userId: session.user.id,
               provider: 'supabase'
-            },
-            process.env.NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY!
-          );
+            }
+          });
           console.log('AuthContext: User identified with HumanBehavior');
         } catch (error) {
           console.error('AuthContext: Error identifying user with HumanBehavior:', error);
@@ -148,15 +148,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Identify user after successful sign in
     if (data.user) {
       try {
-        await identifyUser(
-          data.user.id,
-          {
+        const tracker = HumanBehaviorTracker.init(process.env.NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY!);
+        await tracker.identifyUser({
+          userProperties: {
             email: data.user.email || '',
             name: data.user.user_metadata?.full_name || data.user.email || 'Unknown User',
+            userId: data.user.id,
             provider: 'supabase'
-          },
-          process.env.NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY!
-        );
+          }
+        });
         console.log('AuthContext: User identified after sign in');
       } catch (error) {
         console.error('AuthContext: Error identifying user after sign in:', error);
@@ -207,15 +207,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         
         // Identify user after successful sign up
         try {
-          await identifyUser(
-            data.user.id,
-            {
+          const tracker = HumanBehaviorTracker.init(process.env.NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY!);
+          await tracker.identifyUser({
+            userProperties: {
               email: data.user.email || '',
               name: fullName,
+              userId: data.user.id,
               provider: 'supabase'
-            },
-            process.env.NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY!
-          );
+            }
+          });
           console.log('AuthContext: User identified after sign up');
         } catch (error) {
           console.error('AuthContext: Error identifying user after sign up:', error);
