@@ -19,12 +19,7 @@ function DelayedHumanBehaviorProvider({ children }: { children: React.ReactNode 
   }
 
   return (
-    <HumanBehaviorProvider 
-      apiKey={process.env.NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY!}
-      options={{
-        logLevel: 'debug'
-      }}
-    >
+    <HumanBehaviorProvider apiKey={process.env.NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY!}>
       {children}
     </HumanBehaviorProvider>
   )
