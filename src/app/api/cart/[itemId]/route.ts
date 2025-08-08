@@ -52,7 +52,7 @@ async function getAuthenticatedUser(request?: NextRequest) {
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { itemId: string } }
+  { params }: { params: Promise<{ itemId: string }> }
 ) {
   try {
     // Get authenticated user
@@ -100,7 +100,7 @@ export async function DELETE(
       }
     );
 
-    const { itemId } = params;
+    const { itemId } = await params;
     
     // Parse the itemId to extract product_id and variant_id
     const parts = itemId.split('-');
