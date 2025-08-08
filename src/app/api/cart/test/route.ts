@@ -1,38 +1,49 @@
-import { NextResponse } from 'next/server';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { NextRequest, NextResponse } from 'next/server';
+import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const cookieStore = await cookies();
-    const supabase = createRouteHandlerClient({ cookies: () => Promise.resolve(cookieStore) });
-    
-    // Test if cart_items table exists
-    const { data, error } = await supabase
-      .from('cart_items')
-      .select('count')
-      .limit(1);
-    
-    if (error) {
-      console.error('Cart test API: Database error:', error);
-      return NextResponse.json({ 
-        error: 'Database error', 
-        details: error,
-        code: error.code,
-        message: error.message 
-      }, { status: 500 });
-    }
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value;
+          },
+          set(name: string, value: string, options: any) {
+            try {
+              cookieStore.set(name, value, options);
+            } catch {
+              // The `set` method was called from a Server Component.
+              // This can be ignored if you have middleware refreshing
+              // user sessions.
+            }
+          },
+          remove(name: string, options: any) {
+            try {
+              cookieStore.set(name, '', { ...options, maxAge: 0 });
+            } catch {
+              // The `remove` method was called from a Server Component.
+              // This can be ignored if you have middleware refreshing
+              // user sessions.
+            }
+          },
+        },
+      }
+    );
+
+    const { data: { user }, error } = await supabase.auth.getUser();
     
     return NextResponse.json({ 
-      success: true, 
-      message: 'Cart table exists and is accessible',
-      data 
+      user: user ? { id: user.id, email: user.email } : null,
+      error: error?.message || null,
+      timestamp: new Date().toISOString()
     });
   } catch (error) {
-    console.error('Cart test API: Unexpected error:', error);
-    return NextResponse.json({ 
-      error: 'Unexpected error', 
-      details: error 
-    }, { status: 500 });
+    console.error('Cart test error:', error);
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
   }
 } 

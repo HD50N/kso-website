@@ -1,12 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { CartItem } from '@/types/shop';
 
 // Helper function to get authenticated user
 async function getAuthenticatedUser(request?: NextRequest) {
   const cookieStore = await cookies();
-  const supabase = createRouteHandlerClient({ cookies: () => Promise.resolve(cookieStore) });
+  
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return cookieStore.get(name)?.value;
+        },
+        set(name: string, value: string, options: any) {
+          try {
+            cookieStore.set(name, value, options);
+          } catch {
+            // The `set` method was called from a Server Component.
+            // This can be ignored if you have middleware refreshing
+            // user sessions.
+          }
+        },
+        remove(name: string, options: any) {
+          try {
+            cookieStore.set(name, '', { ...options, maxAge: 0 });
+          } catch {
+            // The `remove` method was called from a Server Component.
+            // This can be ignored if you have middleware refreshing
+            // user sessions.
+          }
+        },
+      },
+    }
+  );
   
   const { data: { user }, error } = await supabase.auth.getUser();
   
@@ -41,7 +70,35 @@ export async function GET(request: NextRequest) {
 
     // Create supabase client for database operations
     const cookieStore = await cookies();
-    const supabase = createRouteHandlerClient({ cookies: () => Promise.resolve(cookieStore) });
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value;
+          },
+          set(name: string, value: string, options: any) {
+            try {
+              cookieStore.set(name, value, options);
+            } catch {
+              // The `set` method was called from a Server Component.
+              // This can be ignored if you have middleware refreshing
+              // user sessions.
+            }
+          },
+          remove(name: string, options: any) {
+            try {
+              cookieStore.set(name, '', { ...options, maxAge: 0 });
+            } catch {
+              // The `remove` method was called from a Server Component.
+              // This can be ignored if you have middleware refreshing
+              // user sessions.
+            }
+          },
+        },
+      }
+    );
 
     // Fetch cart items for the user
     const { data: cartItems, error } = await supabase
@@ -96,7 +153,35 @@ export async function POST(request: NextRequest) {
 
     // Create supabase client for database operations
     const cookieStore = await cookies();
-    const supabase = createRouteHandlerClient({ cookies: () => Promise.resolve(cookieStore) });
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value;
+          },
+          set(name: string, value: string, options: any) {
+            try {
+              cookieStore.set(name, value, options);
+            } catch {
+              // The `set` method was called from a Server Component.
+              // This can be ignored if you have middleware refreshing
+              // user sessions.
+            }
+          },
+          remove(name: string, options: any) {
+            try {
+              cookieStore.set(name, '', { ...options, maxAge: 0 });
+            } catch {
+              // The `remove` method was called from a Server Component.
+              // This can be ignored if you have middleware refreshing
+              // user sessions.
+            }
+          },
+        },
+      }
+    );
 
     const body = await request.json();
     const { items }: { items: CartItem[] } = body;
@@ -190,7 +275,35 @@ export async function DELETE(request: NextRequest) {
 
     // Create supabase client for database operations
     const cookieStore = await cookies();
-    const supabase = createRouteHandlerClient({ cookies: () => Promise.resolve(cookieStore) });
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value;
+          },
+          set(name: string, value: string, options: any) {
+            try {
+              cookieStore.set(name, value, options);
+            } catch {
+              // The `set` method was called from a Server Component.
+              // This can be ignored if you have middleware refreshing
+              // user sessions.
+            }
+          },
+          remove(name: string, options: any) {
+            try {
+              cookieStore.set(name, '', { ...options, maxAge: 0 });
+            } catch {
+              // The `remove` method was called from a Server Component.
+              // This can be ignored if you have middleware refreshing
+              // user sessions.
+            }
+          },
+        },
+      }
+    );
 
     // Clear all cart items for the user
     const { error } = await supabase
@@ -199,12 +312,7 @@ export async function DELETE(request: NextRequest) {
       .eq('user_id', user.id);
 
     if (error) {
-      console.error('Cart API DELETE: Error clearing cart:', error);
-      // Check if the table doesn't exist
-      if (error.code === '42P01') {
-        console.error('Cart API DELETE: Cart items table does not exist. Please run the cart-schema.sql file.');
-        return NextResponse.json({ error: 'Cart table not found. Please contact administrator.' }, { status: 500 });
-      }
+      console.error('Error clearing cart items:', error);
       return NextResponse.json({ error: 'Failed to clear cart' }, { status: 500 });
     }
 
