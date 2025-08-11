@@ -3,10 +3,8 @@ import { Inter, Poppins } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
-import AuthDebugger from "@/components/AuthDebugger";
 import ThemeScript from "@/components/ThemeScript";
 import { Analytics } from "@vercel/analytics/next";
-import { Providers } from "./providers";
 
 const inter = Inter({ 
   subsets: ["latin"],
@@ -25,6 +23,8 @@ export const metadata: Metadata = {
   title: "Korean Students Organization (KSO) - University of Chicago",
   description: "Representing and unifying the Korean and Korean-American student community at the University of Chicago since 1976.",
 };
+
+import { Providers } from './providers';
 
 export default function RootLayout({
   children,
