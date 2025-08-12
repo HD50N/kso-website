@@ -1,10 +1,9 @@
-import type { NextAuthConfig } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
 // Minimal NextAuth config using Credentials (email/password) with Supabase auth
 // No Prisma, no DB adapter – session strategy is JWT
-const authConfig: NextAuthConfig = {
-  session: { strategy: "jwt" },
+const authConfig = {
+  session: { strategy: "jwt" as const },
   providers: [
     CredentialsProvider({
       name: "Credentials",
