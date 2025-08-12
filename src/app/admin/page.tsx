@@ -660,7 +660,7 @@ export default function AdminPage() {
       <Navigation />
 
       {/* Admin Panel Section */}
-      <section className="min-h-screen bg-white py-8">
+      <section className="min-h-screen bg-white py-16 sm:py-20 lg:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="mb-8">
                       <div className="mb-2">

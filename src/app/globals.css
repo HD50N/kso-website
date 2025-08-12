@@ -998,6 +998,43 @@ section {
   transform: translateY(0);
 }
 
+/* Disable scroll animations on mobile */
+@media (max-width: 767px) {
+  .scroll-trigger {
+    opacity: 1;
+    transform: translateY(0);
+    transition: none;
+  }
+  
+  /* Disable some intensive animations on mobile */
+  .animate-bounce-in,
+  .animate-slide-in-up,
+  .animate-slide-in-left,
+  .animate-slide-in-right,
+  .animate-scale-in,
+  .animate-rotate-in {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  
+  /* Disable hover animations on mobile */
+  .hover-lift:hover,
+  .hover-scale:hover,
+  .hover-rotate:hover {
+    transform: none;
+    box-shadow: none;
+  }
+  
+  /* Disable continuous animations on mobile for better performance */
+  .animate-float-slow,
+  .animate-float-fast,
+  .animate-pulse-slow,
+  .animate-pulse-fast {
+    animation: none;
+  }
+}
+
 /* Glass morphism effect */
 .glass {
   background: rgba(255, 255, 255, 0.1);

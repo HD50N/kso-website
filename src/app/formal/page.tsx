@@ -10,7 +10,7 @@ export default function Formal() {
       <Navigation />
       
       {/* Coming Soon Section */}
-      <section className="min-h-screen bg-white flex items-center justify-center py-20">
+      <section className="min-h-screen bg-white flex items-center justify-center py-16 sm:py-20 lg:py-24">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <ScrollAnimation>
             <div className="mb-8">

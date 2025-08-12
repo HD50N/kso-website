@@ -7,6 +7,13 @@ export default function PhotoCollage() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Disable scroll animations on mobile devices
+    const isMobile = window.innerWidth < 768; // md breakpoint
+    if (isMobile) {
+      setScrollProgress(1); // Show all photos immediately on mobile
+      return;
+    }
+
     const handleScroll = () => {
       if (!containerRef.current) return;
       

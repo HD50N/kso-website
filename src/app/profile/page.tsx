@@ -164,49 +164,8 @@ export default function ProfilePage() {
                   
                   await Promise.race([
                     (async () => {
-                      // Handle photo upload first if there's a cropped file
-                      let avatarUrl = cleanedData.avatar_url;
-                      
-                      if (croppedFile && user) {
-                        console.log('Uploading cropped photo...');
-                        
-                        // Upload cropped image to Supabase Storage
-                        const fileExt = croppedFile.name.split('.').pop();
-                        const fileName = `${Date.now()}.${fileExt}`;
-                        const filePath = `${user.id}/${fileName}`;
-
-                        const { error: uploadError } = await supabase.storage
-                          .from('avatars')
-                          .upload(filePath, croppedFile);
-
-                        if (uploadError) {
-                          throw new Error(`Photo upload failed: ${uploadError.message}`);
-                        }
-
-                        // Get public URL
-                        const { data: { publicUrl } } = supabase.storage
-                          .from('avatars')
-                          .getPublicUrl(filePath);
-                        
-                        avatarUrl = publicUrl;
-                        console.log('Photo uploaded successfully:', publicUrl);
-                      }
-                      
-                      // Update profile with all data including photo URL
-                      const finalData = {
-                        ...cleanedData,
-                        avatar_url: avatarUrl
-                      };
-                      
-                      await updateProfile(finalData);
-                      
-                      // Clear photo-related state after successful update
-                      if (croppedFile) {
-                        setCroppedFile(null);
-                        setSelectedFile(null);
-                        setPreviewUrl(null);
-                        setPendingPhotoUrl(null);
-                      }
+                      // Update profile with form data (photo upload is handled separately)
+                      await updateProfile(cleanedData);
                     })(),
                     timeoutPromise
                   ]);
@@ -353,7 +312,7 @@ export default function ProfilePage() {
   }
 
   const handleCropComplete = async () => {
-    if (!completedCrop || !imgRef.current || !selectedFile) return;
+    if (!completedCrop || !imgRef.current || !selectedFile || !user) return;
 
     try {
       setUploadingPhoto(true);
@@ -366,21 +325,49 @@ export default function ProfilePage() {
         selectedFile.name
       );
 
-      // Store the cropped file for later upload
-      setCroppedFile(croppedImageFile);
+      // Upload cropped image to Supabase Storage immediately
+      console.log('Uploading cropped photo...');
       
-      // Close modal and show preview
+      const fileExt = croppedImageFile.name.split('.').pop();
+      const fileName = `${Date.now()}.${fileExt}`;
+      const filePath = `${user.id}/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, croppedImageFile);
+
+      if (uploadError) {
+        throw new Error(`Photo upload failed: ${uploadError.message}`);
+      }
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+      
+      console.log('Photo uploaded successfully:', publicUrl);
+      
+      // Update profile immediately with new avatar URL
+      await updateProfile({ avatar_url: publicUrl });
+      
+      // Clear photo-related state
+      setCroppedFile(null);
+      setSelectedFile(null);
+      setPreviewUrl(null);
+      setPendingPhotoUrl(null);
+      
+      // Close modal
       setShowCropModal(false);
       setCrop(undefined);
       setCompletedCrop(undefined);
       
-      // Show success message for cropping
-      setSuccess('Photo cropped successfully! Click "Save Changes" to upload.');
+      // Show success message
+      setSuccess('Profile photo updated successfully!');
       setTimeout(() => setSuccess(''), 3000);
       
     } catch (error: any) {
-      console.error('Photo cropping error:', error);
-      setError('Failed to crop photo. Please try again.');
+      console.error('Photo upload error:', error);
+      setError('Failed to upload photo. Please try again.');
     } finally {
       setUploadingPhoto(false);
     }
@@ -388,13 +375,31 @@ export default function ProfilePage() {
 
 
 
-  const removeProfilePhoto = () => {
-    if (!profile?.avatar_url) return;
+  const removeProfilePhoto = async () => {
+    if (!profile?.avatar_url || !user) return;
 
-    // Set the avatar_url to undefined in form data
-    setFormData(prev => ({ ...prev, avatar_url: undefined }));
-    setSuccess('Profile photo will be removed when you save changes.');
-    setTimeout(() => setSuccess(''), 3000);
+    try {
+      setUploadingPhoto(true);
+      setError('');
+
+      // Update profile to remove avatar URL
+      await updateProfile({ avatar_url: undefined });
+      
+      // Clear photo-related state
+      setCroppedFile(null);
+      setSelectedFile(null);
+      setPreviewUrl(null);
+      setPendingPhotoUrl(null);
+      
+      setSuccess('Profile photo removed successfully!');
+      setTimeout(() => setSuccess(''), 3000);
+      
+    } catch (error: any) {
+      console.error('Error removing profile photo:', error);
+      setError('Failed to remove profile photo. Please try again.');
+    } finally {
+      setUploadingPhoto(false);
+    }
   };
 
   if (authLoading) {
@@ -443,7 +448,7 @@ export default function ProfilePage() {
       )}
       
       {/* Profile Section */}
-      <section className="min-h-screen bg-white py-8">
+      <section className="min-h-screen bg-white py-16 sm:py-20 lg:py-24">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Left Side - Profile Info & Stats */}
@@ -564,11 +569,7 @@ export default function ProfilePage() {
                       {isEditing ? 'Cancel Editing' : 'Edit Profile'}
                     </button>
                     <button
-                      onClick={() => {
-                        if (confirm('Are you sure you want to logout?')) {
-                          signOut();
-                        }
-                      }}
+                      onClick={() => signOut()}
                       className="w-full px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium text-sm"
                     >
                       Logout
@@ -870,7 +871,7 @@ export default function ProfilePage() {
                           disabled={loading}
                           className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50 text-sm"
                         >
-                          {loading ? 'Saving...' : `Save Changes${croppedFile ? ' + Upload Photo' : ''}`}
+                          {loading ? 'Saving...' : 'Save Changes'}
                         </button>
                       </div>
                     )}

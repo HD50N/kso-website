@@ -18,6 +18,18 @@ export default function ScrollAnimation({
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // Disable scroll animations on mobile devices
+    const isMobile = window.innerWidth < 768; // md breakpoint
+    
+    if (isMobile) {
+      // On mobile, immediately show the content without scroll animation
+      const currentRef = ref.current;
+      if (currentRef) {
+        currentRef.classList.add('visible');
+      }
+      return;
+    }
+
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting) {

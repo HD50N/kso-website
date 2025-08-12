@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import { createContext, useContext, useEffect, useState, useCallback, useRef, useMemo } from 'react';
 import { CartItem } from '@/types/shop';
 import { useAuth } from './AuthContext';
 
@@ -23,6 +23,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [loading, setLoading] = useState(false);
   const { user } = useAuth();
+  
+  // Refs to prevent duplicate operations
+  const lastUserId = useRef<string | null>(null);
+  const isLoadingCart = useRef(false);
 
   const loadCart = useCallback(async () => {
     if (!user) {
@@ -30,8 +34,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
+    // Prevent duplicate loading for the same user
+    if (lastUserId.current === user.id && isLoadingCart.current) {
+      console.log('CartContext: Already loading cart for user:', user.id);
+      return;
+    }
+
     console.log('CartContext: Starting to load cart for user:', user.id);
+    lastUserId.current = user.id;
+    isLoadingCart.current = true;
     setLoading(true);
+    
     try {
       // Add credentials to ensure cookies are sent
       const response = await fetch('/api/cart', {
@@ -60,6 +73,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       console.error('CartContext: Error loading cart:', error);
     } finally {
       setLoading(false);
+      isLoadingCart.current = false;
     }
   }, [user]);
 
@@ -67,12 +81,17 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     console.log('CartContext: User changed or component mounted, user:', user?.id);
     if (user) {
-      console.log('CartContext: Loading cart for user:', user.id);
-      loadCart();
+      // Only load cart if user ID changed
+      if (lastUserId.current !== user.id) {
+        console.log('CartContext: Loading cart for user:', user.id);
+        loadCart();
+      }
     } else {
       console.log('CartContext: No user, clearing cart');
       // Clear cart when user logs out
       setCartItems([]);
+      lastUserId.current = null;
+      isLoadingCart.current = false;
     }
   }, [user, loadCart]);
 
@@ -247,12 +266,19 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     }
   }, [user]);
 
+  // Memoize computed values to prevent unnecessary re-renders
+  const cartItemCount = useMemo(() => 
+    cartItems.reduce((sum, item) => sum + item.quantity, 0), 
+    [cartItems]
+  );
+  
+  const cartTotal = useMemo(() => 
+    cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0), 
+    [cartItems]
+  );
 
-
-  const cartItemCount = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-  const cartTotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-
-  const value = {
+  // Memoize the context value to prevent unnecessary re-renders
+  const value = useMemo(() => ({
     cartItems,
     addToCart,
     removeFromCart,
@@ -263,7 +289,18 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     loading,
     saveCart,
     loadCart,
-  };
+  }), [
+    cartItems,
+    addToCart,
+    removeFromCart,
+    updateQuantity,
+    clearCart,
+    cartItemCount,
+    cartTotal,
+    loading,
+    saveCart,
+    loadCart,
+  ]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }

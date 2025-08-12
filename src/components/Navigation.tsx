@@ -5,8 +5,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
-import ThemeToggle from './ThemeToggle';
 import DropdownNav from './DropdownNav';
+import UserDropdown from './UserDropdown';
 
 interface NavigationProps {
   onOpenCart?: () => void;
@@ -77,12 +77,9 @@ export default function Navigation({ onOpenCart }: NavigationProps) {
 
           {/* Right side - Auth buttons and mobile menu */}
           <div className="flex items-center w-32 justify-end z-10">
-            {/* Auth buttons - Desktop */}
-            <div className="hidden lg:flex items-center space-x-3">
-              {/* Theme Toggle */}
-              <ThemeToggle />
-              
-              {/* Cart Icon */}
+                         {/* Auth buttons - Desktop */}
+             <div className="hidden lg:flex items-center space-x-2">
+               {/* Cart Icon */}
               {onOpenCart ? (
                 <button
                   onClick={onOpenCart}
@@ -114,27 +111,10 @@ export default function Navigation({ onOpenCart }: NavigationProps) {
                   )}
                 </Link>
               )}
+              
+              {/* User Dropdown or Login Button */}
               {user ? (
-                <>
-                  <Link 
-                    href="/profile"
-                    className="font-body-bold px-4 py-2 text-sm text-gray-700 hover:text-black hover:bg-gray-50 rounded-xl transition-all duration-300"
-                  >
-                    Profile
-                  </Link>
-                  {profile?.is_admin && (
-                    <Link 
-                      href="/admin"
-                      className="p-2 text-gray-700 hover:text-black hover:bg-gray-50 rounded-lg transition-all duration-300"
-                      title="Admin Panel"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                      </svg>
-                    </Link>
-                  )}
-                </>
+                <UserDropdown user={user} profile={profile} />
               ) : (
                 <Link 
                   href="/auth"
@@ -145,12 +125,9 @@ export default function Navigation({ onOpenCart }: NavigationProps) {
               )}
             </div>
             
-            {/* Mobile menu button */}
-            <div className="lg:hidden flex items-center space-x-2">
-              {/* Theme Toggle for Mobile */}
-              <ThemeToggle />
-              
-              <button
+                         {/* Mobile menu button */}
+             <div className="lg:hidden flex items-center space-x-2">
+               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                 className="inline-flex items-center justify-center p-2 rounded-md text-gray-700 hover:text-black hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-gray-500 transition-all duration-300"
                 aria-label="Toggle mobile menu"

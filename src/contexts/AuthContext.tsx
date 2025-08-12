@@ -1,10 +1,9 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useRef, useMemo } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { Profile } from '@/lib/supabase';
-import { HumanBehaviorTracker } from 'humanbehavior-js';
 
 interface AuthContextType {
   user: User | null;
@@ -19,14 +18,88 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Separate component to handle HumanBehavior integration
+function HumanBehaviorIdentifier({ user }: { user: User | null }) {
+  const [humanBehaviorInitialized, setHumanBehaviorInitialized] = useState(false);
+  
+  useEffect(() => {
+    if (user && !humanBehaviorInitialized) {
+      let timeoutId: NodeJS.Timeout | null = null;
+      
+      // Try to get HumanBehavior tracker from window object if available
+      const identifyUser = async () => {
+        try {
+          // Check if HumanBehavior is available in the global scope
+          if (typeof window !== 'undefined' && (window as any).__humanBehaviorGlobalTracker) {
+            const tracker = (window as any).__humanBehaviorGlobalTracker;
+            if (tracker && tracker.identifyUser) {
+              // Wait for tracker to be fully initialized
+              if (tracker.initializationPromise) {
+                await tracker.initializationPromise;
+              }
+              
+              await tracker.identifyUser({
+                userProperties: {
+                  email: user.email || '',
+                  name: user.user_metadata?.full_name || user.email || 'Unknown User',
+                  userId: user.id,
+                  provider: 'supabase'
+                }
+              });
+              console.log('AuthContext: User identified with HumanBehavior');
+              setHumanBehaviorInitialized(true);
+            }
+          } else {
+            // If tracker is not available yet, retry after a short delay
+            timeoutId = setTimeout(() => {
+              if (!humanBehaviorInitialized) {
+                identifyUser();
+              }
+            }, 1000);
+          }
+        } catch (error) {
+          console.error('AuthContext: Error identifying user with HumanBehavior:', error);
+          // Retry after error with delay
+          timeoutId = setTimeout(() => {
+            if (!humanBehaviorInitialized) {
+              identifyUser();
+            }
+          }, 2000);
+        }
+      };
+      
+      identifyUser();
+      
+      // Cleanup function to clear timeout if component unmounts
+      return () => {
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+      };
+    }
+  }, [user, humanBehaviorInitialized]);
+
+  return null; // This component doesn't render anything
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  
+  // Refs to prevent duplicate operations
+  const isInitialized = useRef(false);
+  const lastUserId = useRef<string | null>(null);
 
   useEffect(() => {
+    // Prevent multiple initializations
+    if (isInitialized.current) {
+      return;
+    }
+    
     console.log('AuthContext: Initializing authentication...');
+    isInitialized.current = true;
     
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -50,25 +123,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(session?.user ?? null);
       
       if (session?.user) {
-        await fetchProfile(session.user.id);
-        
-        // Identify user with HumanBehavior
-        try {
-          const tracker = HumanBehaviorTracker.init(process.env.NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY!);
-          await tracker.identifyUser({
-            userProperties: {
-              email: session.user.email || '',
-              name: session.user.user_metadata?.full_name || session.user.email || 'Unknown User',
-              userId: session.user.id,
-              provider: 'supabase'
-            }
-          });
-          console.log('AuthContext: User identified with HumanBehavior');
-        } catch (error) {
-          console.error('AuthContext: Error identifying user with HumanBehavior:', error);
+        // Only fetch profile if user ID changed
+        if (lastUserId.current !== session.user.id) {
+          lastUserId.current = session.user.id;
+          await fetchProfile(session.user.id);
         }
       } else {
         setProfile(null);
+        lastUserId.current = null;
       }
       
       // Always set loading to false after auth state change
@@ -78,6 +140,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => {
       console.log('AuthContext: Cleaning up auth subscription');
       subscription.unsubscribe();
+      isInitialized.current = false;
     };
   }, []);
 
@@ -94,33 +157,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         .from('profiles')
         .select('*')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
       
       const { data, error } = await Promise.race([fetchPromise, timeoutPromise]) as any;
 
       if (error) {
-        console.error('Error fetching profile:', error);
-        if (error.code === 'PGRST116') {
-          console.log('AuthContext: No profile found for user, creating one...');
-          // Try to create a basic profile
-          const { data: newProfile, error: createError } = await supabase
-            .from('profiles')
-            .insert({
-              user_id: userId,
-              full_name: 'Unknown User',
-              is_admin: false,
-            })
-            .select()
-            .single();
-          
-          if (createError) {
-            console.error('Error creating profile:', createError);
-          } else {
-            console.log('AuthContext: Profile created successfully');
-            setProfile(newProfile);
-          }
-        }
-        // Set loading to false even on error
+        // If no profile found or any transient error, avoid noisy console.error
+        console.log('AuthContext: Profile not available yet or fetch error, will proceed without it');
+        setProfile(null);
+        setLoading(false);
+      } else if (!data) {
+        // Gracefully handle not-found with maybeSingle
+        console.log('AuthContext: No profile found for user yet');
+        setProfile(null);
         setLoading(false);
       } else {
         console.log('AuthContext: Profile fetched successfully');
@@ -144,24 +193,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       password,
     });
     if (error) throw error;
-    
-    // Identify user after successful sign in
-    if (data.user) {
-      try {
-        const tracker = HumanBehaviorTracker.init(process.env.NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY!);
-        await tracker.identifyUser({
-          userProperties: {
-            email: data.user.email || '',
-            name: data.user.user_metadata?.full_name || data.user.email || 'Unknown User',
-            userId: data.user.id,
-            provider: 'supabase'
-          }
-        });
-        console.log('AuthContext: User identified after sign in');
-      } catch (error) {
-        console.error('AuthContext: Error identifying user after sign in:', error);
-      }
-    }
   };
 
   const signUp = async (email: string, password: string, fullName: string, username: string) => {
@@ -185,41 +216,61 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       console.log('Auth signup successful:', data);
       
-      // Create profile after successful signup
+      // Create or update profile after successful signup (idempotent)
       if (data.user) {
-        console.log('Creating profile for user:', data.user.id);
+        console.log('Upserting profile for user:', data.user.id);
         
-        const { error: profileError } = await supabase
+        // Wait a moment for the auth session to be fully established
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        // Try to insert the profile first
+        let { data: upserted, error: profileError } = await supabase
           .from('profiles')
           .insert({
             user_id: data.user.id,
             full_name: fullName,
             username: username,
+            user_type: 'undergrad',
             is_admin: false,
-          });
-        
+          })
+          .select()
+          .single();
+
+        // If insert fails due to conflict, try update
+        if (profileError && profileError.code === '23505') { // Unique violation
+          console.log('Profile already exists, updating...');
+          const { data: updated, error: updateError } = await supabase
+            .from('profiles')
+            .update({
+              full_name: fullName,
+              username: username,
+              user_type: 'undergrad',
+              is_admin: false,
+            })
+            .eq('user_id', data.user.id)
+            .select()
+            .single();
+          
+          if (updateError) {
+            console.error('Error updating profile:', updateError);
+            profileError = updateError;
+          } else {
+            console.log('Profile updated successfully');
+            upserted = updated;
+            profileError = null;
+          }
+        }
+
         if (profileError) {
-          console.error('Error creating profile:', profileError);
-          // Don't throw error here as user is already created
+          console.error('Error upserting profile:', profileError);
+          console.error('Profile error details:', JSON.stringify(profileError, null, 2));
+          // Don't throw — the account exists; we can retry fetch
         } else {
-          console.log('Profile created successfully');
+          console.log('Profile upserted successfully');
+          setProfile(upserted);
         }
-        
-        // Identify user after successful sign up
-        try {
-          const tracker = HumanBehaviorTracker.init(process.env.NEXT_PUBLIC_HUMANBEHAVIOR_API_KEY!);
-          await tracker.identifyUser({
-            userProperties: {
-              email: data.user.email || '',
-              name: fullName,
-              userId: data.user.id,
-              provider: 'supabase'
-            }
-          });
-          console.log('AuthContext: User identified after sign up');
-        } catch (error) {
-          console.error('AuthContext: Error identifying user after sign up:', error);
-        }
+        // Refresh fetched profile to ensure UI reflects latest
+        await fetchProfile(data.user.id);
       }
     } catch (error) {
       console.error('Signup process error:', error);
@@ -314,7 +365,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const value = {
+  // Memoize the context value to prevent unnecessary re-renders
+  const value = useMemo(() => ({
     user,
     profile,
     session,
@@ -323,9 +375,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signUp,
     signOut,
     updateProfile,
-  };
+  }), [
+    user,
+    profile,
+    session,
+    loading,
+    signIn,
+    signUp,
+    signOut,
+    updateProfile,
+  ]);
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={value}>
+      <HumanBehaviorIdentifier user={user} />
+      {children}
+    </AuthContext.Provider>
+  );
 }
 
 export function useAuth() {

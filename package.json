@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@auth/supabase-adapter": "^1.10.0",
     "@headlessui/react": "^2.2.6",
     "@stripe/stripe-js": "^7.7.0",
     "@supabase/auth-ui-react": "^0.4.7",
@@ -20,6 +21,7 @@
     "autoprefixer": "^10.4.21",
     "humanbehavior-js": "^0.4.21",
     "next": "15.4.4",
+    "next-auth": "^4.24.11",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-image-crop": "^11.0.10",

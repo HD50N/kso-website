@@ -32,8 +32,9 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={toggleTheme}
-      className="p-2 text-gray-700 hover:text-black hover:bg-gray-50 rounded-lg transition-all duration-300"
-      aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+      className="p-2 text-gray-400 hover:text-gray-500 rounded-lg transition-all duration-300 cursor-not-allowed opacity-50"
+      aria-label="Dark mode temporarily disabled"
+      disabled
     >
       {isDarkMode ? (
         // Sun icon for dark mode

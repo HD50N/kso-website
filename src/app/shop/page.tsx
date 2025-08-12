@@ -158,7 +158,7 @@ export default function ShopPage() {
       <Navigation onOpenCart={() => setIsCartOpen(true)} />
       
       {/* Hero Section */}
-      <section className="bg-white text-black py-12 sm:py-16 lg:py-20">
+      <section className="bg-white text-black py-16 sm:py-20 lg:py-24">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="hero-title text-3xl sm:text-4xl md:text-5xl lg:text-6xl mb-4 sm:mb-6 animate-bounce-in text-black">KSO Shop</h1>
           <p className="hero-subtitle text-lg sm:text-xl lg:text-2xl text-gray-700 px-4 animate-slide-in-up stagger-1">
@@ -173,7 +173,7 @@ export default function ShopPage() {
       </div>
 
       {/* Shop Section */}
-      <section className="py-8 bg-white">
+      <section className="py-16 sm:py-20 lg:py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Header with Cart Button and Search Bar */}
           <div className="flex flex-col sm:flex-row justify-between items-start mb-8 gap-4">
