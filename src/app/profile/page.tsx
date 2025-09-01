@@ -11,6 +11,7 @@ import ScrollAnimation from '@/components/ScrollAnimation';
 import AuthPrompt from '@/components/AuthPrompt';
 import ReactCrop, { Crop, PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
+import { identifyUserGlobally } from 'humanbehavior-js';
 
 export default function ProfilePage() {
   const { user, profile, updateProfile, signOut, loading: authLoading } = useAuth();
@@ -32,6 +33,23 @@ export default function ProfilePage() {
   const [pendingPhotoUrl, setPendingPhotoUrl] = useState<string | null>(null);
   const [croppedFile, setCroppedFile] = useState<File | null>(null);
   const imgRef = useRef<HTMLImageElement>(null);
+
+  // Identify user in HumanBehavior when they visit the profile page
+  useEffect(() => {
+    if (user && profile) {
+      identifyUserGlobally({
+        email: user.email || '',
+        name: profile.full_name || user.user_metadata?.full_name || user.email || 'Unknown User',
+        userId: user.id,
+        provider: 'supabase',
+        userType: profile.user_type,
+        graduationYear: profile.graduation_year,
+        major: profile.major,
+        boardPosition: profile.board_position
+      });
+      console.log('✅ HumanBehavior: User identified successfully in KSO profile');
+    }
+  }, [user, profile]);
 
               // No authentication redirect - show login prompt if not authenticated
 

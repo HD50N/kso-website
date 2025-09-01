@@ -18,70 +18,6 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Separate component to handle HumanBehavior integration
-function HumanBehaviorIdentifier({ user }: { user: User | null }) {
-  const [humanBehaviorInitialized, setHumanBehaviorInitialized] = useState(false);
-  
-  useEffect(() => {
-    if (user && !humanBehaviorInitialized) {
-      let timeoutId: NodeJS.Timeout | null = null;
-      
-      // Try to get HumanBehavior tracker from window object if available
-      const identifyUser = async () => {
-        try {
-          // Check if HumanBehavior is available in the global scope
-          if (typeof window !== 'undefined' && (window as any).__humanBehaviorGlobalTracker) {
-            const tracker = (window as any).__humanBehaviorGlobalTracker;
-            if (tracker && tracker.identifyUser) {
-              // Wait for tracker to be fully initialized
-              if (tracker.initializationPromise) {
-                await tracker.initializationPromise;
-              }
-              
-              await tracker.identifyUser({
-                userProperties: {
-                  email: user.email || '',
-                  name: user.user_metadata?.full_name || user.email || 'Unknown User',
-                  userId: user.id,
-                  provider: 'supabase'
-                }
-              });
-              console.log('AuthContext: User identified with HumanBehavior');
-              setHumanBehaviorInitialized(true);
-            }
-          } else {
-            // If tracker is not available yet, retry after a short delay
-            timeoutId = setTimeout(() => {
-              if (!humanBehaviorInitialized) {
-                identifyUser();
-              }
-            }, 1000);
-          }
-        } catch (error) {
-          console.error('AuthContext: Error identifying user with HumanBehavior:', error);
-          // Retry after error with delay
-          timeoutId = setTimeout(() => {
-            if (!humanBehaviorInitialized) {
-              identifyUser();
-            }
-          }, 2000);
-        }
-      };
-      
-      identifyUser();
-      
-      // Cleanup function to clear timeout if component unmounts
-      return () => {
-        if (timeoutId) {
-          clearTimeout(timeoutId);
-        }
-      };
-    }
-  }, [user, humanBehaviorInitialized]);
-
-  return null; // This component doesn't render anything
-}
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -388,7 +324,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <AuthContext.Provider value={value}>
-      <HumanBehaviorIdentifier user={user} />
       {children}
     </AuthContext.Provider>
   );
