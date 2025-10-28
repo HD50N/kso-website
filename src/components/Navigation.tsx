@@ -279,6 +279,7 @@ export default function Navigation({ onOpenCart }: NavigationProps) {
           </div>
         </div>
       )}
+
     </nav>
   );
 } 
