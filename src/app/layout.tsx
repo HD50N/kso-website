@@ -4,7 +4,6 @@ import "./globals.css";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { CartProvider } from "@/contexts/CartContext";
 import { SpotifyPlayerProvider } from "@/contexts/SpotifyPlayerContext";
-import ThemeScript from "@/components/ThemeScript";
 import { Analytics } from "@vercel/analytics/next";
 import SpotifyPlayerWidget from "@/components/SpotifyPlayerWidget";
 
@@ -37,17 +36,16 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.variable} ${poppins.variable} font-sans`}>
         <Providers>
-          <ThemeScript />
-                 <AuthProvider>
-                   <CartProvider>
-                     <SpotifyPlayerProvider>
-                       <div className="min-h-screen bg-white dark-mode:bg-gray-900 transition-colors duration-300">
-                         {children}
-                       </div>
-                       <SpotifyPlayerWidget playlistId={process.env.NEXT_PUBLIC_SPOTIFY_DEFAULT_PLAYLIST_ID || ''} />
-                     </SpotifyPlayerProvider>
-                   </CartProvider>
-                 </AuthProvider>
+          <AuthProvider>
+            <CartProvider>
+              <SpotifyPlayerProvider>
+                <div className="min-h-screen bg-white">
+                  {children}
+                </div>
+                <SpotifyPlayerWidget playlistId={process.env.NEXT_PUBLIC_SPOTIFY_DEFAULT_PLAYLIST_ID || ''} />
+              </SpotifyPlayerProvider>
+            </CartProvider>
+          </AuthProvider>
           <Analytics />
         </Providers>
       </body>

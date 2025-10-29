@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useCart } from '@/contexts/CartContext';
 import DropdownNav from './DropdownNav';
 import UserDropdown from './UserDropdown';
+import Button from './ui/Button';
 
 interface NavigationProps {
   onOpenCart?: () => void;
@@ -23,7 +24,7 @@ export default function Navigation({ onOpenCart }: NavigationProps) {
     { name: 'About Us', href: '/about' },
     { name: 'Executive Board', href: '/board' },
     { name: 'Network', href: '/alumni' },
-    { name: 'Shop', href: '/shop' },
+    { name: 'Applications', href: '/applications' },
   ];
 
   const bigEventsItems = [
@@ -81,9 +82,11 @@ export default function Navigation({ onOpenCart }: NavigationProps) {
              <div className="hidden lg:flex items-center space-x-2">
                {/* Cart Icon */}
               {onOpenCart ? (
-                <button
+                <Button
                   onClick={onOpenCart}
-                  className="relative p-2 text-gray-700 hover:text-black hover:bg-gray-50 rounded-lg transition-all duration-300 cursor-pointer"
+                  variant="ghost"
+                  size="md"
+                  className="relative p-2"
                   title="Shopping Cart"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -94,16 +97,14 @@ export default function Navigation({ onOpenCart }: NavigationProps) {
                       {cartItemCount > 99 ? '99+' : cartItemCount}
                     </span>
                   )}
-                </button>
+                </Button>
               ) : (
-                <Link 
-                  href="/shop"
-                  className="relative p-2 text-gray-700 hover:text-black hover:bg-gray-50 rounded-lg transition-all duration-300"
-                  title="Shopping Cart"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                  </svg>
+                <Link href="/shop" title="Shopping Cart" className="relative">
+                  <Button variant="ghost" size="md" className="p-2">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                    </svg>
+                  </Button>
                   {cartItemCount > 0 && (
                     <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center font-bold">
                       {cartItemCount > 99 ? '99+' : cartItemCount}
@@ -116,11 +117,8 @@ export default function Navigation({ onOpenCart }: NavigationProps) {
               {user ? (
                 <UserDropdown user={user} profile={profile} />
               ) : (
-                <Link 
-                  href="/auth"
-                  className="font-body-bold px-4 py-2 text-sm bg-black text-white hover:bg-gray-800 rounded-xl transition-all duration-300"
-                >
-                  Login
+                <Link href="/auth">
+                  <Button size="md" variant="primary">Login</Button>
                 </Link>
               )}
             </div>

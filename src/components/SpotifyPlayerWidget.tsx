@@ -167,7 +167,7 @@ export default function SpotifyPlayerWidget({ playlistId }: SpotifyPlayerWidgetP
     return (
       <div
         ref={widgetRef}
-        className="fixed z-50 bg-white rounded-lg shadow-lg border border-gray-200 p-3 w-80"
+        className="fixed z-50 bg-black/30 backdrop-blur-md rounded-lg shadow-lg p-3 w-80"
         style={{
           left: position.x,
           top: position.y,
@@ -175,7 +175,7 @@ export default function SpotifyPlayerWidget({ playlistId }: SpotifyPlayerWidgetP
       >
         <div className="flex items-center space-x-2">
           <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-600"></div>
-          <span className="text-sm text-gray-600">Loading...</span>
+          <span className="text-sm text-white">Loading...</span>
         </div>
       </div>
     );
@@ -188,7 +188,7 @@ export default function SpotifyPlayerWidget({ playlistId }: SpotifyPlayerWidgetP
   return (
     <div
       ref={widgetRef}
-      className={`fixed z-50 bg-white rounded-lg shadow-lg border border-gray-200 cursor-move select-none w-80 ${
+      className={`fixed z-50 bg-black/30 backdrop-blur-md rounded-lg shadow-lg cursor-move select-none w-80 ${
         isDragging ? 'shadow-2xl' : 'hover:shadow-xl'
       } transition-shadow duration-200`}
       style={{
@@ -198,7 +198,7 @@ export default function SpotifyPlayerWidget({ playlistId }: SpotifyPlayerWidgetP
       onMouseDown={handleMouseDown}
     >
       {/* Drag Handle */}
-      <div className="drag-handle absolute top-1 right-1 w-2 h-2 bg-gray-300 rounded-full cursor-move"></div>
+      <div className="drag-handle absolute top-1 right-1 w-2 h-2 bg-white/60 rounded-full cursor-move"></div>
       
       {/* Main Widget Content */}
       <div className="flex items-center space-x-4 p-4">
@@ -207,16 +207,16 @@ export default function SpotifyPlayerWidget({ playlistId }: SpotifyPlayerWidgetP
           <img
             src={getBestImage(playlist.images)}
             alt={playlist.name}
-            className="w-14 h-14 rounded object-cover"
+            className="w-14 h-14 rounded object-cover ring-1 ring-white/30"
           />
         </div>
         
         {/* Playlist Info */}
         <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-semibold text-gray-900 truncate" title={playlist.name}>
+          <h3 className="text-sm font-semibold text-white truncate" title={playlist.name}>
             {playlist.name}
           </h3>
-          <p className="text-xs text-gray-600 truncate" title={playlist.owner.display_name}>
+          <p className="text-xs text-gray-200 truncate" title={playlist.owner.display_name}>
             {playlist.owner.display_name}
           </p>
         </div>
@@ -241,7 +241,7 @@ export default function SpotifyPlayerWidget({ playlistId }: SpotifyPlayerWidgetP
       </div>
       
       {/* Dropdown Player */}
-      <div className={`absolute bottom-full left-0 right-0 mb-2 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden transition-all duration-300 ${
+      <div className={`absolute bottom-full left-0 right-0 mb-2 bg-white rounded-lg shadow-xl overflow-hidden transition-all duration-300 ${
         isPlayerOpen ? 'opacity-100 visible' : 'opacity-0 invisible'
       }`}>
         <iframe

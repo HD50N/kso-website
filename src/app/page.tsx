@@ -10,6 +10,7 @@ import AnimatedMask from '@/components/AnimatedMask';
 import AnimatedPalace from '@/components/AnimatedPalace';
 import PhotoCollage from '@/components/PhotoCollage';
 import Link from 'next/link';
+import Button from '@/components/ui/Button';
 
 export default function Home() {
   const [currentAnimation, setCurrentAnimation] = useState('flag');
@@ -126,9 +127,28 @@ export default function Home() {
   return (
     <div className="min-h-screen">
       <Navigation />
+      {/* Announcement Bar */
+      }
+      <div className="w-full bg-korean-gradient text-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex items-center justify-between">
+          <div className="text-xs sm:text-sm font-body-bold tracking-wide">
+            Applications are open — get involved with KSO!
+          </div>
+          <Link href="/applications" className="hidden sm:block">
+            <Button size="sm" variant="secondary" className="!bg-white !text-black !border-0">
+              Apply now
+            </Button>
+          </Link>
+        </div>
+      </div>
       
       {/* Hero Section */}
-      <section className="relative bg-white overflow-hidden min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
+      <section className="relative overflow-hidden min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
+        {/* Gradient backdrop */}
+        <div className="absolute inset-0 bg-korean-gradient opacity-10" />
+        {/* Accent blobs */}
+        <div className="pointer-events-none absolute -top-20 -right-20 w-80 h-80 rounded-full bg-korean-red opacity-10 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-24 -left-24 w-96 h-96 rounded-full bg-korean-blue opacity-10 blur-3xl" />
         <div className="relative max-w-7xl mx-auto py-8 sm:py-12 lg:py-16">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             {/* Left side - Content */}
@@ -199,12 +219,9 @@ export default function Home() {
               {/* Buttons */}
               <ScrollAnimation>
                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start animate-scale-in stagger-3 px-4 lg:px-0">
-                  <a 
-                    href="#fall-events"
-                    className="modern-button bg-black text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl font-semibold hover:bg-gray-800 hover-lift shadow-lg text-sm sm:text-base animate-float-slow transition-all duration-300"
-                  >
-                    Fall 2025-2026
-                  </a>
+                  <Link href="#fall-events">
+                    <Button size="lg" variant="primary" className="shadow-lg animate-float-slow">See Events</Button>
+                  </Link>
                 </div>
               </ScrollAnimation>
             </div>
