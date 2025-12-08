@@ -102,6 +102,67 @@ export default function TestErrorsPage() {
     }
   };
 
+  const triggerLongLoadingRequest = async () => {
+    setLoading(true);
+    try {
+      console.log('⏳ Starting long-loading request test (will take ~12 seconds)...');
+      const startTime = Date.now();
+      const response = await fetch('/api/test-long-loading');
+      const endTime = Date.now();
+      const duration = endTime - startTime;
+      
+      if (response.ok) {
+        const data = await response.json();
+        console.log(`✅ Long-loading request completed after ${duration}ms:`, data);
+        alert(`Request completed after ${duration}ms. Check the logs viewer to see if it was marked as long-loading (>10 seconds).`);
+      } else {
+        console.error('Long-loading request failed:', response.status);
+      }
+    } catch (error) {
+      console.error('Long-loading request error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const triggerStuckRequest = async () => {
+    setLoading(true);
+    try {
+      console.log('⏳ Starting stuck request test (will hang indefinitely, but should be marked as long-loading after 10 seconds)...');
+      const startTime = Date.now();
+      
+      // Set a client-side timeout to abort after 15 seconds so the UI doesn't hang forever
+      const controller = new AbortController();
+      const abortTimeout = setTimeout(() => {
+        controller.abort();
+        const duration = Date.now() - startTime;
+        console.log(`⏱️ Client-side abort after ${duration}ms (request was stuck)`);
+        alert(`Request was stuck and aborted after ${duration}ms. Check the logs viewer - it should have been marked as long-loading after 10 seconds, even though it never completed.`);
+        setLoading(false);
+      }, 15000);
+      
+      try {
+        const response = await fetch('/api/test-stuck-request', {
+          signal: controller.signal
+        });
+        clearTimeout(abortTimeout);
+        // This should never happen since the endpoint hangs
+        console.log('Unexpected: Request completed:', response);
+      } catch (error: any) {
+        clearTimeout(abortTimeout);
+        if (error.name === 'AbortError') {
+          const duration = Date.now() - startTime;
+          console.log(`✅ Request aborted after ${duration}ms (expected for stuck request)`);
+        } else {
+          throw error;
+        }
+      }
+    } catch (error) {
+      console.error('Stuck request error:', error);
+      setLoading(false);
+    }
+  };
+
   const triggerMultipleErrors = () => {
     // Trigger multiple errors at once
     console.warn('Multiple errors test - Warning 1');
@@ -157,7 +218,7 @@ export default function TestErrorsPage() {
             {/* Network Errors Section */}
             <div>
               <h2 className="text-xl font-semibold text-gray-800 mb-4">
-                Network Errors
+                Network Errors & Long Loading
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <button
@@ -194,6 +255,20 @@ export default function TestErrorsPage() {
                   className="px-4 py-3 bg-orange-100 hover:bg-orange-200 text-orange-800 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {loading ? 'Loading...' : 'Trigger Blocked Request'}
+                </button>
+                <button
+                  onClick={triggerLongLoadingRequest}
+                  disabled={loading}
+                  className="px-4 py-3 bg-teal-100 hover:bg-teal-200 text-teal-800 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? 'Loading...' : 'Trigger Long Loading (>10s)'}
+                </button>
+                <button
+                  onClick={triggerStuckRequest}
+                  disabled={loading}
+                  className="px-4 py-3 bg-cyan-100 hover:bg-cyan-200 text-cyan-800 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {loading ? 'Loading...' : 'Trigger Stuck Request (Hangs)'}
                 </button>
               </div>
             </div>
