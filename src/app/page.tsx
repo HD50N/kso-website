@@ -30,59 +30,35 @@ export default function Home() {
 
   const upcomingEvents = [
     {
-      title: "Engagement Expo (RSO Fair)",
-      date: "Friday, Oct 3rd",
-      description: "Join us at the Engagement Expo to learn more about KSO and meet our community. Sponsored by Weee!",
+      title: "General Meeting",
+      date: "Week 1-2",
+      description: "Join us for our general meeting to kick off winter quarter and learn about upcoming events.",
       image: "/placeholder-rso-fair.jpg"
     },
     {
-      title: "Point Event - S'mores",
-      date: "Saturday, Oct 4th",
-      description: "Enjoy delicious s'mores and connect with fellow KSO members. Sponsored by Weee!",
-      image: "/placeholder-smores.jpg"
-    },
-    {
-      title: "Welcome Dinner",
-      date: "Saturday, Oct 11th",
-      description: "Our annual welcome dinner featuring delicious Korean cuisine. Sponsored by Weee!",
-      image: "/placeholder-welcome-dinner.jpg"
-    },
-    {
-      title: "Family Reveal",
-      date: "Saturday, Oct 18th",
-      description: "Find out which KSO family you'll be joining! A fun evening of bonding and community building.",
-      image: "/placeholder-family-reveal.jpg"
-    },
-    {
-      title: "Surprise Event",
-      date: "?",
-      description: "Details TBA",
-      image: "/placeholder-kso-phi-delt.jpg"
-    },
-    {
-      title: "Interviews",
-      date: "3/4 Week",
-      description: "Application period and interviews for KSO leadership positions.",
-      image: "/placeholder-interviews.jpg"
-    },
-    {
-      title: "Fundraisers",
-      date: "TBD",
-      description: "Support KSO through our annual fundraising event. Details to be announced.",
-      image: "/placeholder-fundraiser.jpg"
-    },
-    {
       title: "Family Event",
-      date: "6 Week",
+      date: "Week 3-4",
       description: "A special event for KSO families to bond and celebrate our community together.",
       image: "/placeholder-family-event.jpg"
     },
     {
-      title: "Study Break",
-      date: "8/9 Week",
-      description: "Take a break from studying and enjoy snacks with your KSO community.",
-      image: "/placeholder-study-break.jpg"
-    }
+      title: "Winter Formal",
+      date: "Week 5",
+      description: "Join us for our annual Winter Formal! A night of celebration, dancing, and community.",
+      image: "/placeholder-kso-phi-delt.jpg"
+    },
+    {
+      title: "TBD",
+      date: "Week 5",
+      description: "Details to be announced.",
+      image: "/placeholder-welcome-dinner.jpg"
+    },
+    {
+      title: "Fundraiser",
+      date: "Week 6-7",
+      description: "Support KSO through our fundraising event. Details to be announced.",
+      image: "/placeholder-fundraiser.jpg"
+    },
   ];
 
   const socialLinks = [
@@ -219,7 +195,7 @@ export default function Home() {
               {/* Buttons */}
               <ScrollAnimation>
                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start animate-scale-in stagger-3 px-4 lg:px-0">
-                  <Link href="#fall-events">
+                  <Link href="#winter-events">
                     <Button size="lg" variant="primary" className="shadow-lg animate-float-slow">See Events</Button>
                   </Link>
                 </div>
@@ -353,10 +329,10 @@ export default function Home() {
       </ScrollAnimation>
 
       {/* Upcoming Events */}
-      <section id="fall-events" className="section-padding px-6 sm:px-6 lg:px-8 p-4 sm:p-0">
+      <section id="winter-events" className="section-padding px-6 sm:px-6 lg:px-8 p-4 sm:p-0">
         <div className="max-w-sm sm:max-w-7xl mx-auto">
           <ScrollAnimation className="text-center mb-8 sm:mb-12 lg:mb-16">
-            <h2 className="section-title text-xl sm:text-2xl md:text-3xl lg:text-4xl text-black mb-3 sm:mb-4">Fall 2025-2026</h2>
+            <h2 className="section-title text-xl sm:text-2xl md:text-3xl lg:text-4xl text-black mb-3 sm:mb-4">Winter 2025-2026</h2>
             <p className="font-body text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl text-gray-600 max-w-2xl mx-auto px-4">Check out our latest events and stay connected with the Korean community</p>
           </ScrollAnimation>
           
