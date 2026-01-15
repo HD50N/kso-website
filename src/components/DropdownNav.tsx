@@ -36,7 +36,7 @@ export default function DropdownNav({ label, items, isActive = false }: Dropdown
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`font-body-bold px-2 xl:px-3 py-2 rounded-xl text-xs xl:text-sm transition-all duration-300 relative group hover-scale whitespace-nowrap flex items-center space-x-1 ${
+        className={`font-body-bold px-1.5 xl:px-2 py-1.5 rounded-lg text-xs transition-all duration-300 relative group hover-scale whitespace-nowrap flex items-center space-x-1 ${
           isActive || isDropdownActive
             ? 'text-black bg-gray-50'
             : 'text-gray-700 hover:text-black hover:bg-gray-50'

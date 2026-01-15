@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 
@@ -8,11 +8,117 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { Profile, BoardPosition } from '@/lib/supabase';
 
+// Component to handle bio expansion with truncation detection
+function ProfileBio({ 
+  bio, 
+  index, 
+  expandedProfiles, 
+  setExpandedProfiles 
+}: { 
+  bio: string; 
+  index: number; 
+  expandedProfiles: Set<number>; 
+  setExpandedProfiles: (set: Set<number>) => void;
+}) {
+  const bioRef = useRef<HTMLParagraphElement>(null);
+  const [isTruncated, setIsTruncated] = useState(false);
+  const isExpanded = expandedProfiles.has(index);
+
+  useEffect(() => {
+    if (bioRef.current) {
+      const element = bioRef.current;
+      // Check if content is truncated by comparing scroll height to client height
+      setIsTruncated(element.scrollHeight > element.clientHeight);
+    }
+  }, [bio]);
+
+  return (
+    <>
+      <p 
+        ref={bioRef}
+        className={`text-gray-700 text-xs mb-2 ${isExpanded ? '' : 'line-clamp-1'}`}
+      >
+        {bio}
+      </p>
+      {isTruncated && (
+        <button
+          onClick={() => {
+            const newExpanded = new Set(expandedProfiles);
+            if (newExpanded.has(index)) {
+              newExpanded.delete(index);
+            } else {
+              newExpanded.add(index);
+            }
+            setExpandedProfiles(newExpanded);
+          }}
+          className="text-xs text-gray-500 hover:text-black transition-colors mb-2"
+        >
+          {isExpanded ? 'Show less' : 'Show more'}
+        </button>
+      )}
+    </>
+  );
+}
+
+// Component for desktop view bio
+function ProfileBioDesktop({ 
+  bio, 
+  index, 
+  expandedProfiles, 
+  setExpandedProfiles 
+}: { 
+  bio: string; 
+  index: number; 
+  expandedProfiles: Set<number>; 
+  setExpandedProfiles: (set: Set<number>) => void;
+}) {
+  const bioRef = useRef<HTMLParagraphElement>(null);
+  const [isTruncated, setIsTruncated] = useState(false);
+  const isExpanded = expandedProfiles.has(index);
+
+  useEffect(() => {
+    if (bioRef.current) {
+      const element = bioRef.current;
+      // Check if content is truncated by comparing scroll height to client height
+      setIsTruncated(element.scrollHeight > element.clientHeight);
+    }
+  }, [bio]);
+
+  return (
+    <>
+      <p 
+        ref={bioRef}
+        className={`text-gray-700 text-xs lg:text-sm flex-1 ${isExpanded ? '' : 'line-clamp-1'}`}
+      >
+        {bio}
+      </p>
+      {isTruncated && (
+        <button
+          onClick={() => {
+            const newExpanded = new Set(expandedProfiles);
+            if (newExpanded.has(index)) {
+              newExpanded.delete(index);
+            } else {
+              newExpanded.add(index);
+            }
+            setExpandedProfiles(newExpanded);
+          }}
+          className="mt-2 text-xs text-gray-500 hover:text-black transition-colors"
+        >
+          {isExpanded ? 'Show less' : 'Show more'}
+        </button>
+      )}
+    </>
+  );
+}
+
 export default function Board() {
   const [boardMembers, setBoardMembers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>('');
   const [retryCount, setRetryCount] = useState(0);
+  const [expandedProfiles, setExpandedProfiles] = useState<Set<number>>(new Set());
+  const [expandedCardIndex, setExpandedCardIndex] = useState<number | null>(null);
 
   const fetchBoardMembers = useCallback(async (isRetry = false) => {
     try {
@@ -90,7 +196,7 @@ export default function Board() {
           return {
             name: user.full_name,
             role: position.role,
-            year: user.graduation_year ? `Class of ${user.graduation_year}` : 'Class of 2025',
+            year: user.graduation_year ? `${user.graduation_year}` : 'Class of 2025',
             major: user.major || 'Various Majors',
             bio: user.bio || 'KSO Executive Board Member.',
             linkedin: user.linkedin_url || '#',
@@ -226,11 +332,18 @@ export default function Board() {
                       <h3 className={`text-base font-semibold mb-1 ${
                         member.hasUser ? 'text-black' : 'text-gray-500'
                       }`}>{member.name}</h3>
-                      <p className="text-black text-sm font-medium mb-1">{member.role}</p>
-                      <p className="text-gray-600 text-xs mb-1">{member.year} • {member.major}</p>
-                      <p className="text-gray-700 text-xs line-clamp-2 mb-2">{member.bio}</p>
+                      <p className="text-black text-sm font-medium mb-1 line-clamp-1">{member.role}</p>
+                      <p className="text-gray-600 text-xs mb-1 line-clamp-1">{member.year} • {member.major}</p>
+                      {member.bio && (
+                        <ProfileBio 
+                          bio={member.bio}
+                          index={index}
+                          expandedProfiles={expandedProfiles}
+                          setExpandedProfiles={setExpandedProfiles}
+                        />
+                      )}
                       {member.hasUser && (member.linkedin !== '#' || member.instagram !== '#') && (
-                        <div className="flex space-x-2">
+                        <div className="flex space-x-2 mt-1">
                           {member.linkedin !== '#' && (
                             <a 
                               href={member.linkedin}
@@ -267,7 +380,7 @@ export default function Board() {
           </div>
 
           {/* Tablet/Desktop: Card Grid */}
-          <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+          <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8 auto-rows-fr">
             {loading ? (
               // Loading skeletons for desktop
               [...Array(8)].map((_, index) => (
@@ -293,70 +406,242 @@ export default function Board() {
                 </div>
               ))
             ) : (
-              boardMembers.map((member, index) => (
-                <div key={index} className={`bg-white rounded-lg shadow-lg overflow-hidden hover:shadow-xl transition-shadow hover-lift h-full flex flex-col ${
-                  !member.hasUser ? 'border-2 border-dashed border-gray-300' : ''
-                }`}>
-                  <div className={`h-48 lg:h-64 flex items-center justify-center animate-shimmer flex-shrink-0 overflow-hidden ${
-                    member.hasUser ? 'bg-black' : 'bg-gray-200'
-                  }`}>
-                    {member.hasUser && member.avatar_url ? (
-                      <img
-                        src={member.avatar_url}
-                        alt={member.name}
-                        className="w-full h-full object-cover"
-                      />
+              boardMembers.map((member, index) => {
+                const isExpanded = expandedCardIndex === index;
+                // Check if this is in the rightmost column (4th position in a 4-column grid)
+                const isRightmostColumn = (index % 4) === 3;
+                // Calculate which row this card is on (1-indexed for CSS Grid)
+                const rowNumber = Math.floor(index / 4) + 1;
+                return (
+                  <div 
+                    key={index} 
+                    style={isExpanded && isRightmostColumn ? {
+                      gridColumn: '3 / span 2',
+                      gridRow: `${rowNumber}`
+                    } : undefined}
+                    className={`bg-white rounded-lg shadow-lg overflow-hidden transition-all duration-500 ease-in-out hover:shadow-xl flex flex-col relative h-full ${
+                      isExpanded 
+                        ? isRightmostColumn
+                          ? 'md:col-span-2'
+                          : 'md:col-span-2 lg:col-span-2'
+                        : ''
+                    } ${
+                      !member.hasUser ? 'border-2 border-dashed border-gray-300' : ''
+                    }`}
+                  >
+                    {isExpanded ? (
+                      // Expanded view - circular image bubble
+                      <div className="relative flex items-center justify-center py-4 transition-all duration-300 flex-shrink-0">
+                        <div className="relative">
+                          <div className={`w-24 h-24 lg:w-28 lg:h-28 rounded-full overflow-hidden shadow-xl border-4 border-white ${
+                            member.hasUser ? 'bg-black' : 'bg-gray-200'
+                          }`}>
+                            {member.hasUser && member.avatar_url ? (
+                              <img
+                                src={member.avatar_url}
+                                alt={member.name}
+                                className="w-full h-full object-cover"
+                              />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center">
+                                <span className={`text-2xl lg:text-3xl animate-float-slow ${
+                                  member.hasUser ? 'text-white' : 'text-gray-500'
+                                }`}>
+                                  {member.hasUser ? '👤' : '⏳'}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                          {/* Title overlay on circular image */}
+                          <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 bg-red-600 text-white px-2 py-1 rounded shadow-lg">
+                            <p className="font-bold uppercase tracking-wider whitespace-nowrap text-xs">
+                              {member.role}
+                            </p>
+                          </div>
+                        </div>
+                        {/* X button in expanded view */}
+                        <button
+                          onClick={() => {
+                            setExpandedCardIndex(null);
+                          }}
+                          className="absolute top-2 right-2 p-2 text-gray-500 hover:text-black hover:bg-gray-100 rounded-lg transition-all duration-300 z-10"
+                          title="Collapse"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
                     ) : (
-                      <span className={`text-4xl lg:text-6xl animate-float-slow ${
-                        member.hasUser ? 'text-white' : 'text-gray-500'
+                      // Collapsed view - full width image
+                      <div className={`h-48 lg:h-64 relative flex items-center justify-center animate-shimmer flex-shrink-0 overflow-hidden transition-all duration-300 ${
+                        member.hasUser ? 'bg-black' : 'bg-gray-200'
                       }`}>
-                        {member.hasUser ? '👤' : '⏳'}
-                      </span>
+                        {member.hasUser && member.avatar_url ? (
+                          <img
+                            src={member.avatar_url}
+                            alt={member.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span className={`text-4xl lg:text-6xl animate-float-slow ${
+                            member.hasUser ? 'text-white' : 'text-gray-500'
+                          }`}>
+                            {member.hasUser ? '👤' : '⏳'}
+                          </span>
+                        )}
+                        {/* Title overlay */}
+                        <div className="absolute bottom-2 left-2 bg-red-600 text-white px-3 py-1.5 rounded">
+                          <p className="font-bold uppercase tracking-wider whitespace-nowrap text-xs">
+                            {member.role}
+                          </p>
+                        </div>
+                      </div>
                     )}
-                  </div>
-                  <div className="p-4 lg:p-6 flex flex-col flex-1">
-                    <div className="mb-2">
-                      <h3 className={`text-lg lg:text-xl font-semibold ${
-                        member.hasUser ? 'text-black' : 'text-gray-500'
-                      }`}>{member.name}</h3>
-                      {member.hasUser && (member.linkedin !== '#' || member.instagram !== '#') && (
-                        <div className="flex space-x-2 mt-2">
-                          {member.linkedin !== '#' && (
-                            <a 
-                              href={member.linkedin}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex-shrink-0 inline-flex items-center justify-center w-8 h-8 bg-black hover:bg-gray-800 text-white rounded-full transition-colors hover-scale"
-                              title="View LinkedIn Profile"
-                            >
-                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-                              </svg>
-                            </a>
+                    <div className={`p-4 lg:p-6 flex flex-col flex-1 transition-all duration-500 ${isExpanded ? 'lg:px-8 lg:py-4' : ''}`}>
+                      {!isExpanded && (
+                        <div className="mb-2 flex items-start justify-between">
+                          <div className="flex-1">
+                            <h3 className={`text-lg lg:text-xl font-semibold transition-all duration-500 ${
+                              member.hasUser ? 'text-black' : 'text-gray-500'
+                            }`}>{member.name}</h3>
+                            {member.year && (
+                              <p className="text-gray-600 text-xs lg:text-sm mt-1">
+                                Class of {member.year}
+                              </p>
+                            )}
+                          </div>
+                          <button
+                            onClick={() => {
+                              setExpandedCardIndex(index);
+                            }}
+                            className="ml-2 p-2 text-gray-500 hover:text-black hover:bg-gray-100 rounded-lg transition-all duration-300"
+                            title="Expand"
+                          >
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+                            </svg>
+                          </button>
+                        </div>
+                      )}
+                      
+                      {isExpanded && (
+                        <div className="flex flex-col items-center text-center mb-2">
+                          <h3 className={`text-xl lg:text-2xl font-semibold transition-all duration-500 ${
+                            member.hasUser ? 'text-black' : 'text-gray-500'
+                          }`}>{member.name}</h3>
+                          {member.year && (
+                            <p className="text-gray-600 text-sm lg:text-base mt-1">
+                              Class of {member.year}
+                            </p>
                           )}
-                          {member.instagram !== '#' && (
-                            <a 
-                              href={member.instagram}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="flex-shrink-0 inline-flex items-center justify-center w-8 h-8 bg-pink-600 hover:bg-pink-700 text-white rounded-full transition-colors hover-scale"
-                              title="View Instagram Profile"
-                            >
-                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                              </svg>
-                            </a>
+                          {member.username && (
+                            <p className="text-gray-500 text-xs mt-1">@{member.username}</p>
                           )}
                         </div>
                       )}
+                      
+                      {isExpanded ? (
+                        // Expanded view - compact to fit same height
+                        <div className="space-y-2 flex-1">
+                          <div className="grid grid-cols-2 gap-3 items-start">
+                            <div>
+                              {member.major && (
+                                <p className="text-xs lg:text-sm text-gray-700 font-medium">Major: {member.major}</p>
+                              )}
+                            </div>
+                            
+                            <div className="flex justify-end">
+                              {member.hasUser && (member.linkedin !== '#' || member.instagram !== '#') && (
+                                <div className="flex space-x-2">
+                                  {member.linkedin !== '#' && (
+                                    <a 
+                                      href={member.linkedin}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="inline-flex items-center justify-center w-8 h-8 bg-black hover:bg-gray-800 text-white rounded-full transition-colors hover-scale"
+                                      title="View LinkedIn Profile"
+                                    >
+                                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                                      </svg>
+                                    </a>
+                                  )}
+                                  {member.instagram !== '#' && (
+                                    <a 
+                                      href={member.instagram}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="inline-flex items-center justify-center w-8 h-8 bg-pink-600 hover:bg-pink-700 text-white rounded-full transition-colors hover-scale"
+                                      title="View Instagram Profile"
+                                    >
+                                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                                      </svg>
+                                    </a>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                          
+                          {member.bio && (
+                            <div className="bg-gray-50 rounded-lg p-3">
+                              <h4 className="text-xs font-semibold text-gray-700 mb-1 uppercase tracking-wide">About</h4>
+                              <p className="text-xs text-gray-600 leading-relaxed line-clamp-3">{member.bio}</p>
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        // Collapsed view
+                        <>
+                          {member.hasUser && (member.linkedin !== '#' || member.instagram !== '#') && (
+                            <div className="flex space-x-2 mt-1 mb-2">
+                              {member.linkedin !== '#' && (
+                                <a 
+                                  href={member.linkedin}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex-shrink-0 inline-flex items-center justify-center w-8 h-8 bg-black hover:bg-gray-800 text-white rounded-full transition-colors hover-scale"
+                                  title="View LinkedIn Profile"
+                                >
+                                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                                  </svg>
+                                </a>
+                              )}
+                              {member.instagram !== '#' && (
+                                <a 
+                                  href={member.instagram}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="flex-shrink-0 inline-flex items-center justify-center w-8 h-8 bg-pink-600 hover:bg-pink-700 text-white rounded-full transition-colors hover-scale"
+                                  title="View Instagram Profile"
+                                >
+                                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                                  </svg>
+                                </a>
+                              )}
+                            </div>
+                          )}
+                          {member.major && (
+                            <p className="text-gray-600 text-xs lg:text-sm mb-2 line-clamp-1">{member.major}</p>
+                          )}
+                          {member.bio && (
+                            <ProfileBioDesktop 
+                              bio={member.bio}
+                              index={index}
+                              expandedProfiles={expandedProfiles}
+                              setExpandedProfiles={setExpandedProfiles}
+                            />
+                          )}
+                        </>
+                      )}
                     </div>
-                    <p className="text-black font-medium mb-2 text-sm lg:text-base line-clamp-1">{member.role}</p>
-                    <p className="text-gray-600 text-xs lg:text-sm mb-2">{member.year}</p>
-                    <p className="text-gray-600 text-xs lg:text-sm mb-3">{member.major}</p>
-                    <p className="text-gray-700 text-xs lg:text-sm line-clamp-3 flex-1">{member.bio}</p>
                   </div>
-                </div>
-            ))
+                );
+              })
             )}
           </div>
         </div>

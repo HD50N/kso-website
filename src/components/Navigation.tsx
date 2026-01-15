@@ -21,9 +21,10 @@ export default function Navigation({ onOpenCart }: NavigationProps) {
 
   const navItems = [
     { name: 'Home', href: '/' },
-    { name: 'About Us', href: '/about' },
-    { name: 'Executive Board', href: '/board' },
+    { name: 'About', href: '/about' },
+    { name: 'Board', href: '/board' },
     { name: 'Network', href: '/alumni' },
+    { name: 'Internships', href: '/internships' },
     { name: 'Applications', href: '/applications' },
   ];
 
@@ -37,25 +38,25 @@ export default function Navigation({ onOpenCart }: NavigationProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 relative">
           {/* Left side - Logo */}
-          <div className="flex items-center w-32 z-10">
-            <Link href="/" className="flex-shrink-0 flex items-center group space-x-2">
+          <div className="flex items-center w-28 xl:w-32 z-10">
+            <Link href="/" className="flex-shrink-0 flex items-center group space-x-1.5">
               <img 
                 src="/favicon.ico" 
                 alt="KSO Logo" 
-                className="w-8 h-8 object-contain"
+                className="w-7 h-7 xl:w-8 xl:h-8 object-contain"
               />
-              <span className="font-display text-lg sm:text-xl lg:text-2xl font-bold text-black group-hover:scale-110 transition-transform">UChicago KSO</span>
+              <span className="font-display text-base sm:text-lg lg:text-xl xl:text-2xl font-bold text-black group-hover:scale-110 transition-transform">UChicago KSO</span>
             </Link>
           </div>
           
           {/* Center - Navigation Links - Absolutely Centered */}
           <div className="hidden lg:flex items-center justify-center absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
-            <div className="flex items-center space-x-4 xl:space-x-6">
+            <div className="flex items-center space-x-1.5 xl:space-x-2.5">
               {navItems.map((item) => (
                 <Link
                   key={item.name}
                   href={item.href}
-                  className={`font-body-bold px-2 xl:px-3 py-2 rounded-xl text-xs xl:text-sm transition-all duration-300 relative group hover-scale whitespace-nowrap ${
+                  className={`font-body-bold px-1.5 xl:px-2 py-1.5 rounded-lg text-xs transition-all duration-300 relative group hover-scale whitespace-nowrap ${
                     pathname === item.href
                       ? 'text-black bg-gray-50'
                       : 'text-gray-700 hover:text-black hover:bg-gray-50'
@@ -70,14 +71,14 @@ export default function Navigation({ onOpenCart }: NavigationProps) {
               
               {/* Big Events Dropdown */}
               <DropdownNav 
-                label="Big Events" 
+                label="Events" 
                 items={bigEventsItems}
               />
             </div>
           </div>
 
           {/* Right side - Auth buttons and mobile menu */}
-          <div className="flex items-center w-32 justify-end z-10">
+          <div className="flex items-center w-28 xl:w-32 justify-end z-10">
                          {/* Auth buttons - Desktop */}
              <div className="hidden lg:flex items-center space-x-2">
                {/* Cart Icon */}
@@ -171,7 +172,7 @@ export default function Navigation({ onOpenCart }: NavigationProps) {
             {/* Big Events Section */}
             <div className="pt-2 pb-2">
               <div className="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                Big Events
+                Events
               </div>
               <div className="space-y-1">
                 {bigEventsItems.map((item) => (

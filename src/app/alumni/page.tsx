@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { Profile } from '@/lib/supabase';
@@ -8,6 +8,58 @@ import { useAuth } from '@/contexts/AuthContext';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import AuthPrompt from '@/components/AuthPrompt';
+
+// Component to handle bio expansion with truncation detection
+function ProfileBio({ 
+  bio, 
+  profileId, 
+  expandedProfiles, 
+  setExpandedProfiles 
+}: { 
+  bio: string; 
+  profileId: string; 
+  expandedProfiles: Set<string>; 
+  setExpandedProfiles: (set: Set<string>) => void;
+}) {
+  const bioRef = useRef<HTMLParagraphElement>(null);
+  const [isTruncated, setIsTruncated] = useState(false);
+  const isExpanded = expandedProfiles.has(profileId);
+
+  useEffect(() => {
+    if (bioRef.current) {
+      const element = bioRef.current;
+      // Check if content is truncated by comparing scroll height to client height
+      setIsTruncated(element.scrollHeight > element.clientHeight);
+    }
+  }, [bio]);
+
+  return (
+    <>
+      <p 
+        ref={bioRef}
+        className={`text-gray-600 mt-1 ${isExpanded ? '' : 'line-clamp-1'}`}
+      >
+        {bio}
+      </p>
+      {isTruncated && (
+        <button
+          onClick={() => {
+            const newExpanded = new Set(expandedProfiles);
+            if (newExpanded.has(profileId)) {
+              newExpanded.delete(profileId);
+            } else {
+              newExpanded.add(profileId);
+            }
+            setExpandedProfiles(newExpanded);
+          }}
+          className="mt-1 text-xs text-gray-500 hover:text-black transition-colors"
+        >
+          {isExpanded ? 'Show less' : 'Show more'}
+        </button>
+      )}
+    </>
+  );
+}
 
 export default function AlumniPage() {
   const { user, loading: authLoading } = useAuth();
@@ -19,6 +71,7 @@ export default function AlumniPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
   const [filterYear, setFilterYear] = useState<string>('all');
+  const [expandedProfiles, setExpandedProfiles] = useState<Set<string>>(new Set());
 
   const fetchAlumni = useCallback(async (isRetry = false) => {
     try {
@@ -250,26 +303,29 @@ export default function AlumniPage() {
                       <p className="text-gray-500 text-xs sm:text-sm mb-1 sm:mb-2 line-clamp-1">@{person.username}</p>
                     )}
 
-                    <div className="space-y-1 sm:space-y-2 text-xs sm:text-sm text-gray-600">
-                      <p className="capitalize">
+                    <div className="space-y-1 text-xs sm:text-sm text-gray-600">
+                      <p className="capitalize line-clamp-1">
                         {person.user_type?.replace('_', ' ')}
                         {person.board_position && ` • ${person.board_position}`}
                       </p>
                       
                       {person.graduation_year && (
-                        <p>Class of {person.graduation_year}</p>
+                        <p className="line-clamp-1">Class of {person.graduation_year}</p>
                       )}
                       
                       {person.major && (
-                        <p>{person.major}</p>
+                        <p className="line-clamp-1">{person.major}</p>
+                      )}
+                      
+                      {person.bio && (
+                        <ProfileBio 
+                          bio={person.bio}
+                          profileId={person.id}
+                          expandedProfiles={expandedProfiles}
+                          setExpandedProfiles={setExpandedProfiles}
+                        />
                       )}
                     </div>
-
-                    {person.bio && (
-                      <p className="text-gray-600 text-xs sm:text-sm mt-2 sm:mt-4 line-clamp-2 sm:line-clamp-3">
-                        {person.bio}
-                      </p>
-                    )}
 
                     {(person.linkedin_url || person.instagram_url) && (
                       <div className="mt-auto pt-2 sm:pt-4 flex justify-center space-x-2 sm:space-x-3">

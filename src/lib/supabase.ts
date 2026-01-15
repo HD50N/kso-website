@@ -59,6 +59,22 @@ export interface BoardPosition {
   updated_at: string
 }
 
+export interface Internship {
+  id: string
+  title: string
+  company: string
+  location?: string
+  description?: string
+  application_url?: string
+  contact_email?: string
+  contact_name?: string
+  contact_linkedin?: string
+  contact_phone?: string
+  posted_by?: string
+  created_at: string
+  updated_at: string
+}
+
 export interface Order {
   id: string
   stripe_session_id: string

@@ -11,7 +11,7 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, fullName: string, username: string) => Promise<void>;
+  signUp: (email: string, password: string, fullName: string, username: string, graduationYear: number, major: string, bio?: string) => Promise<void>;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<Profile>) => Promise<void>;
 }
@@ -131,7 +131,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (error) throw error;
   };
 
-  const signUp = async (email: string, password: string, fullName: string, username: string) => {
+  const signUp = async (email: string, password: string, fullName: string, username: string, graduationYear: number, major: string, bio?: string) => {
     try {
       console.log('Attempting to sign up user:', email);
       
@@ -166,6 +166,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             user_id: data.user.id,
             full_name: fullName,
             username: username,
+            graduation_year: graduationYear,
+            major: major,
+            bio: bio || null,
             user_type: 'undergrad',
             is_admin: false,
           })
@@ -180,6 +183,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             .update({
               full_name: fullName,
               username: username,
+              graduation_year: graduationYear,
+              major: major,
+              bio: bio || null,
               user_type: 'undergrad',
               is_admin: false,
             })
