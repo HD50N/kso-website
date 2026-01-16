@@ -119,7 +119,12 @@ export default function Home() {
       </div>
       
       {/* Hero Section */}
-      <section className="relative overflow-hidden min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
+      <section className="relative overflow-hidden min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[#fef2f2] via-[#f8f9fa] to-white">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-[0.02]" style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23000000' fill-opacity='1'%3E%3Cpath d='M20 20.5V18H0v-2h20v-2H0v-2h20v-2H0V8h20V6H0V4h20V2H0V0h22v20h2V0h2v20h2V0h2v20h2V0h2v22H20v-1.5zM0 20h2v20H0V20zm4 0h2v20H4V20zm4 0h2v20H8V20zm4 0h2v20h-2V20zm4 0h2v20h-2V20zm4 4h20v2H20v-2zm0 4h20v2H20v-2zm0 4h20v2H20v-2zm0 4h20v2H20v-2z'/%3E%3C/g%3E%3C/svg%3E")`,
+        }}></div>
+        
         {/* Gradient backdrop */}
         <div className="absolute inset-0 bg-korean-gradient opacity-10" />
         {/* Accent blobs */}
@@ -145,42 +150,51 @@ export default function Home() {
               
               {/* ASCII Component - Mobile Only */}
               <ScrollAnimation className="flex justify-center lg:hidden mb-0">
-                <div className="animate-fade-in stagger-2 relative h-75 w-full max-w-xs flex items-center justify-center">
-                  <div 
-                    className={`transition-all duration-1500 ease-in-out ${
-                      currentAnimation === 'flag' 
-                        ? 'opacity-100 transform scale-100' 
-                        : 'opacity-0 transform scale-95 absolute top-0 left-0'
-                    }`}
-                  >
-                    <AnimatedFlag />
-                  </div>
-                  <div 
-                    className={`transition-all duration-1500 ease-in-out ${
-                      currentAnimation === 'fan' 
-                        ? 'opacity-100 transform scale-100' 
-                        : 'opacity-0 transform scale-95 absolute top-0 left-0'
-                    }`}
-                  >
-                    <AnimatedFan />
-                  </div>
-                  <div 
-                    className={`transition-all duration-1500 ease-in-out ${
-                      currentAnimation === 'mask' 
-                        ? 'opacity-100 transform scale-100' 
-                        : 'opacity-0 transform scale-95 absolute top-0 left-0'
-                    }`}
-                  >
-                    <AnimatedMask />
-                  </div>
-                  <div 
-                    className={`transition-all duration-1500 ease-in-out ${
-                      currentAnimation === 'palace' 
-                        ? 'opacity-100 transform scale-100' 
-                        : 'opacity-0 transform scale-95 absolute top-0 left-0'
-                    }`}
-                  >
-                    <AnimatedPalace />
+                {/* Layered Card with Rotated Background Accent */}
+                <div className="relative w-80 h-80 mx-auto">
+                  {/* Bottom layer - rotated background accent */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-korean-red/20 to-korean-blue/20 rounded-3xl rotate-6"></div>
+                  
+                  {/* Top layer - white card with shadow */}
+                  <div className="absolute inset-0 bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl flex items-center justify-center">
+                    <div className="relative w-full h-full flex items-center justify-center">
+                      <div 
+                        className={`transition-all duration-1500 ease-in-out ${
+                          currentAnimation === 'flag' 
+                            ? 'opacity-100 transform scale-100' 
+                            : 'opacity-0 transform scale-95 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'
+                        }`}
+                      >
+                        <AnimatedFlag />
+                      </div>
+                      <div 
+                        className={`transition-all duration-1500 ease-in-out ${
+                          currentAnimation === 'fan' 
+                            ? 'opacity-100 transform scale-100' 
+                            : 'opacity-0 transform scale-95 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'
+                        }`}
+                      >
+                        <AnimatedFan />
+                      </div>
+                      <div 
+                        className={`transition-all duration-1500 ease-in-out ${
+                          currentAnimation === 'mask' 
+                            ? 'opacity-100 transform scale-100' 
+                            : 'opacity-0 transform scale-95 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'
+                        }`}
+                      >
+                        <AnimatedMask />
+                      </div>
+                      <div 
+                        className={`transition-all duration-1500 ease-in-out ${
+                          currentAnimation === 'palace' 
+                            ? 'opacity-100 transform scale-100' 
+                            : 'opacity-0 transform scale-95 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'
+                        }`}
+                      >
+                        <AnimatedPalace />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </ScrollAnimation>
@@ -204,51 +218,60 @@ export default function Home() {
             
             {/* Right side - Alternating Flag, Fan, Mask, and Palace - Desktop Only */}
             <ScrollAnimation className="hidden lg:flex lg:justify-end order-1 lg:order-2">
-              <div className="animate-fade-in stagger-2 relative h-96 w-full max-w-md flex items-center justify-end">
-                <div 
-                  className={`transition-all duration-1500 ease-in-out ${
-                    currentAnimation === 'flag' 
-                      ? 'opacity-100 transform scale-100' 
-                      : 'opacity-0 transform scale-95 absolute top-0 left-0'
-                  }`}
-                >
-                  <AnimatedFlag />
-                </div>
-                <div 
-                  className={`transition-all duration-1500 ease-in-out ${
-                    currentAnimation === 'fan' 
-                      ? 'opacity-100 transform scale-100' 
-                      : 'opacity-0 transform scale-95 absolute top-0 left-0'
-                  }`}
-                  style={{ transform: 'translateX(-10rem)' }}
-                >
-                  <AnimatedFan />
-                </div>
-                <div 
-                  className={`transition-all duration-1500 ease-in-out ${
-                    currentAnimation === 'mask' 
-                      ? 'opacity-100 transform scale-100' 
-                      : 'opacity-0 transform scale-95 absolute top-0 left-0'
-                  }`}
-                  style={{ transform: 'translateX(-10rem)' }}
-                >
-                  <AnimatedMask />
-                </div>
-                <div 
-                  className={`transition-all duration-1500 ease-in-out ${
-                    currentAnimation === 'palace' 
-                      ? 'opacity-100 transform scale-100' 
-                      : 'opacity-0 transform scale-95 absolute top-0 left-0'
-                  }`}
-                  style={{ transform: 'translateX(-10rem)' }}
-                >
-                  <AnimatedPalace />
+              {/* Layered Card with Rotated Background Accent */}
+              <div className="relative w-96 h-96">
+                {/* Bottom layer - rotated background accent */}
+                <div className="absolute inset-0 bg-gradient-to-br from-korean-red/20 to-korean-blue/20 rounded-3xl rotate-6"></div>
+                
+                {/* Top layer - white card with shadow */}
+                <div className="absolute inset-0 bg-white/95 backdrop-blur-sm rounded-3xl shadow-2xl flex items-center justify-center">
+                  <div className="relative w-full h-full flex items-center justify-center">
+                    <div 
+                      className={`transition-all duration-1500 ease-in-out ${
+                        currentAnimation === 'flag' 
+                          ? 'opacity-100 transform scale-100' 
+                          : 'opacity-0 transform scale-95 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'
+                      }`}
+                    >
+                      <AnimatedFlag />
+                    </div>
+                    <div 
+                      className={`transition-all duration-1500 ease-in-out ${
+                        currentAnimation === 'fan' 
+                          ? 'opacity-100 transform scale-100' 
+                          : 'opacity-0 transform scale-95 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'
+                      }`}
+                    >
+                      <AnimatedFan />
+                    </div>
+                    <div 
+                      className={`transition-all duration-1500 ease-in-out ${
+                        currentAnimation === 'mask' 
+                          ? 'opacity-100 transform scale-100' 
+                          : 'opacity-0 transform scale-95 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'
+                      }`}
+                    >
+                      <AnimatedMask />
+                    </div>
+                    <div 
+                      className={`transition-all duration-1500 ease-in-out ${
+                        currentAnimation === 'palace' 
+                          ? 'opacity-100 transform scale-100' 
+                          : 'opacity-0 transform scale-95 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'
+                      }`}
+                    >
+                      <AnimatedPalace />
+                    </div>
+                  </div>
                 </div>
               </div>
             </ScrollAnimation>
           </div>
         </div>
       </section>
+
+      {/* Gradient Transition */}
+      <div className="h-24 bg-gradient-to-b from-white via-white to-white"></div>
 
       {/* Horizontal separator line */}
       <ScrollAnimation>

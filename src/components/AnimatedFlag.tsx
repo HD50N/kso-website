@@ -115,7 +115,7 @@ export default function AnimatedFlag() {
   if (!isVisible) return null;
 
   return (
-    <div className="font-mono text-xs leading-none overflow-visible select-none h-48 lg:h-96">
+    <div className="font-mono text-[10px] leading-none overflow-visible select-none h-36 lg:h-72">
       <div className="animate-fade-in flex items-center justify-center h-full">
         {/* Mobile version (hidden on lg screens and up) */}
         <div className="block lg:hidden">
