@@ -1,56 +1,64 @@
-'use client';
-
+import { readdirSync } from 'fs';
+import path from 'path';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import ScrollAnimation from '@/components/ScrollAnimation';
+import FormalGallery from './FormalGallery';
 
-export default function Formal() {
+const IMAGE_EXT = /\.(jpg|jpeg|png|webp|gif)$/i;
+
+function getFormalPhotos(): { src: string; alt: string }[] {
+  const formalDir = path.join(process.cwd(), 'public', 'formal');
+  try {
+    const files = readdirSync(formalDir)
+      .filter((f) => IMAGE_EXT.test(f))
+      .sort();
+    return files.map((name) => ({ src: `/formal/${name}`, alt: 'KSO Formal' }));
+  } catch {
+    return [];
+  }
+}
+
+export default function FormalPage() {
+  const photos = getFormalPhotos();
+
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-[#fafafa]">
       <Navigation />
-      
-      {/* Coming Soon Section */}
-      <section className="min-h-screen bg-white flex items-center justify-center py-16 sm:py-20 lg:py-24">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <ScrollAnimation>
-            <div className="mb-8">
-              <div className="w-24 h-24 bg-gray-100 rounded-full mx-auto mb-6 flex items-center justify-center">
-                <span className="text-4xl">🎩</span>
-              </div>
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-black mb-4">
-                KSO Formal
-              </h1>
-              <p className="text-xl sm:text-2xl text-gray-600 mb-8">
-                Date TBD
-              </p>
-            </div>
-          </ScrollAnimation>
 
+      {/* Hero Section */}
+      <section className="relative bg-korean-gradient text-white overflow-hidden">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.06\'%3E%3Ccircle cx=\'30\' cy=\'30\' r=\'2\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-80" aria-hidden="true" />
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20 text-center">
           <ScrollAnimation>
-            <div className="bg-gray-50 rounded-xl p-8 max-w-2xl mx-auto">
-              <h2 className="text-xl font-semibold text-black mb-4">
-                Coming Soon
-              </h2>
-              <p className="text-gray-600 mb-6">
-                We're currently planning our next Formal event. Check back soon for updates on dates, venue, and ticket information.
-              </p>
-              <div className="text-sm text-gray-500">
-                <p>For questions about the Formal, please DM us on Instagram:</p>
-                <a 
-                  href="https://instagram.com/uchicagokso" 
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-black hover:underline font-medium"
-                >
-                  @uchicagokso
-                </a>
-              </div>
+            <div className="inline-flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white/15 backdrop-blur-sm border border-white/20 mb-6 sm:mb-8">
+              <span className="text-4xl sm:text-5xl" aria-hidden="true">🎩</span>
             </div>
+            <h1 className="hero-title text-4xl sm:text-5xl md:text-6xl text-white mb-4 drop-shadow-sm">
+              KSO Formal
+            </h1>
+            <p className="text-lg sm:text-xl md:text-2xl text-white/90 font-body max-w-xl mx-auto mb-6">
+              Thank you for celebrating with us
+            </p>
+            <p className="text-sm sm:text-base text-white/80 font-body">
+              More photos or questions? Reach out to{' '}
+              <a
+                href="https://instagram.com/uchicagokso"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white font-medium hover:underline underline-offset-2"
+              >
+                @uchicagokso
+              </a>{' '}
+              on Instagram
+            </p>
           </ScrollAnimation>
         </div>
       </section>
 
+      <FormalGallery photos={photos} />
+
       <Footer />
     </div>
   );
-} 
+}
