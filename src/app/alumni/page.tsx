@@ -184,8 +184,9 @@ export default function AlumniPage() {
       )}
 
       {/* Hero Section */}
-      <section className="bg-white text-black py-16 sm:py-20 lg:py-24">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <section className="relative overflow-hidden bg-white text-black py-16 sm:py-20 lg:py-24">
+        <div className="absolute inset-0 hero-pattern-bg opacity-[0.02]" aria-hidden="true" />
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="hero-title text-3xl sm:text-4xl md:text-5xl lg:text-6xl mb-4 sm:mb-6 animate-bounce-in text-black">Member Directory</h1>
           <p className="hero-subtitle text-lg sm:text-xl lg:text-2xl text-gray-700 px-4 animate-slide-in-up stagger-1">
             Connect with KSO members from across different graduating classes and backgrounds

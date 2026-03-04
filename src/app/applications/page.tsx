@@ -13,8 +13,9 @@ export default function ApplicationsPage() {
       <Navigation />
 
       {/* Hero Section */}
-      <section className="bg-white text-black py-16 sm:py-20 lg:py-24">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <section className="relative overflow-hidden bg-white text-black py-16 sm:py-20 lg:py-24">
+        <div className="absolute inset-0 hero-pattern-bg opacity-[0.02]" aria-hidden="true" />
+        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <ScrollAnimation>
             <h1 className="hero-title text-3xl sm:text-4xl md:text-5xl lg:text-6xl mb-4 sm:mb-6 animate-bounce-in text-black">Applications</h1>
           </ScrollAnimation>

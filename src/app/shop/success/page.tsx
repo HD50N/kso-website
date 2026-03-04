@@ -99,14 +99,17 @@ export default function SuccessPage() {
       <Navigation />
       
       {/* Success Section */}
-      <section className="bg-white text-black py-16 sm:py-20 lg:py-24">
+      <section className="relative overflow-hidden bg-white text-black py-16 sm:py-20 lg:py-24">
+        <div className="absolute inset-0 hero-pattern-bg opacity-[0.02]" aria-hidden="true" />
         <Suspense fallback={
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto mb-4"></div>
             <p className="text-gray-600">Loading...</p>
           </div>
         }>
-          <SuccessContent />
+          <div className="relative">
+            <SuccessContent />
+          </div>
         </Suspense>
       </section>
 

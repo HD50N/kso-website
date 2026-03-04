@@ -88,9 +88,7 @@ export default function HomePage({ homepagePhotos }: { homepagePhotos: Photo[] }
 
       {/* Hero Section */}
       <section className="relative overflow-hidden min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[#fef2f2] via-[#f8f9fa] to-white">
-        <div className="absolute inset-0 opacity-[0.02]" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23000000' fill-opacity='1'%3E%3Cpath d='M20 20.5V18H0v-2h20v-2H0v-2h20v-2H0V8h20V6H0V4h20V2H0V0h22v20h2V0h2v20h2V0h2v20h2V0h2v22H20v-1.5zM0 20h2v20H0V20zm4 0h2v20H4V20zm4 0h2v20H8V20zm4 0h2v20h-2V20zm4 0h2v20h-2V20zm4 4h20v2H20v-2zm0 4h20v2H20v-2zm0 4h20v2H20v-2zm0 4h20v2H20v-2z'/%3E%3C/g%3E%3C/svg%3E")`,
-        }} />
+        <div className="absolute inset-0 hero-pattern-bg opacity-[0.02]" aria-hidden="true" />
         <div className="absolute inset-0 bg-korean-gradient opacity-10" />
         <div className="pointer-events-none absolute -top-20 -right-20 w-80 h-80 rounded-full bg-korean-red opacity-10 blur-3xl" />
         <div className="pointer-events-none absolute -bottom-24 -left-24 w-96 h-96 rounded-full bg-korean-blue opacity-10 blur-3xl" />
