@@ -9,66 +9,100 @@ export const metadata = {
 
 export default function ApplicationsPage() {
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-white">
       <Navigation />
 
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-white text-black py-16 sm:py-20 lg:py-24">
-        <div className="absolute inset-0 hero-pattern-bg opacity-[0.02]" aria-hidden="true" />
-        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <ScrollAnimation>
-            <h1 className="hero-title text-3xl sm:text-4xl md:text-5xl lg:text-6xl mb-4 sm:mb-6 animate-bounce-in text-black">Applications</h1>
-          </ScrollAnimation>
-          <ScrollAnimation>
-            <p className="hero-subtitle text-lg sm:text-xl lg:text-2xl text-gray-700 px-4 animate-slide-in-up stagger-1">
-              Opportunities and roles within UChicago KSO
-            </p>
-          </ScrollAnimation>
+      {/* Hero */}
+      <section className="border-b border-gray-100 py-20 lg:py-28">
+        <div className="max-w-7xl mx-auto px-6 lg:px-16">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 lg:gap-24 items-start">
+            <ScrollAnimation>
+              <div>
+                <p className="text-[10px] tracking-[0.32em] uppercase text-gray-400 font-medium mb-10">
+                  University of Chicago · KSO
+                </p>
+                <h1 className="text-[3rem] sm:text-[4.5rem] lg:text-[4.5rem] xl:text-[5.5rem] font-black text-black leading-[0.87] tracking-tighter">
+                  Applications
+                </h1>
+              </div>
+            </ScrollAnimation>
+            <ScrollAnimation>
+              <div className="lg:pt-20">
+                <div className="w-10 h-px bg-[#CD2E3A] mb-8" />
+                <p className="text-lg sm:text-xl text-gray-700 leading-relaxed font-light italic mb-6">
+                  &ldquo;Get involved — perform, lead, and shape what KSO does next.&rdquo;
+                </p>
+                <p className="text-sm text-gray-500 leading-relaxed">
+                  Opportunities and roles within UChicago KSO. Open forms and deadlines will be listed below as they go live.
+                </p>
+              </div>
+            </ScrollAnimation>
+          </div>
         </div>
       </section>
 
-      {/* Horizontal separator line */}
-      <ScrollAnimation>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="border-t border-gray-300"></div>
-        </div>
-      </ScrollAnimation>
+      {/* Opportunities */}
+      <section className="py-20 lg:py-24 px-6 lg:px-16 border-b border-gray-100">
+        <div className="max-w-7xl mx-auto">
+          <ScrollAnimation>
+            <div className="mb-12">
+              <p className="text-[10px] tracking-[0.28em] uppercase text-gray-400 font-medium mb-2">Open Now</p>
+              <h2 className="text-3xl sm:text-4xl font-black text-black tracking-tight">Opportunities</h2>
+            </div>
+          </ScrollAnimation>
 
-      {/* Content */}
-      <section className="section-padding bg-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6 sm:space-y-8">
-          <ScrollAnimation>
-            <div className="modern-card p-6 sm:p-8 hover-lift shadow-lg border-2 border-black">
-              <h2 className="section-title text-2xl sm:text-3xl text-black mb-3 sm:mb-4">Culture Show — Perform</h2>
-              <p className="font-body text-base sm:text-lg text-gray-700 mb-6">
-                Sign up to perform at Culture Show! Fill out the form below to apply.
-              </p>
-              <a
-                href="https://docs.google.com/forms/d/e/1FAIpQLSdQxpIpm-MJbrVMHlhyhs8wLGOESImGn2D9gmERP70ERop6Rg/viewform?usp=header"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 bg-black text-white font-semibold px-6 py-3 rounded-lg hover:bg-gray-800 transition-colors"
-              >
-                Open Culture Show form
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                </svg>
-              </a>
-            </div>
-          </ScrollAnimation>
-          <ScrollAnimation>
-            <div className="modern-card p-6 sm:p-8 hover-lift shadow-lg">
-              <h2 className="section-title text-2xl sm:text-3xl text-black mb-3 sm:mb-4">More opportunities</h2>
-              <p className="font-body text-base sm:text-lg text-gray-700 mb-4">
-                Additional applications will appear here. Check back later for other opportunities and roles within KSO.
-              </p>
-              <p className="font-body text-sm sm:text-base text-gray-600">
-                For questions, please contact us at
-                {' '}
-                <a href="mailto:kso@uchicago.edu" className="text-black underline hover:no-underline">kso@uchicago.edu</a>.
-              </p>
-            </div>
-          </ScrollAnimation>
+          <div className="divide-y divide-gray-100">
+            <ScrollAnimation>
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6 py-10">
+                <div className="flex-1">
+                  <div className="flex items-center gap-4 mb-3">
+                    <span className="text-gray-200 text-[10px] font-mono tabular-nums">01</span>
+                    <h3 className="text-xl font-black text-black tracking-tight">Culture Show — Perform</h3>
+                  </div>
+                  <p className="text-sm text-gray-500 leading-relaxed max-w-xl pl-10">
+                    Sign up to perform at Culture Show. Fill out the form to apply for a performance slot. Open to all KSO members and interested students.
+                  </p>
+                </div>
+                <div className="pl-10 sm:pl-0 flex-shrink-0">
+                  <a
+                    href="https://docs.google.com/forms/d/e/1FAIpQLSdQxpIpm-MJbrVMHlhyhs8wLGOESImGn2D9gmERP70ERop6Rg/viewform?usp=header"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-between gap-8 border border-gray-200 px-6 py-4 hover:border-black hover:bg-black group transition-colors duration-150"
+                  >
+                    <span className="text-sm font-semibold tracking-tight text-black group-hover:text-white transition-colors whitespace-nowrap">
+                      Open Form
+                    </span>
+                    <svg className="w-4 h-4 text-gray-300 group-hover:text-white flex-shrink-0 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 17L17 7M17 7H7M17 7v10" />
+                    </svg>
+                  </a>
+                </div>
+              </div>
+            </ScrollAnimation>
+
+            <ScrollAnimation>
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-6 py-10">
+                <div className="flex-1">
+                  <div className="flex items-center gap-4 mb-3">
+                    <span className="text-gray-200 text-[10px] font-mono tabular-nums">02</span>
+                    <h3 className="text-xl font-black text-black tracking-tight">More Opportunities</h3>
+                  </div>
+                  <p className="text-sm text-gray-500 leading-relaxed max-w-xl pl-10">
+                    Additional applications will appear here. Check back later for other opportunities and roles within KSO. Questions? Contact us at{' '}
+                    <a href="mailto:ksouchicago@gmail.com" className="text-black underline underline-offset-2 hover:no-underline">
+                      ksouchicago@gmail.com
+                    </a>.
+                  </p>
+                </div>
+                <div className="pl-10 sm:pl-0 flex-shrink-0">
+                  <span className="flex items-center gap-2 px-6 py-4 border border-gray-100 text-sm text-gray-300 tracking-tight">
+                    Coming Soon
+                  </span>
+                </div>
+              </div>
+            </ScrollAnimation>
+          </div>
         </div>
       </section>
 
@@ -76,5 +110,3 @@ export default function ApplicationsPage() {
     </div>
   );
 }
-
-

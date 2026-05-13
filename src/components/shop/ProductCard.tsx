@@ -2,6 +2,7 @@
 
 import { Product } from '@/types/shop';
 import { getProductDisplayImage } from '@/lib/utils';
+import PhotoDownloadButton from '@/components/PhotoDownloadButton';
 
 interface ProductCardProps {
   product: Product;
@@ -15,7 +16,7 @@ export default function ProductCard({ product, onAddToCart, onOpenModal }: Produ
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
       <div className="relative">
-        <div 
+        <div
           className="cursor-pointer group relative"
           onClick={() => onOpenModal(product)}
         >
@@ -28,6 +29,14 @@ export default function ProductCard({ product, onAddToCart, onOpenModal }: Produ
               target.src = '/placeholder-product.jpg';
             }}
           />
+          <div className="absolute top-2 right-2 z-10 opacity-0 pointer-events-none transition-opacity group-hover:opacity-100 group-hover:pointer-events-auto">
+            <PhotoDownloadButton
+              imageUrl={displayImage}
+              fileName={`${product.name.replace(/\s+/g, '-')}-kso-shop.jpg`}
+              tone="onLight"
+              size="sm"
+            />
+          </div>
         </div>
         {product.inventory_count === 0 && (
           <div className="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded text-xs font-semibold">

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { CartItem } from '@/types/shop';
+import PhotoDownloadButton from '@/components/PhotoDownloadButton';
 
 interface ShoppingCartProps {
   items: CartItem[];
@@ -77,11 +78,21 @@ export default function ShoppingCart({
               <div className="space-y-4 mb-6">
                 {items.map((item) => (
                   <div key={item.id} className="flex items-center space-x-4 p-3 bg-gray-50 rounded-lg">
+                  <div className="relative group shrink-0">
                     <img 
                       src={item.image} 
                       alt={item.name} 
                       className="w-16 h-16 object-cover rounded"
                     />
+                    <div className="absolute -bottom-1 -right-1 z-10 opacity-0 pointer-events-none transition-opacity group-hover:opacity-100 group-hover:pointer-events-auto">
+                      <PhotoDownloadButton
+                        imageUrl={item.image}
+                        fileName={`${item.name.replace(/\s+/g, '-')}-kso-cart.jpg`}
+                        tone="onLight"
+                        size="sm"
+                      />
+                    </div>
+                  </div>
                     <div className="flex-1">
                       <h3 className="font-medium text-gray-900">{item.name}</h3>
                       <p className="text-gray-600">${item.price.toFixed(2)}</p>

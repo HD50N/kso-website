@@ -15,60 +15,52 @@ export default function DropdownNav({ label, items, isActive = false }: Dropdown
   const dropdownRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
 
-  // Close dropdown when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     }
-
     document.addEventListener('mousedown', handleClickOutside);
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Check if any dropdown item is active
   const isDropdownActive = items.some(item => pathname === item.href);
 
   return (
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`font-body-bold px-1.5 xl:px-2 py-1.5 rounded-lg text-xs transition-all duration-300 relative group hover-scale whitespace-nowrap flex items-center space-x-1 ${
-          isActive || isDropdownActive
-            ? 'text-black bg-gray-50'
-            : 'text-gray-700 hover:text-black hover:bg-gray-50'
+        className={`relative group flex items-center gap-1 text-[10px] font-semibold tracking-[0.18em] uppercase transition-colors ${
+          isActive || isDropdownActive ? 'text-black' : 'text-gray-400 hover:text-black'
         }`}
       >
         <span>{label}</span>
-        <svg 
-          className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
-          fill="none" 
-          stroke="currentColor" 
+        <svg
+          className={`w-3 h-3 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+          fill="none"
+          stroke="currentColor"
           viewBox="0 0 24 24"
         >
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" />
         </svg>
-        <span className={`absolute bottom-0 left-0 w-0 h-0.5 bg-black transition-all duration-300 group-hover:w-full ${
-          isActive || isDropdownActive ? 'w-full' : ''
-        }`}></span>
+        <span className={`absolute -bottom-[17px] left-0 h-px bg-black transition-all duration-200 ${
+          isActive || isDropdownActive ? 'w-full' : 'w-0 group-hover:w-full'
+        }`} />
       </button>
 
-      {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute top-full left-0 mt-1 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50">
+        <div className="absolute top-full left-0 mt-3 w-44 bg-white border border-gray-100 shadow-sm z-[60]">
           {items.map((item) => (
             <Link
               key={item.name}
               href={item.href}
-              className={`block px-4 py-2 text-sm transition-colors ${
+              onClick={() => setIsOpen(false)}
+              className={`block px-4 py-3 text-[10px] font-semibold tracking-[0.18em] uppercase transition-colors border-b border-gray-50 last:border-0 ${
                 pathname === item.href
                   ? 'text-black bg-gray-50'
-                  : 'text-gray-700 hover:text-black hover:bg-gray-50'
+                  : 'text-gray-400 hover:text-black hover:bg-gray-50'
               }`}
-              onClick={() => setIsOpen(false)}
             >
               {item.name}
             </Link>
@@ -77,4 +69,4 @@ export default function DropdownNav({ label, items, isActive = false }: Dropdown
       )}
     </div>
   );
-} 
+}

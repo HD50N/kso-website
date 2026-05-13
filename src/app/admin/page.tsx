@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
@@ -11,11 +10,32 @@ import Footer from '@/components/Footer';
 import AuthPrompt from '@/components/AuthPrompt';
 import UserProfileModal from '@/components/UserProfileModal';
 import ProductPreviewModal from '@/components/shop/ProductPreviewModal';
+import PhotoDownloadButton from '@/components/PhotoDownloadButton';
 import { getProductDisplayImage } from '@/lib/utils';
+
+/** Shared field + control styles (editorial / rest of site) */
+const ADMIN_FIELD =
+  'w-full px-4 py-3 border border-gray-200 bg-white text-sm text-black placeholder-gray-400 focus:outline-none focus:border-black transition-colors';
+const ADMIN_SECTION_TITLE = 'text-[10px] tracking-[0.28em] uppercase text-gray-400 font-medium mb-2';
+const ADMIN_HEADING = 'text-3xl sm:text-4xl font-black text-black tracking-tight mb-4';
+const ADMIN_LEAD = 'text-sm text-gray-500 leading-relaxed max-w-2xl mb-6';
+const ADMIN_BTN_PRIMARY =
+  'inline-flex items-center justify-center gap-2 text-[10px] font-semibold tracking-[0.18em] uppercase px-6 py-3.5 bg-black text-white hover:bg-gray-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed';
+const ADMIN_BTN_OUTLINE =
+  'inline-flex items-center justify-center gap-2 text-[10px] font-semibold tracking-[0.18em] uppercase px-6 py-3.5 border border-gray-200 text-black hover:border-black hover:bg-black hover:text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed';
+const ADMIN_BTN_ACCENT =
+  'inline-flex items-center justify-center gap-2 text-[10px] font-semibold tracking-[0.18em] uppercase px-6 py-3.5 bg-[#CD2E3A] text-white hover:bg-[#b02633] transition-colors disabled:opacity-40 disabled:cursor-not-allowed';
+const ADMIN_BTN_DANGER =
+  'inline-flex items-center justify-center text-[10px] font-semibold tracking-[0.18em] uppercase px-6 py-3.5 border border-[#CD2E3A] text-[#CD2E3A] hover:bg-[#CD2E3A] hover:text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed';
+const ADMIN_TABLE_WRAP = 'border border-gray-100 bg-white overflow-hidden';
+const ADMIN_TH =
+  'px-6 py-3 text-left text-[10px] font-semibold tracking-[0.14em] uppercase text-gray-400 border-b border-gray-100 bg-white';
+const ADMIN_ALERT_ERR = 'border border-[#CD2E3A]/20 bg-[#CD2E3A]/5 px-4 py-3 mb-4';
+const ADMIN_ALERT_OK = 'border border-gray-200 bg-gray-50 px-4 py-3 mb-4';
+const ADMIN_ALERT_WARN = 'border border-gray-200 bg-gray-50 px-4 py-4 mb-6';
 
 export default function AdminPage() {
   const { user, profile, loading: authLoading } = useAuth();
-  const router = useRouter();
   const [users, setUsers] = useState<Profile[]>([]);
   const [boardPositions, setBoardPositions] = useState<BoardPosition[]>([]);
   const [localBoardPositions, setLocalBoardPositions] = useState<BoardPosition[]>([]);
@@ -659,12 +679,12 @@ export default function AdminPage() {
   // Show loading only for auth, not for content loading
   if (authLoading) {
     return (
-      <div className="min-h-screen">
+      <div className="min-h-screen bg-white">
         <Navigation />
-        <div className="min-h-screen flex items-center justify-center">
+        <div className="min-h-[50vh] flex items-center justify-center px-6">
           <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto"></div>
-            <p className="mt-4 text-gray-600">Checking authentication...</p>
+            <div className="w-8 h-8 border border-black border-t-transparent rounded-full animate-spin mx-auto" />
+            <p className="mt-4 text-sm text-gray-400">Checking authentication...</p>
           </div>
         </div>
       </div>
@@ -690,92 +710,111 @@ export default function AdminPage() {
 
   if (!profile?.is_admin) {
     return (
-      <div className="min-h-screen">
+      <div className="min-h-screen bg-white">
         <Navigation />
-        <div className="min-h-screen flex items-center justify-center">
-          <div className="text-center max-w-md mx-auto px-4">
-            <div className="mb-8">
-              <h1 className="text-3xl font-bold text-black mb-4">Access Denied</h1>
-              <p className="text-gray-600 mb-6">
-                You don't have permission to access the admin panel. Only administrators can view this page.
-              </p>
+        <section className="border-b border-gray-100 py-20 lg:py-28">
+          <div className="max-w-7xl mx-auto px-6 lg:px-16">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 lg:gap-24 items-start">
+              <div>
+                <p className="text-[10px] tracking-[0.32em] uppercase text-gray-400 font-medium mb-10">
+                  Admin
+                </p>
+                <h1 className="text-[4.5rem] sm:text-[6rem] lg:text-[7.5rem] font-black text-black leading-[0.87] tracking-tighter">
+                  Access<br />Denied
+                </h1>
+              </div>
+              <div className="lg:pt-20">
+                <div className="w-10 h-px bg-[#CD2E3A] mb-8" />
+                <p className="text-lg sm:text-xl text-gray-700 leading-relaxed font-light italic mb-6">
+                  &ldquo;This area is restricted to KSO administrators.&rdquo;
+                </p>
+                <p className="text-sm text-gray-500 leading-relaxed mb-8 max-w-md">
+                  You don&apos;t have permission to view the admin panel. If you need access, contact the KSO board.
+                </p>
+                <Link
+                  href="/profile"
+                  className="inline-block bg-black text-white text-[10px] font-semibold tracking-[0.18em] uppercase px-8 py-4 hover:bg-gray-800 transition-colors"
+                >
+                  Go to Profile
+                </Link>
+              </div>
             </div>
-            <div className="bg-gray-50 rounded-lg p-6 mb-6">
-              <h2 className="text-lg font-semibold text-black mb-2">Need Admin Access?</h2>
-              <p className="text-sm text-gray-600">
-                If you believe you should have admin access, please contact the KSO board or your organization administrator.
-              </p>
-            </div>
-            <Link 
-              href="/profile"
-              className="inline-block bg-black text-white px-6 py-3 rounded-lg font-semibold hover:bg-gray-800 transition-colors"
-            >
-              Go to Profile
-            </Link>
           </div>
-        </div>
+        </section>
         <Footer />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-white">
       <Navigation />
 
-      {/* Admin Panel Section */}
-      <section className="min-h-screen bg-white py-16 sm:py-20 lg:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div className="mb-8">
-                      <div className="mb-2">
-                        <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">Admin Panel</span>
-                      </div>
-                      <h1 className="text-3xl font-bold text-black mb-2">Admin Dashboard</h1>
-                      <p className="text-gray-600">
-                        Manage user accounts, permissions, and board configurations
-                      </p>
-                    </div>
+      <section className="border-b border-gray-100 py-20 lg:py-28">
+        <div className="max-w-7xl mx-auto px-6 lg:px-16">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 lg:gap-24 items-start">
+            <div>
+              <p className="text-[10px] tracking-[0.32em] uppercase text-gray-400 font-medium mb-10">
+                KSO Internal
+              </p>
+              <h1 className="text-[4.5rem] sm:text-[6rem] lg:text-[7.5rem] font-black text-black leading-[0.87] tracking-tighter">
+                Admin<br />Dashboard
+              </h1>
+            </div>
+            <div className="lg:pt-20">
+              <div className="w-10 h-px bg-[#CD2E3A] mb-8" />
+              <p className="text-lg sm:text-xl text-gray-700 leading-relaxed font-light italic mb-6">
+                &ldquo;Manage members, board roles, shop sync, and orders.&rdquo;
+              </p>
+              <p className="text-sm text-gray-500 leading-relaxed max-w-md">
+                Manage user accounts, permissions, and board configurations. Use the tabs below to switch areas.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
 
-                    {/* Tab Navigation */}
-                    <div className="mb-6">
-                      <div className="border-b border-gray-200">
-                        <nav className="-mb-px flex space-x-8">
+      <section className="py-20 lg:py-24 px-6 lg:px-16 border-b border-gray-100">
+        <div className="max-w-7xl mx-auto">
+                    <div className="mb-8">
+                      <div className="mb-6">
+                        <nav className="-mb-px flex flex-wrap gap-x-8 gap-y-2 border-b border-gray-100">
                           <button
                             onClick={() => setActiveTab('users')}
-                            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                            className={`py-3 px-0 border-b-2 text-[10px] font-semibold tracking-[0.14em] uppercase transition-colors ${
                               activeTab === 'users'
                                 ? 'border-black text-black'
-                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                : 'border-transparent text-gray-400 hover:text-black'
                             }`}
                           >
                             User Management
                           </button>
                           <button
                             onClick={() => setActiveTab('board')}
-                            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                            className={`py-3 px-0 border-b-2 text-[10px] font-semibold tracking-[0.14em] uppercase transition-colors ${
                               activeTab === 'board'
                                 ? 'border-black text-black'
-                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                : 'border-transparent text-gray-400 hover:text-black'
                             }`}
                           >
                             Board Configuration
                           </button>
                           <button
                             onClick={() => setActiveTab('sync')}
-                            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                            className={`py-3 px-0 border-b-2 text-[10px] font-semibold tracking-[0.14em] uppercase transition-colors ${
                               activeTab === 'sync'
                                 ? 'border-black text-black'
-                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                : 'border-transparent text-gray-400 hover:text-black'
                             }`}
                           >
                             Sync Products
                           </button>
                           <button
                             onClick={() => setActiveTab('orders')}
-                            className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                            className={`py-3 px-0 border-b-2 text-[10px] font-semibold tracking-[0.14em] uppercase transition-colors ${
                               activeTab === 'orders'
                                 ? 'border-black text-black'
-                                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                                : 'border-transparent text-gray-400 hover:text-black'
                             }`}
                           >
                             Orders
@@ -787,22 +826,28 @@ export default function AdminPage() {
                                 {/* User Management Tab */}
                     {activeTab === 'users' && (
                       <>
-                        {/* Search and Filters */}
-                        <div className="mb-6 space-y-4">
-                          <div className="flex flex-col sm:flex-row gap-4">
+                        <div className="mb-10 space-y-4">
+                          <div>
+                            <p className={ADMIN_SECTION_TITLE}>Directory</p>
+                            <h2 className={ADMIN_HEADING}>User accounts</h2>
+                            <p className={ADMIN_LEAD}>
+                              Search members, toggle admin or board status, open profiles, or remove accounts (non-admins only).
+                            </p>
+                          </div>
+                          <div className="flex flex-col sm:flex-row gap-3">
                             <div className="flex-1">
                               <input
                                 type="text"
                                 placeholder="Search by name, username, or email..."
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                                className={ADMIN_FIELD}
                               />
                             </div>
                             <select
                               value={filterType}
                               onChange={(e) => setFilterType(e.target.value)}
-                              className="px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                              className={`${ADMIN_FIELD} sm:max-w-[220px]`}
                             >
                               <option value="all">All Types</option>
                               <option value="undergrad">Undergraduate</option>
@@ -813,22 +858,20 @@ export default function AdminPage() {
                           </div>
 
                           {error && (
-                            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                              <p className="text-red-600 text-sm">{error}</p>
+                            <div className={ADMIN_ALERT_ERR}>
+                              <p className="text-[#CD2E3A] text-sm">{error}</p>
                             </div>
                           )}
 
                           {success && (
-                            <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                              <p className="text-green-600 text-sm">{success}</p>
+                            <div className={ADMIN_ALERT_OK}>
+                              <p className="text-gray-700 text-sm">{success}</p>
                             </div>
                           )}
 
-                          <div className="mb-4">
-                            <p className="text-gray-600">
-                              Showing {filteredUsers.length} of {users.length} users
-                            </p>
-                          </div>
+                          <p className="text-[10px] tracking-[0.18em] uppercase text-gray-400 font-medium">
+                            Showing {filteredUsers.length} of {users.length} users
+                          </p>
                         </div>
                       </>
                     )}
@@ -836,47 +879,45 @@ export default function AdminPage() {
                     {/* Board Configuration Tab */}
                     {activeTab === 'board' && (
                       <>
-                        <div className="mb-6">
-                          <h2 className="text-xl font-semibold text-black mb-4">Executive Board Positions</h2>
-                          <p className="text-gray-600 mb-4">
-                            Configure board positions and assign usernames to automatically display user information on the board page.
+                        <div className="mb-10">
+                          <p className={ADMIN_SECTION_TITLE}>Executive board</p>
+                          <h2 className={ADMIN_HEADING}>Board positions</h2>
+                          <p className={ADMIN_LEAD}>
+                            Map roles to usernames for the public board page. Drag cards to set display order (left to right, then next row).
                           </p>
-                          
+
                           {error && (
-                            <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
-                              <p className="text-red-600 text-sm">{error}</p>
+                            <div className={ADMIN_ALERT_ERR}>
+                              <p className="text-[#CD2E3A] text-sm">{error}</p>
                             </div>
                           )}
 
                           {success && (
-                            <div className="bg-green-50 border border-green-200 rounded-lg p-3 mb-4">
-                              <p className="text-green-600 text-sm">{success}</p>
+                            <div className={ADMIN_ALERT_OK}>
+                              <p className="text-gray-700 text-sm">{success}</p>
                             </div>
                           )}
 
-
-                          {/* Save Changes Button */}
                           {hasUnsavedChanges && (
-                            <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center">
-                                  <svg className="w-5 h-5 text-yellow-600 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                                  </svg>
-                                  <span className="text-yellow-800 font-medium">You have unsaved changes</span>
-                                </div>
+                            <div className={ADMIN_ALERT_WARN}>
+                              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                <p className="text-sm text-gray-700">
+                                  <span className="text-[10px] font-semibold tracking-[0.14em] uppercase text-black block mb-1">Unsaved changes</span>
+                                  Save to push order and edits to the board page.
+                                </p>
                                 <button
+                                  type="button"
                                   onClick={saveAllChanges}
                                   disabled={savingChanges}
-                                  className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                                  className={ADMIN_BTN_ACCENT}
                                 >
                                   {savingChanges ? (
                                     <>
-                                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                                      Saving...
+                                      <span className="w-3 h-3 border border-white border-t-transparent rounded-full animate-spin inline-block" />
+                                      Saving
                                     </>
                                   ) : (
-                                    'Save All Changes'
+                                    'Save all'
                                   )}
                                 </button>
                               </div>
@@ -889,148 +930,155 @@ export default function AdminPage() {
                                     {/* Users Table */}
                         {activeTab === 'users' && (
                           <>
-                            <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+                            <div className={ADMIN_TABLE_WRAP}>
                               <div className="overflow-x-auto">
                                 <table className="w-full">
-                                  <thead className="bg-gray-50">
+                                  <thead>
                                     <tr>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        User
-                                      </th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Type
-                                      </th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Admin
-                                      </th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Actions
-                                      </th>
+                                      <th className={ADMIN_TH}>User</th>
+                                      <th className={ADMIN_TH}>Type</th>
+                                      <th className={ADMIN_TH}>Admin</th>
+                                      <th className={ADMIN_TH}>Actions</th>
                                     </tr>
                                   </thead>
-                                  <tbody className="bg-white divide-y divide-gray-200">
+                                  <tbody className="divide-y divide-gray-100">
                                     {loading ? (
                                       // Loading skeletons
                                       [...Array(5)].map((_, index) => (
                                         <tr key={index} className="animate-pulse">
                                           <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="flex items-center">
-                                              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gray-200 mr-3"></div>
+                                              <div className="flex-shrink-0 w-10 h-10 bg-gray-100 mr-3" />
                                               <div>
-                                                <div className="h-4 bg-gray-200 rounded w-24 mb-1"></div>
-                                                <div className="h-3 bg-gray-200 rounded w-16"></div>
+                                                <div className="h-4 bg-gray-100 w-24 mb-1" />
+                                                <div className="h-3 bg-gray-100 w-16" />
                                               </div>
                                             </div>
                                           </td>
                                           <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="h-6 bg-gray-200 rounded w-20"></div>
+                                            <div className="h-6 bg-gray-100 w-20" />
                                           </td>
                                           <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="h-6 bg-gray-200 rounded w-16"></div>
+                                            <div className="h-6 bg-gray-100 w-16" />
                                           </td>
                                           <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="flex space-x-2">
-                                              <div className="h-6 bg-gray-200 rounded w-20"></div>
-                                              <div className="h-6 bg-gray-200 rounded w-20"></div>
-                                              <div className="h-6 bg-gray-200 rounded w-20"></div>
+                                            <div className="flex flex-wrap gap-2">
+                                              <div className="h-8 bg-gray-100 w-20" />
+                                              <div className="h-8 bg-gray-100 w-20" />
                                             </div>
                                           </td>
                                         </tr>
                                       ))
                                     ) : (
                                       filteredUsers.map((user) => (
-                                      <tr key={user.id} className="hover:bg-gray-50">
+                                      <tr key={user.id} className="hover:bg-gray-50/80">
                                         <td className="px-6 py-4 whitespace-nowrap">
                                           <div className="flex items-center">
-                                            <div className="flex-shrink-0 w-10 h-10 rounded-full overflow-hidden mr-3">
+                                            <div className="relative group flex-shrink-0 w-10 h-10 overflow-hidden mr-3 border border-gray-100 bg-gray-50">
                                               {user.avatar_url ? (
-                                                <img
-                                                  src={user.avatar_url}
-                                                  alt={user.full_name}
-                                                  className="w-10 h-10 object-cover"
-                                                />
+                                                <>
+                                                  <img
+                                                    src={user.avatar_url}
+                                                    alt={user.full_name}
+                                                    className="w-10 h-10 object-cover"
+                                                  />
+                                                  <div className="absolute bottom-0 right-0 z-10 scale-75 origin-bottom-right opacity-0 pointer-events-none transition-opacity group-hover:opacity-100 group-hover:pointer-events-auto">
+                                                    <PhotoDownloadButton
+                                                      imageUrl={user.avatar_url}
+                                                      fileName={`${user.full_name.replace(/\s+/g, '_')}-kso-admin.jpg`}
+                                                      tone="onLight"
+                                                      size="sm"
+                                                    />
+                                                  </div>
+                                                </>
                                               ) : (
-                                                <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
-                                                  <span className="text-sm font-bold text-gray-600">
+                                                <div className="w-10 h-10 flex items-center justify-center">
+                                                  <span className="text-xs font-black text-gray-400">
                                                     {user.full_name.split(' ').map(n => n[0]).join('').toUpperCase()}
                                                   </span>
                                                 </div>
                                               )}
                                             </div>
                                             <div>
-                                              <div className="text-sm font-medium text-gray-900">
+                                              <div className="text-sm font-semibold text-black tracking-tight">
                                                 {user.full_name}
                                               </div>
                                               {user.username && (
-                                                <div className="text-sm text-gray-400">
-                                                  @{user.username}
-                                                </div>
+                                                <div className="text-xs text-gray-400">@{user.username}</div>
                                               )}
                                             </div>
                                           </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full capitalize ${
-                                            user.user_type === 'board_member' 
-                                              ? 'bg-blue-100 text-blue-800' 
-                                              : 'bg-gray-100 text-gray-800'
-                                          }`}>
+                                          <span className="inline-block border border-gray-200 px-2 py-1 text-[10px] font-semibold tracking-[0.08em] uppercase text-gray-700">
                                             {user.user_type?.replace('_', ' ')}
                                           </span>
                                           {user.board_position && (
-                                            <div className="text-xs text-blue-600 mt-1 font-medium">
+                                            <div className="text-[10px] tracking-[0.12em] uppercase text-gray-400 mt-1.5">
                                               {user.board_position}
                                             </div>
                                           )}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                            user.is_admin
-                                              ? 'bg-red-100 text-red-800'
-                                              : 'bg-gray-100 text-gray-800'
-                                          }`}>
-                                            {user.is_admin ? 'Admin' : 'User'}
+                                          <span
+                                            className={`inline-block border px-2 py-1 text-[10px] font-semibold tracking-[0.08em] uppercase ${
+                                              user.is_admin
+                                                ? 'border-[#CD2E3A]/40 text-[#CD2E3A]'
+                                                : 'border-gray-200 text-gray-500'
+                                            }`}
+                                          >
+                                            {user.is_admin ? 'Admin' : 'Member'}
                                           </span>
                                         </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                          <div className="flex space-x-2">
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                          <div className="flex flex-wrap gap-2">
                                             <button
+                                              type="button"
                                               onClick={() => updateUserStatus(user.id, { is_admin: !user.is_admin })}
                                               disabled={updatingUser === user.id}
-                                              className={`px-3 py-1 text-xs rounded-md transition-colors ${
-                                                user.is_admin
-                                                  ? 'bg-gray-600 text-white hover:bg-gray-700'
-                                                  : 'bg-red-600 text-white hover:bg-red-700'
-                                              } disabled:opacity-50`}
+                                              className="text-[10px] font-semibold tracking-[0.12em] uppercase px-3 py-2 border border-gray-200 hover:border-black hover:bg-black hover:text-white transition-colors disabled:opacity-40"
                                             >
-                                              {updatingUser === user.id ? 'Updating...' : (user.is_admin ? 'Remove Admin' : 'Make Admin')}
+                                              {updatingUser === user.id ? '…' : user.is_admin ? 'Remove admin' : 'Make admin'}
                                             </button>
                                             <button
-                                              onClick={() => updateUserStatus(user.id, { user_type: user.user_type === 'board_member' ? 'undergrad' : 'board_member' })}
+                                              type="button"
+                                              onClick={() =>
+                                                updateUserStatus(user.id, {
+                                                  user_type: user.user_type === 'board_member' ? 'undergrad' : 'board_member',
+                                                })
+                                              }
                                               disabled={updatingUser === user.id}
-                                              className={`px-3 py-1 text-xs rounded-md transition-colors ${
-                                                user.user_type === 'board_member'
-                                                  ? 'bg-gray-600 text-white hover:bg-gray-700'
-                                                  : 'bg-blue-600 text-white hover:bg-blue-700'
-                                              } disabled:opacity-50`}
+                                              className="text-[10px] font-semibold tracking-[0.12em] uppercase px-3 py-2 border border-gray-200 hover:border-black hover:bg-black hover:text-white transition-colors disabled:opacity-40"
                                             >
-                                              {updatingUser === user.id ? 'Updating...' : (user.user_type === 'board_member' ? 'Remove Board' : 'Make Board')}
+                                              {updatingUser === user.id
+                                                ? '…'
+                                                : user.user_type === 'board_member'
+                                                  ? 'Remove board'
+                                                  : 'Make board'}
                                             </button>
                                             <button
+                                              type="button"
                                               onClick={() => openProfileModal(user.user_id)}
-                                              className="px-3 py-1 text-xs bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                                              className="text-[10px] font-semibold tracking-[0.12em] uppercase px-3 py-2 border border-gray-200 text-gray-600 hover:border-black hover:text-black transition-colors"
                                             >
-                                              View Profile
+                                              Profile
                                             </button>
                                             <button
+                                              type="button"
                                               onClick={() => openDeleteUserModal(user)}
                                               disabled={user.is_admin || user.user_id === profile?.user_id}
-                                              className={`px-3 py-1 text-xs rounded-md transition-colors ${
+                                              className={`text-[10px] font-semibold tracking-[0.12em] uppercase px-3 py-2 border transition-colors ${
                                                 user.is_admin || user.user_id === profile?.user_id
-                                                  ? 'bg-gray-400 text-gray-600 cursor-not-allowed'
-                                                  : 'bg-red-600 text-white hover:bg-red-700'
+                                                  ? 'border-gray-100 text-gray-300 cursor-not-allowed'
+                                                  : 'border-[#CD2E3A]/30 text-[#CD2E3A] hover:bg-[#CD2E3A] hover:text-white'
                                               }`}
-                                              title={user.is_admin ? 'Cannot delete admin users' : user.user_id === profile?.user_id ? 'Cannot delete your own account' : 'Delete user'}
+                                              title={
+                                                user.is_admin
+                                                  ? 'Cannot delete admin users'
+                                                  : user.user_id === profile?.user_id
+                                                    ? 'Cannot delete your own account'
+                                                    : 'Delete user'
+                                              }
                                             >
                                               Delete
                                             </button>
@@ -1045,8 +1093,9 @@ export default function AdminPage() {
                             </div>
 
                             {filteredUsers.length === 0 && (
-                              <div className="text-center py-12">
-                                <p className="text-gray-600 text-lg">No users found matching your criteria.</p>
+                              <div className="text-center py-16 border-t border-gray-100">
+                                <p className="text-[10px] tracking-[0.2em] uppercase text-gray-400 font-medium mb-2">No results</p>
+                                <p className="text-sm text-gray-500">No users match your search or filter.</p>
                               </div>
                             )}
                           </>
@@ -1056,21 +1105,20 @@ export default function AdminPage() {
                         {activeTab === 'board' && (
                           <>
                             {boardLoading ? (
-                              <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-8">
+                              <div className={`${ADMIN_TABLE_WRAP} p-12`}>
                                 <div className="text-center">
-                                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-black mx-auto"></div>
-                                  <p className="mt-4 text-gray-600">Loading board positions...</p>
+                                  <div className="w-8 h-8 border border-black border-t-transparent rounded-full animate-spin mx-auto" />
+                                  <p className="mt-4 text-sm text-gray-400">Loading board positions…</p>
                                 </div>
                               </div>
                             ) : (
                               <>
-                                <div className="mb-3">
-                                  <p className="text-xs text-gray-500">
-                                    💡 <strong>Drag and drop</strong> cards to reorder. Order (left→right, top→bottom) determines board page display.
-                                  </p>
-                                </div>
-                                
-                                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3">
+                                <p className="text-sm text-gray-500 mb-6 max-w-2xl">
+                                  <span className="text-[10px] font-semibold tracking-[0.14em] uppercase text-black">Reorder</span>
+                                  {' — '}Drag cards to change order. Order follows left to right, then the next row.
+                                </p>
+
+                                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
                                     {localBoardPositions.map((position, index) => (
                                       <div
                                         key={position.id}
@@ -1080,39 +1128,38 @@ export default function AdminPage() {
                                         onDragLeave={handleDragLeave}
                                         onDrop={(e) => handleDrop(e, index)}
                                         onDragEnd={handleDragEnd}
-                                        className={`bg-white rounded-lg shadow-sm border-2 p-3 transition-all duration-200 cursor-move hover:shadow-md ${
+                                        className={`bg-white border p-4 transition-all duration-200 cursor-move ${
                                           draggedIndex === index
-                                            ? 'opacity-40 scale-95 border-blue-400 z-50'
+                                            ? 'opacity-40 border-black scale-[0.98]'
                                             : dragOverIndex === index
-                                            ? 'border-green-400 scale-[1.02] shadow-md ring-2 ring-green-200'
-                                            : 'border-gray-200 hover:border-gray-300'
+                                            ? 'border-black ring-1 ring-black/10'
+                                            : 'border-gray-100 hover:border-gray-300'
                                         }`}
                                       >
-                                        {/* Header: Drag handle and position number */}
-                                        <div className="flex items-center justify-between mb-2 pb-2 border-b border-gray-100">
-                                          <div className="flex items-center space-x-1.5 cursor-grab active:cursor-grabbing">
-                                            <svg className="w-3 h-3 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-                                              <path d="M7 2a2 2 0 1 1 .001 4.001A2 2 0 0 1 7 2zm0 6a2 2 0 1 1 .001 4.001A2 2 0 0 1 7 8zm0 6a2 2 0 1 1 .001 4.001A2 2 0 0 1 7 14zm6-8a2 2 0 1 1 .001-4.001A2 2 0 0 1 13 6zm0 2a2 2 0 1 1 .001 4.001A2 2 0 0 1 13 8zm0 6a2 2 0 1 1 .001 4.001A2 2 0 0 1 13 14z"></path>
+                                        <div className="flex items-center justify-between mb-3 pb-3 border-b border-gray-100">
+                                          <div className="flex items-center gap-1 cursor-grab active:cursor-grabbing text-gray-400">
+                                            <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                                              <path d="M7 2a2 2 0 1 1 .001 4.001A2 2 0 0 1 7 2zm0 6a2 2 0 1 1 .001 4.001A2 2 0 0 1 7 8zm0 6a2 2 0 1 1 .001 4.001A2 2 0 0 1 7 14zm6-8a2 2 0 1 1 .001-4.001A2 2 0 0 1 13 6zm0 2a2 2 0 1 1 .001 4.001A2 2 0 0 1 13 8zm0 6a2 2 0 1 1 .001 4.001A2 2 0 0 1 13 14z" />
                                             </svg>
                                           </div>
-                                          <span className="text-[10px] font-bold text-gray-400 bg-gray-50 px-1.5 py-0.5 rounded">
-                                            #{index + 1}
+                                          <span className="text-[10px] font-mono tabular-nums text-gray-300">
+                                            {String(index + 1).padStart(2, '0')}
                                           </span>
                                         </div>
 
-                                        {/* Position Role - Compact */}
-                                        <div className="mb-2">
+                                        <div className="mb-3">
+                                          <label className="block text-[10px] tracking-[0.14em] uppercase text-gray-400 font-medium mb-1.5">Role</label>
                                           <input
                                             type="text"
                                             value={position.role}
                                             onChange={(e) => updateLocalPosition(position.id, { role: e.target.value })}
-                                            className="w-full px-2 py-1.5 text-xs font-semibold border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-black focus:border-transparent bg-white"
-                                            placeholder="Role"
+                                            className={`${ADMIN_FIELD} py-2 text-xs font-semibold`}
+                                            placeholder="Role title"
                                           />
                                         </div>
 
-                                        {/* Username - Compact */}
-                                        <div className="mb-2">
+                                        <div className="mb-3">
+                                          <label className="block text-[10px] tracking-[0.14em] uppercase text-gray-400 font-medium mb-1.5">Username</label>
                                           <div className="flex items-center gap-1">
                                             <input
                                               type="text"
@@ -1125,39 +1172,36 @@ export default function AdminPage() {
                                                 }
                                               }}
                                               placeholder="username"
-                                              className="flex-1 px-2 py-1.5 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-black focus:border-transparent bg-white"
+                                              className={`${ADMIN_FIELD} py-2 text-xs flex-1`}
                                             />
                                             {position.username && (
-                                              <span className="text-[10px] text-gray-400">✓</span>
+                                              <span className="text-[10px] text-gray-400 shrink-0">✓</span>
                                             )}
                                           </div>
                                         </div>
 
-                                        {/* Status and Actions - Compact */}
-                                        <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-                                          <span className={`inline-flex px-1.5 py-0.5 text-[10px] font-semibold rounded ${
-                                            position.is_active
-                                              ? 'bg-green-100 text-green-700'
-                                              : 'bg-gray-100 text-gray-600'
-                                          }`}>
-                                            {position.is_active ? '✓' : '○'}
+                                        <div className="flex items-center justify-between pt-3 border-t border-gray-100">
+                                          <span
+                                            className={`text-[10px] font-semibold tracking-[0.12em] uppercase ${
+                                              position.is_active ? 'text-black' : 'text-gray-400'
+                                            }`}
+                                          >
+                                            {position.is_active ? 'Active' : 'Inactive'}
                                           </span>
                                           <div className="flex gap-1">
                                             <button
+                                              type="button"
                                               onClick={() => updateLocalPosition(position.id, { is_active: !position.is_active })}
-                                              className={`px-2 py-0.5 text-[10px] rounded transition-colors ${
-                                                position.is_active
-                                                  ? 'bg-gray-500 text-white hover:bg-gray-600'
-                                                  : 'bg-green-500 text-white hover:bg-green-600'
-                                              }`}
+                                              className="text-[10px] font-semibold tracking-[0.12em] uppercase px-2 py-1.5 border border-gray-200 hover:border-black transition-colors"
                                               title={position.is_active ? 'Deactivate' : 'Activate'}
                                             >
-                                              {position.is_active ? 'OFF' : 'ON'}
+                                              {position.is_active ? 'Off' : 'On'}
                                             </button>
                                             <button
+                                              type="button"
                                               onClick={() => deleteLocalPosition(position.id)}
-                                              className="px-2 py-0.5 text-[10px] bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
-                                              title="Delete"
+                                              className="text-[10px] font-semibold tracking-[0.12em] uppercase px-2 py-1.5 border border-[#CD2E3A]/30 text-[#CD2E3A] hover:bg-[#CD2E3A] hover:text-white transition-colors"
+                                              title="Remove position"
                                             >
                                               ×
                                             </button>
@@ -1165,32 +1209,30 @@ export default function AdminPage() {
                                         </div>
                                       </div>
                                     ))}
-                                    
-                                    {/* Add New Position Card */}
+
                                     <button
+                                      type="button"
                                       onClick={addBoardPosition}
                                       disabled={addingPosition}
-                                      className="bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-3 transition-all duration-200 cursor-pointer hover:border-gray-400 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed flex flex-col items-center justify-center min-h-[140px]"
+                                      className="border border-dashed border-gray-200 bg-gray-50/50 p-4 transition-all min-h-[160px] flex flex-col items-center justify-center hover:border-gray-400 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
                                     >
                                       {addingPosition ? (
-                                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-400"></div>
+                                        <div className="w-6 h-6 border border-black border-t-transparent rounded-full animate-spin" />
                                       ) : (
                                         <>
-                                          <svg className="w-8 h-8 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                                          <svg className="w-6 h-6 text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
                                           </svg>
-                                          <span className="text-xs font-medium text-gray-500">Add Position</span>
+                                          <span className="text-[10px] font-semibold tracking-[0.14em] uppercase text-gray-500">Add position</span>
                                         </>
                                       )}
                                     </button>
                                   </div>
 
                                 {localBoardPositions.length > 0 && (
-                                  <div className="mt-4 text-center">
-                                    <p className="text-sm text-gray-600">
-                                      Showing {localBoardPositions.filter(p => p.is_active).length} active positions out of {localBoardPositions.length} total positions
-                                    </p>
-                                  </div>
+                                  <p className="mt-6 text-[10px] tracking-[0.18em] uppercase text-gray-400 font-medium">
+                                    {localBoardPositions.filter((p) => p.is_active).length} active · {localBoardPositions.length} total
+                                  </p>
                                 )}
                               </>
                             )}
@@ -1200,106 +1242,105 @@ export default function AdminPage() {
                         {/* Sync Products Tab */}
                         {activeTab === 'sync' && (
                           <>
-                            <div className="mb-6">
-                              <h2 className="text-xl font-semibold text-black mb-4">Product Management</h2>
-                              <p className="text-gray-600 mb-4">
-                                Import products from Printful to your shop by syncing them to Stripe.
+                            <div className="mb-10">
+                              <p className={ADMIN_SECTION_TITLE}>Shop</p>
+                              <h2 className={ADMIN_HEADING}>Printful → Stripe</h2>
+                              <p className={ADMIN_LEAD}>
+                                Preview products from Printful, then sync to Stripe for the shop. Syncing removes orphaned Stripe products that no longer exist in Printful.
                               </p>
-                              
+
                               {syncError && (
-                                <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
-                                  <p className="text-red-600 text-sm">{syncError}</p>
+                                <div className={ADMIN_ALERT_ERR}>
+                                  <p className="text-[#CD2E3A] text-sm">{syncError}</p>
                                 </div>
                               )}
 
-                              {/* Instructions */}
-                              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                                <h3 className="font-semibold text-blue-900 mb-2">How it works:</h3>
-                                <ul className="text-blue-800 space-y-1 text-sm">
-                                  <li>• <strong>Step 1:</strong> Preview products from Printful (safe - no changes)</li>
-                                  <li>• <strong>Step 2:</strong> Review the products and prices</li>
-                                  <li>• <strong>Step 3:</strong> Sync to Stripe to add them to your shop (will delete removed products)</li>
-                                </ul>
+                              <div className="border border-gray-100 p-6 mb-8 space-y-3">
+                                <p className="text-[10px] tracking-[0.2em] uppercase text-gray-400 font-semibold mb-2">How it works</p>
+                                <ol className="text-sm text-gray-600 space-y-2 list-decimal list-inside">
+                                  <li>Preview — load Printful catalog (read-only).</li>
+                                  <li>Review — check names, variants, and prices in the grid.</li>
+                                  <li>Sync — push to Stripe and clean up removed SKUs.</li>
+                                </ol>
                               </div>
 
-                              {/* Action Buttons */}
-                              <div className="flex flex-col sm:flex-row gap-4 mb-8">
+                              <div className="flex flex-col sm:flex-row gap-3 mb-10">
                                 <button
+                                  type="button"
                                   onClick={fetchProductsFromPrintful}
                                   disabled={previewLoading}
-                                  className="flex-1 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                                  className={`${ADMIN_BTN_OUTLINE} flex-1`}
                                 >
-                                  {previewLoading ? 'Loading...' : '👁️ Preview Products from Printful'}
+                                  {previewLoading ? 'Loading…' : 'Preview from Printful'}
                                 </button>
-                                
+
                                 <button
+                                  type="button"
                                   onClick={syncProductsToStripe}
                                   disabled={syncLoading || syncProducts.length === 0}
-                                  className="flex-1 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors disabled:opacity-50"
+                                  className={`${ADMIN_BTN_PRIMARY} flex-1`}
                                 >
-                                  {syncLoading ? 'Syncing...' : '🔄 Sync to Stripe (with cleanup)'}
+                                  {syncLoading ? 'Syncing…' : 'Sync to Stripe'}
                                 </button>
                               </div>
                             </div>
 
                             {/* Products from Printful */}
                             {syncProducts.length > 0 && (
-                              <div className="mb-8">
-                                <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                                  📦 Products from Printful ({syncProducts.length})
-                                </h3>
+                              <div className="mb-10">
+                                <p className="text-[10px] tracking-[0.28em] uppercase text-gray-400 font-medium mb-3">
+                                  Printful ({syncProducts.length})
+                                </p>
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                   {syncProducts.map((product, index) => (
-                                    <div key={index} className="bg-white rounded-lg shadow-md overflow-hidden">
-                                      {/* Product Image */}
-                                      <div className="h-80 bg-gray-100 flex items-center justify-center">
+                                    <div key={index} className="border border-gray-100 bg-white overflow-hidden flex flex-col">
+                                      <div className="relative group h-64 bg-gray-50 flex items-center justify-center border-b border-gray-100 overflow-hidden">
                                         {(() => {
                                           const displayImage = getProductDisplayImage(product);
                                           return displayImage ? (
-                                            <img 
-                                              src={displayImage} 
-                                              alt={product.name} 
-                                              className="w-full h-full object-cover"
-                                            />
+                                            <>
+                                              <img
+                                                src={displayImage}
+                                                alt={product.name}
+                                                className="w-full h-full object-cover"
+                                              />
+                                              <div className="absolute bottom-2 right-2 z-10 opacity-0 pointer-events-none transition-opacity group-hover:opacity-100 group-hover:pointer-events-auto">
+                                                <PhotoDownloadButton
+                                                  imageUrl={displayImage}
+                                                  fileName={`${String(product.name).replace(/\s+/g, '-')}-sync-preview.jpg`}
+                                                  tone="onLight"
+                                                  size="sm"
+                                                />
+                                              </div>
+                                            </>
                                           ) : (
-                                            <div className="text-gray-500 text-center p-4">
-                                              <div className="text-2xl mb-2">🖼️</div>
-                                              <p className="text-sm">No Image</p>
-                                            </div>
+                                            <span className="text-xs text-gray-400 uppercase tracking-wider">No image</span>
                                           );
                                         })()}
                                       </div>
-                                      
-                                      {/* Product Details */}
-                                      <div className="p-4">
-                                        <h4 className="font-semibold text-gray-900 mb-2">
-                                          {product.name}
-                                        </h4>
-                                        <div className="space-y-1 text-sm text-gray-600">
+
+                                      <div className="p-4 flex flex-col flex-1">
+                                        <h4 className="text-sm font-bold text-black tracking-tight mb-2">{product.name}</h4>
+                                        <div className="space-y-1 text-xs text-gray-500 mb-4 flex-1">
                                           <p>ID: {product.id}</p>
                                           <p>Variants: {product.variants}</p>
                                           <p>Synced: {product.synced}</p>
                                         </div>
-                                        <div className="mt-3 pt-3 border-t border-gray-200">
-                                          <div className="flex justify-between items-center">
-                                            <span className="font-bold text-lg text-gray-900">
-                                              ${product.retail_price ? product.retail_price.toFixed(2) : 'N/A'}
-                                            </span>
-                                            <span className="text-xs text-gray-500">
-                                              {product.is_ignored ? 'Ignored' : 'Active'}
-                                            </span>
-                                          </div>
+                                        <div className="flex justify-between items-center border-t border-gray-100 pt-3 mb-3">
+                                          <span className="text-sm font-black text-black">
+                                            ${product.retail_price ? product.retail_price.toFixed(2) : 'N/A'}
+                                          </span>
+                                          <span className="text-[10px] tracking-[0.12em] uppercase text-gray-400">
+                                            {product.is_ignored ? 'Ignored' : 'Active'}
+                                          </span>
                                         </div>
-                                        
-                                        {/* Preview Button */}
-                                        <div className="mt-3">
-                                          <button
-                                            onClick={() => openProductPreview(product)}
-                                            className="w-full bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
-                                          >
-                                            👁️ Preview Product
-                                          </button>
-                                        </div>
+                                        <button
+                                          type="button"
+                                          onClick={() => openProductPreview(product)}
+                                          className={`${ADMIN_BTN_OUTLINE} w-full py-2.5`}
+                                        >
+                                          Preview
+                                        </button>
                                       </div>
                                     </div>
                                   ))}
@@ -1309,166 +1350,137 @@ export default function AdminPage() {
 
                             {/* Synced Products */}
                             {syncedProducts.length > 0 && (
-                              <div>
-                                <h3 className="text-xl font-semibold text-gray-900 mb-4">
-                                  ✅ Synced to Stripe ({syncedProducts.length})
-                                </h3>
-                                <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                                  <div className="space-y-2">
-                                    {syncedProducts.map((item, index) => (
-                                      <div key={index} className="flex justify-between items-center">
-                                        <span className="font-medium text-green-900">
-                                          {item.product?.name || 'Product'}
-                                        </span>
-                                        <span className="text-green-700">
-                                          ${item.priceDetails?.amount ? item.priceDetails.amount.toFixed(2) : 'N/A'}
-                                        </span>
-                                      </div>
-                                    ))}
-                                  </div>
-                                  <p className="text-green-700 text-sm mt-3">
-                                    ✅ Products have been successfully synced to your shop!
-                                  </p>
+                              <div className="mb-8">
+                                <p className="text-[10px] tracking-[0.28em] uppercase text-gray-400 font-medium mb-3">
+                                  Synced ({syncedProducts.length})
+                                </p>
+                                <div className="border border-gray-100 divide-y divide-gray-100">
+                                  {syncedProducts.map((item, index) => (
+                                    <div key={index} className="flex justify-between items-center px-4 py-3 text-sm">
+                                      <span className="font-medium text-black">{item.product?.name || 'Product'}</span>
+                                      <span className="text-gray-600 tabular-nums">
+                                        ${item.priceDetails?.amount ? item.priceDetails.amount.toFixed(2) : 'N/A'}
+                                      </span>
+                                    </div>
+                                  ))}
                                 </div>
+                                <p className="text-sm text-gray-500 mt-4">Products are live in Stripe for checkout.</p>
                               </div>
                             )}
 
-                            {/* Debug Info */}
                             {process.env.NODE_ENV === 'development' && (
-                              <details className="mt-6">
-                                <summary className="cursor-pointer text-gray-700 font-medium">🔧 Debug Information</summary>
-                                <div className="mt-2 space-y-4">
+                              <details className="mt-8 border border-gray-100 p-4">
+                                <summary className="cursor-pointer text-[10px] font-semibold tracking-[0.14em] uppercase text-gray-500">
+                                  Debug
+                                </summary>
+                                <div className="mt-4 space-y-4">
                                   {syncProducts.length > 0 && (
                                     <div>
-                                      <h4 className="font-medium text-gray-900 mb-2">Raw Products Data:</h4>
-                                      <pre className="text-xs bg-gray-100 p-2 rounded overflow-auto max-h-40">
+                                      <p className="text-xs font-medium text-gray-700 mb-2">Printful payload</p>
+                                      <pre className="text-xs bg-gray-50 p-3 border border-gray-100 overflow-auto max-h-40">
                                         {JSON.stringify(syncProducts, null, 2)}
                                       </pre>
                                     </div>
                                   )}
                                   {syncedProducts.length > 0 && (
                                     <div>
-                                      <h4 className="font-medium text-gray-900 mb-2">Sync Results:</h4>
-                                      <pre className="text-xs bg-gray-100 p-2 rounded overflow-auto max-h-40">
+                                      <p className="text-xs font-medium text-gray-700 mb-2">Sync result</p>
+                                      <pre className="text-xs bg-gray-50 p-3 border border-gray-100 overflow-auto max-h-40">
                                         {JSON.stringify(syncedProducts, null, 2)}
                                       </pre>
                                     </div>
                                   )}
                                 </div>
                               </details>
-                                                         )}
-                           </>
-                         )}
+                            )}
+                          </>
+                        )}
 
                         {/* Orders Tab */}
                         {activeTab === 'orders' && (
                           <>
-                            <div className="mb-6">
-                              <h2 className="text-xl font-semibold text-black mb-4">Order Management</h2>
-                              <p className="text-gray-600 mb-4">
-                                View and manage customer orders and fulfillment status.
+                            <div className="mb-10">
+                              <p className={ADMIN_SECTION_TITLE}>Fulfillment</p>
+                              <h2 className={ADMIN_HEADING}>Orders</h2>
+                              <p className={ADMIN_LEAD}>
+                                Stripe checkout sessions and fulfillment status. Use this list to confirm payments and Printful handoff.
                               </p>
                             </div>
 
-                            {/* Orders Table */}
-                            <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+                            <div className={ADMIN_TABLE_WRAP}>
                               <div className="overflow-x-auto">
                                 <table className="w-full">
-                                  <thead className="bg-gray-50">
+                                  <thead>
                                     <tr>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Order ID
-                                      </th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Customer
-                                      </th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Total
-                                      </th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Status
-                                      </th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Date
-                                      </th>
-                                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                        Actions
-                                      </th>
+                                      <th className={ADMIN_TH}>Order</th>
+                                      <th className={ADMIN_TH}>Customer</th>
+                                      <th className={ADMIN_TH}>Total</th>
+                                      <th className={ADMIN_TH}>Status</th>
+                                      <th className={ADMIN_TH}>Date</th>
+                                      <th className={ADMIN_TH}>Actions</th>
                                     </tr>
                                   </thead>
-                                  <tbody className="bg-white divide-y divide-gray-200">
+                                  <tbody className="divide-y divide-gray-100">
                                     {ordersLoading ? (
-                                      // Loading skeletons
                                       [...Array(3)].map((_, index) => (
                                         <tr key={index} className="animate-pulse">
-                                          <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="h-4 bg-gray-200 rounded w-24"></div>
+                                          <td className="px-6 py-4">
+                                            <div className="h-4 bg-gray-100 w-20" />
                                           </td>
-                                          <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="h-4 bg-gray-200 rounded w-32"></div>
+                                          <td className="px-6 py-4">
+                                            <div className="h-4 bg-gray-100 w-32" />
                                           </td>
-                                          <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="h-4 bg-gray-200 rounded w-16"></div>
+                                          <td className="px-6 py-4">
+                                            <div className="h-4 bg-gray-100 w-14" />
                                           </td>
-                                          <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="h-6 bg-gray-200 rounded w-20"></div>
+                                          <td className="px-6 py-4">
+                                            <div className="h-6 bg-gray-100 w-24" />
                                           </td>
-                                          <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="h-4 bg-gray-200 rounded w-20"></div>
+                                          <td className="px-6 py-4">
+                                            <div className="h-4 bg-gray-100 w-20" />
                                           </td>
-                                          <td className="px-6 py-4 whitespace-nowrap">
-                                            <div className="h-6 bg-gray-200 rounded w-16"></div>
+                                          <td className="px-6 py-4">
+                                            <div className="h-4 bg-gray-100 w-16" />
                                           </td>
                                         </tr>
                                       ))
                                     ) : orders.length === 0 ? (
                                       <tr>
-                                        <td colSpan={6} className="px-6 py-12 text-center">
-                                          <div className="text-gray-500">
-                                            <div className="text-4xl mb-4">📦</div>
-                                            <p className="text-lg font-medium">No orders yet</p>
-                                            <p className="text-sm">Orders will appear here once customers make purchases.</p>
-                                          </div>
+                                        <td colSpan={6} className="px-6 py-16 text-center">
+                                          <p className="text-[10px] tracking-[0.2em] uppercase text-gray-400 font-medium mb-2">No orders</p>
+                                          <p className="text-sm text-gray-500">Purchases will show here after checkout completes.</p>
                                         </td>
                                       </tr>
                                     ) : (
                                       orders.map((order) => (
-                                        <tr key={order.id} className="hover:bg-gray-50">
-                                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                            {order.stripe_session_id.slice(-8)}
+                                        <tr key={order.id} className="hover:bg-gray-50/80">
+                                          <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-black">
+                                            …{order.stripe_session_id.slice(-8)}
                                           </td>
                                           <td className="px-6 py-4 whitespace-nowrap">
-                                            <div>
-                                              <div className="text-sm font-medium text-gray-900">
-                                                {order.customer_name || 'N/A'}
-                                              </div>
-                                              <div className="text-sm text-gray-500">
-                                                {order.customer_email}
-                                              </div>
+                                            <div className="text-sm font-semibold text-black tracking-tight">
+                                              {order.customer_name || '—'}
                                             </div>
+                                            <div className="text-xs text-gray-400">{order.customer_email}</div>
                                           </td>
-                                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                                          <td className="px-6 py-4 whitespace-nowrap text-sm text-black tabular-nums">
                                             ${order.total_amount.toFixed(2)}
                                           </td>
                                           <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                                              order.status === 'fulfilled' ? 'bg-green-100 text-green-800' :
-                                              order.status === 'processing' ? 'bg-blue-100 text-blue-800' :
-                                              order.status === 'paid' ? 'bg-yellow-100 text-yellow-800' :
-                                              'bg-gray-100 text-gray-800'
-                                            }`}>
+                                            <span className="inline-block border border-gray-200 px-2 py-1 text-[10px] font-semibold tracking-[0.1em] uppercase text-gray-700">
                                               {order.status}
                                             </span>
                                           </td>
-                                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                          <td className="px-6 py-4 whitespace-nowrap text-xs text-gray-500 tabular-nums">
                                             {new Date(order.created_at).toLocaleDateString()}
                                           </td>
-                                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                          <td className="px-6 py-4 whitespace-nowrap">
                                             <button
-                                              onClick={() => {/* TODO: View order details */}}
-                                              className="text-blue-600 hover:text-blue-900"
+                                              type="button"
+                                              onClick={() => {}}
+                                              className="text-[10px] font-semibold tracking-[0.12em] uppercase text-gray-400 hover:text-black transition-colors"
                                             >
-                                              View Details
+                                              Details
                                             </button>
                                           </td>
                                         </tr>
@@ -1505,25 +1517,25 @@ export default function AdminPage() {
 
       {/* Delete User Confirmation Modal */}
       {deleteUserModal.isOpen && deleteUserModal.user && (
-        <div className="fixed inset-0 backdrop-blur-md bg-black/20 flex items-center justify-center z-50 p-4">
-          <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-2xl max-w-md w-full border border-gray-200/50">
-            {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
-              <h2 className="text-xl font-semibold text-black">Delete User</h2>
+        <div className="fixed inset-0 backdrop-blur-md bg-black/20 flex items-center justify-center z-[70] p-4">
+          <div className="bg-white max-w-md w-full border border-gray-100 shadow-sm">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+              <h2 className="text-[10px] font-semibold tracking-[0.2em] uppercase text-gray-400">Delete user</h2>
               <button
+                type="button"
                 onClick={closeDeleteUserModal}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                className="p-1 text-gray-400 hover:text-black transition-colors"
+                aria-label="Close"
               >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
 
-            {/* Content */}
             <div className="p-6">
-              <div className="flex items-center mb-4">
-                <div className="flex-shrink-0 w-12 h-12 rounded-full overflow-hidden mr-4">
+              <div className="flex items-center mb-6">
+                <div className="flex-shrink-0 w-12 h-12 overflow-hidden mr-4 border border-gray-100 bg-gray-50">
                   {deleteUserModal.user.avatar_url ? (
                     <img
                       src={deleteUserModal.user.avatar_url}
@@ -1531,57 +1543,43 @@ export default function AdminPage() {
                       className="w-12 h-12 object-cover"
                     />
                   ) : (
-                    <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center">
-                      <span className="text-lg font-bold text-gray-600">
-                        {deleteUserModal.user.full_name.split(' ').map(n => n[0]).join('').toUpperCase()}
+                    <div className="w-12 h-12 flex items-center justify-center">
+                      <span className="text-sm font-black text-gray-400">
+                        {deleteUserModal.user.full_name.split(' ').map((n) => n[0]).join('').toUpperCase()}
                       </span>
                     </div>
                   )}
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    {deleteUserModal.user.full_name}
-                  </h3>
+                  <h3 className="text-base font-bold text-black tracking-tight">{deleteUserModal.user.full_name}</h3>
                   {deleteUserModal.user.username && (
-                    <p className="text-sm text-gray-500">@{deleteUserModal.user.username}</p>
+                    <p className="text-xs text-gray-400">@{deleteUserModal.user.username}</p>
                   )}
                 </div>
               </div>
 
-              <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-                <div className="flex">
-                  <div className="flex-shrink-0">
-                    <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div className="ml-3">
-                    <h3 className="text-sm font-medium text-red-800">
-                      Warning: This action cannot be undone
-                    </h3>
-                    <div className="mt-2 text-sm text-red-700">
-                      <p>
-                        This will permanently delete the user account and all associated data. 
-                        The user will no longer be able to access the system.
-                      </p>
-                    </div>
-                  </div>
-                </div>
+              <div className={ADMIN_ALERT_ERR}>
+                <p className="text-sm text-[#CD2E3A] font-medium mb-1">This cannot be undone</p>
+                <p className="text-xs text-gray-600 leading-relaxed">
+                  Permanently removes the account and associated data. The user will lose access immediately.
+                </p>
               </div>
 
-              <div className="flex space-x-3">
+              <div className="flex flex-col sm:flex-row gap-3">
                 <button
+                  type="button"
                   onClick={closeDeleteUserModal}
-                  className="flex-1 px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
+                  className={`${ADMIN_BTN_OUTLINE} flex-1`}
                 >
                   Cancel
                 </button>
                 <button
+                  type="button"
                   onClick={() => deleteUser(deleteUserModal.user!.id)}
                   disabled={deletingUser === deleteUserModal.user!.id}
-                  className="flex-1 px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className={`${ADMIN_BTN_DANGER} flex-1`}
                 >
-                  {deletingUser === deleteUserModal.user!.id ? 'Deleting...' : 'Delete User'}
+                  {deletingUser === deleteUserModal.user!.id ? 'Deleting…' : 'Delete user'}
                 </button>
               </div>
             </div>

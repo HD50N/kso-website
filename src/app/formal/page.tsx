@@ -3,7 +3,7 @@ import path from 'path';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import ScrollAnimation from '@/components/ScrollAnimation';
-import FormalGallery from './FormalGallery';
+import EventPhotoGallery from '@/components/EventPhotoGallery';
 
 const IMAGE_EXT = /\.(jpg|jpeg|png|webp|gif)$/i;
 
@@ -23,40 +23,48 @@ export default function FormalPage() {
   const photos = getFormalPhotos();
 
   return (
-    <div className="min-h-screen bg-[#fafafa]">
+    <div className="min-h-screen bg-white">
       <Navigation />
 
-      {/* Hero Section */}
-      <section className="relative bg-korean-gradient text-white overflow-hidden">
-        <div className="absolute inset-0 hero-pattern-bg opacity-[0.06]" aria-hidden="true" />
-        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20 text-center">
-          <ScrollAnimation>
-            <div className="inline-flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 rounded-full bg-white/15 backdrop-blur-sm border border-white/20 mb-6 sm:mb-8">
-              <span className="text-4xl sm:text-5xl" aria-hidden="true">🎩</span>
-            </div>
-            <h1 className="hero-title text-4xl sm:text-5xl md:text-6xl text-white mb-4 drop-shadow-sm">
-              KSO Formal
-            </h1>
-            <p className="text-lg sm:text-xl md:text-2xl text-white/90 font-body max-w-xl mx-auto mb-6">
-              Thank you for celebrating with us
-            </p>
-            <p className="text-sm sm:text-base text-white/80 font-body">
-              More photos or questions? Reach out to{' '}
-              <a
-                href="https://instagram.com/uchicagokso"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-white font-medium hover:underline underline-offset-2"
-              >
-                @uchicagokso
-              </a>{' '}
-              on Instagram
-            </p>
-          </ScrollAnimation>
+      {/* Hero */}
+      <section className="border-b border-gray-100 py-20 lg:py-28">
+        <div className="max-w-7xl mx-auto px-6 lg:px-16">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 lg:gap-24 items-start">
+            <ScrollAnimation>
+              <div>
+                <p className="text-[10px] tracking-[0.32em] uppercase text-gray-400 font-medium mb-10">
+                  Annual Event
+                </p>
+                <h1 className="text-[4.5rem] sm:text-[6rem] lg:text-[7.5rem] font-black text-black leading-[0.87] tracking-tighter">
+                  KSO<br />Formal
+                </h1>
+              </div>
+            </ScrollAnimation>
+            <ScrollAnimation>
+              <div className="lg:pt-20">
+                <div className="w-10 h-px bg-[#CD2E3A] mb-8" />
+                <p className="text-lg sm:text-xl text-gray-700 leading-relaxed font-light italic mb-6">
+                  &ldquo;Thank you for celebrating with us.&rdquo;
+                </p>
+                <p className="text-sm text-gray-500 leading-relaxed">
+                  More photos or questions? Reach out to{' '}
+                  <a
+                    href="https://www.instagram.com/uchicagokso?utm_source=ig_web_button_share_sheet&igsh=MWEzNTJibndqMGJ0eA=="
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-black font-medium underline underline-offset-2 hover:no-underline"
+                  >
+                    @uchicagokso
+                  </a>{' '}
+                  on Instagram.
+                </p>
+              </div>
+            </ScrollAnimation>
+          </div>
         </div>
       </section>
 
-      <FormalGallery photos={photos} />
+      <EventPhotoGallery photos={photos} emptyFolderHint="public/formal" />
 
       <Footer />
     </div>

@@ -1,6 +1,5 @@
 'use client';
 
-
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import ScrollAnimation from '@/components/ScrollAnimation';
@@ -38,79 +37,63 @@ export default function About() {
   const values = [
     {
       title: "Community",
-      description: "Building strong connections among Korean and Korean-American students",
-      icon: "🤝"
+      korean: "공동체",
+      description: "Building strong connections among Korean and Korean-American students"
     },
     {
       title: "Culture",
-      description: "Celebrating and sharing Korean heritage and traditions",
-      icon: "🇰🇷"
+      korean: "문화",
+      description: "Celebrating and sharing Korean heritage and traditions"
     },
     {
       title: "Sports",
-      description: "Participating in intramural sports including our Coed IM Soccer team",
-      icon: "⚽"
+      korean: "스포츠",
+      description: "Participating in intramural sports including our Coed IM Soccer team"
     },
     {
       title: "Social Events",
-      description: "Organizing social gatherings, food events, and cultural celebrations",
-      icon: "🍱"
+      korean: "사교 행사",
+      description: "Organizing social gatherings, food events, and cultural celebrations"
     }
   ];
 
+  const accomplishments = [
+    { label: 'Culture Shows', sub: 'Annual' },
+    { label: 'Soccer Team', sub: 'Coed IM' },
+    { label: 'AAPI Events', sub: 'Month' },
+    { label: 'Winter Formal', sub: 'Annual' },
+    { label: 'Social Gatherings', sub: 'Regular' },
+    { label: 'Korean Community', sub: 'Building' },
+  ];
+
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-white">
       <Navigation />
-      
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-white text-black py-16 sm:py-20 lg:py-24">
-        <div className="absolute inset-0 hero-pattern-bg opacity-[0.02]" aria-hidden="true" />
-        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <ScrollAnimation>
-            <h1 className="hero-title text-3xl sm:text-4xl md:text-5xl lg:text-6xl mb-4 sm:mb-6 animate-bounce-in text-black">About KSO</h1>
-          </ScrollAnimation>
-          <ScrollAnimation>
-            <p className="hero-subtitle text-lg sm:text-xl lg:text-2xl text-gray-700 px-4 animate-slide-in-up stagger-1">
-              University of Chicago Korean Students Organization
-            </p>
-          </ScrollAnimation>
-        </div>
-      </section>
 
-      {/* Horizontal separator line */}
-      <ScrollAnimation>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="border-t border-gray-300"></div>
-        </div>
-      </ScrollAnimation>
-
-      {/* Mission & Vision */}
-      <section className="section-padding bg-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
+      {/* ── Hero — editorial split ── */}
+      <section className="border-b border-gray-100 py-20 lg:py-28">
+        <div className="max-w-7xl mx-auto px-6 lg:px-16">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 lg:gap-24 items-start">
             <ScrollAnimation>
               <div>
-                <h2 className="section-title text-2xl sm:text-3xl text-black mb-4 sm:mb-6">Our Mission</h2>
-                <p className="font-body text-base sm:text-lg text-gray-700 mb-4 sm:mb-6">
-                  &ldquo;Our mission is to represent the Korean community and strengthen its voice on (and beyond) campus 
-                  and to bring together those who have a common interest in Korean culture through social activities and events.&rdquo;
+                <p className="text-[10px] tracking-[0.32em] uppercase text-gray-400 font-medium mb-1.5">
+                  University of Chicago · Est. 1976
                 </p>
-                <p className="font-body text-base sm:text-lg text-gray-700">
-                  KSO serves as the primary organization for Korean and Korean-American students at the University of Chicago, 
-                  providing a supportive community and cultural connection for all students interested in Korean culture.
-                </p>
+                <p className="text-[11px] text-gray-300 font-medium tracking-widest mb-10">한국 문화 동아리 · 시카고 대학교</p>
+                <h1 className="text-[4.5rem] sm:text-[6rem] lg:text-[7.5rem] font-black text-black leading-[0.87] tracking-tighter">
+                  About<br />KSO
+                </h1>
+                <p className="text-[#CD2E3A] text-lg font-medium mt-4 tracking-wider">소개</p>
               </div>
             </ScrollAnimation>
             <ScrollAnimation>
-              <div>
-                <h2 className="section-title text-2xl sm:text-3xl text-black mb-4 sm:mb-6">What is KSO?</h2>
-                <p className="font-body text-base sm:text-lg text-gray-700 mb-4 sm:mb-6">
-                  KSO is the University of Chicago's Korean Students Organization, dedicated to bringing together 
-                  students who have a common interest in Korean culture through social activities and events.
+              <div className="lg:pt-20">
+                <div className="w-10 h-px bg-[#CD2E3A] mb-8" />
+                <p className="text-lg sm:text-xl text-gray-700 leading-relaxed font-light italic mb-6">
+                  &ldquo;Our mission is to represent the Korean community and strengthen its voice on (and beyond) campus and to bring together those who have a common interest in Korean culture through social activities and events.&rdquo;
                 </p>
-                <p className="font-body text-base sm:text-lg text-gray-700">
-                  We organize cultural events, social gatherings, and community activities that celebrate Korean 
-                  heritage and create meaningful connections among students.
+                <p className="text-sm text-gray-500 leading-relaxed">
+                  KSO serves as the primary organization for Korean and Korean-American students at the University of Chicago, providing a supportive community and cultural connection for all students interested in Korean culture.
                 </p>
               </div>
             </ScrollAnimation>
@@ -118,48 +101,43 @@ export default function About() {
         </div>
       </section>
 
-      {/* Horizontal separator line */}
-      <ScrollAnimation>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="border-t border-gray-300"></div>
-        </div>
-      </ScrollAnimation>
-
-      {/* Our Values */}
-      <section className="section-padding bg-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ScrollAnimation className="text-center mb-8 sm:mb-12">
-            <h2 className="section-title text-2xl sm:text-3xl md:text-4xl text-black mb-3 sm:mb-4">Our Values</h2>
-            <p className="font-body text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto px-4">
-              The core principles that guide our community and activities
-            </p>
+      {/* ── Values ── */}
+      <section className="py-20 lg:py-24 px-6 lg:px-16 border-b border-gray-100">
+        <div className="max-w-7xl mx-auto">
+          <ScrollAnimation>
+            <div className="mb-12">
+              <p className="text-[10px] tracking-[0.28em] uppercase text-gray-400 font-medium mb-2">가치관 · Principles</p>
+              <h2 className="text-3xl sm:text-4xl font-black text-black tracking-tight">Our Values</h2>
+            </div>
           </ScrollAnimation>
-          
-          {/* Mobile: Compact Cards */}
-          <div className="block md:hidden space-y-3">
+
+          {/* Mobile: horizontal scroll pills */}
+          <div className="flex gap-2.5 overflow-x-auto pb-2 md:hidden scrollbar-hide">
             {values.map((value, index) => (
-              <ScrollAnimation key={index} className={`stagger-${index + 1}`}>
-                <div className="modern-card p-4 hover-lift shadow-lg">
-                  <div className="flex items-center">
-                    <div className="text-2xl mr-4 animate-float-slow hover-rotate">{value.icon}</div>
-                    <div className="flex-1">
-                      <h3 className="text-base font-semibold text-black mb-1">{value.title}</h3>
-                      <p className="text-sm text-gray-600 line-clamp-2">{value.description}</p>
-                    </div>
+              <ScrollAnimation key={index} className="flex-shrink-0">
+                <div className="border border-gray-200 px-5 py-4 min-w-[200px] max-w-[220px]">
+                  <div className="flex items-baseline gap-2 mb-1.5">
+                    <div className="text-xs font-black text-black tracking-tight">{value.title}</div>
+                    <div className="text-[10px] text-[#CD2E3A] font-medium">{value.korean}</div>
                   </div>
+                  <div className="text-xs text-gray-500 leading-relaxed">{value.description}</div>
                 </div>
               </ScrollAnimation>
             ))}
           </div>
 
-          {/* Tablet/Desktop: Grid Layout */}
-          <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-6 lg:gap-8">
+          {/* Desktop: 2×2 bordered grid */}
+          <div className="hidden md:grid md:grid-cols-2 border border-gray-100">
             {values.map((value, index) => (
               <ScrollAnimation key={index} className={`stagger-${index + 1}`}>
-                <div className="text-center modern-card p-6 hover-lift shadow-lg h-full flex flex-col">
-                  <div className="text-3xl sm:text-4xl mb-3 sm:mb-4 animate-float-slow hover-rotate flex-shrink-0">{value.icon}</div>
-                  <h3 className="text-lg sm:text-xl font-semibold text-black mb-2 sm:mb-3 flex-shrink-0">{value.title}</h3>
-                  <p className="text-sm sm:text-base text-gray-600 flex-1">{value.description}</p>
+                <div
+                  className={`px-8 py-8 ${index % 2 === 0 ? 'border-r border-gray-100' : ''} ${index < 2 ? 'border-b border-gray-100' : ''}`}
+                >
+                  <div className="flex items-baseline gap-3 mb-2">
+                    <h3 className="text-base font-black text-black tracking-tight">{value.title}</h3>
+                    <span className="text-[11px] text-[#CD2E3A] font-medium">{value.korean}</span>
+                  </div>
+                  <p className="text-sm text-gray-500 leading-relaxed">{value.description}</p>
                 </div>
               </ScrollAnimation>
             ))}
@@ -167,55 +145,33 @@ export default function About() {
         </div>
       </section>
 
-      {/* Horizontal separator line */}
-      <ScrollAnimation>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="border-t border-gray-300"></div>
-        </div>
-      </ScrollAnimation>
-
-      {/* History Timeline */}
-      <section className="section-padding bg-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ScrollAnimation className="text-center mb-8 sm:mb-12">
-            <h2 className="section-title text-2xl sm:text-3xl md:text-4xl text-black mb-3 sm:mb-4">Our History</h2>
-            <p className="font-body text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto px-4">
-              Key milestones and achievements in our journey
-            </p>
+      {/* ── History Timeline ── */}
+      <section className="py-20 lg:py-24 px-6 lg:px-16 border-b border-gray-100">
+        <div className="max-w-7xl mx-auto">
+          <ScrollAnimation>
+            <div className="mb-14">
+              <p className="text-[10px] tracking-[0.28em] uppercase text-gray-400 font-medium mb-2">역사 · History</p>
+              <h2 className="text-3xl sm:text-4xl font-black text-black tracking-tight">Our History</h2>
+            </div>
           </ScrollAnimation>
-          
-          {/* Mobile: Compact List */}
-          <div className="block md:hidden space-y-3">
-            {milestones.map((milestone, index) => (
-              <ScrollAnimation key={index} className={`stagger-${index + 1}`}>
-                <div className="modern-card p-4 hover-lift shadow-lg">
-                  <div className="flex items-start">
-                    <div className="bg-black text-white rounded-full w-12 h-12 flex items-center justify-center font-bold text-sm mr-4 flex-shrink-0 animate-pulse-slow hover-scale">
-                      {milestone.year}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-base font-semibold text-black mb-1 line-clamp-1">{milestone.title}</h3>
-                      <p className="text-sm text-gray-600 line-clamp-2">{milestone.description}</p>
-                    </div>
-                  </div>
-                </div>
-              </ScrollAnimation>
-            ))}
-          </div>
 
-          {/* Tablet/Desktop: Timeline Layout */}
-          <div className="hidden md:block space-y-6 lg:space-y-8">
+          <div className="divide-y divide-gray-100">
             {milestones.map((milestone, index) => (
               <ScrollAnimation key={index} className={`stagger-${index + 1}`}>
-                <div className="flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-6 modern-card p-6 hover-lift shadow-lg">
-                  <div className="flex-shrink-0">
-                    <div className="bg-black text-white rounded-full w-14 md:w-16 h-14 md:h-16 flex items-center justify-center font-bold text-base md:text-lg animate-pulse-slow hover-scale">
+                <div className="flex items-start gap-8 sm:gap-16 py-7 sm:py-8 -mx-2 px-2 hover:bg-gray-50 transition-colors">
+                  <div className="flex-shrink-0 w-14 sm:w-20 pt-0.5">
+                    <span className="text-[#CD2E3A] text-[10px] tracking-[0.14em] uppercase font-semibold">
                       {milestone.year}
-                    </div>
+                    </span>
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-lg md:text-xl font-semibold text-black mb-2">{milestone.title}</h3>
-                    <p className="text-sm md:text-base text-gray-600">{milestone.description}</p>
+                    <div className="flex items-center gap-4 mb-2">
+                      <span className="text-gray-200 text-[10px] font-mono tabular-nums">
+                        {String(index + 1).padStart(2, '0')}
+                      </span>
+                      <h3 className="text-base sm:text-lg font-bold text-black tracking-tight">{milestone.title}</h3>
+                    </div>
+                    <p className="text-sm text-gray-500 leading-relaxed max-w-xl">{milestone.description}</p>
                   </div>
                 </div>
               </ScrollAnimation>
@@ -224,113 +180,88 @@ export default function About() {
         </div>
       </section>
 
-      {/* Horizontal separator line */}
-      <ScrollAnimation>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="border-t border-gray-300"></div>
-        </div>
-      </ScrollAnimation>
-
-      {/* Accomplishments */}
-      <section className="section-padding bg-white">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <ScrollAnimation className="text-center mb-8 sm:mb-12">
-            <h2 className="section-title text-2xl sm:text-3xl md:text-4xl text-black mb-3 sm:mb-4">Past Accomplishments</h2>
-            <p className="font-body text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto px-4">
-              Celebrating our achievements and community impact
-            </p>
+      {/* ── Accomplishments ── */}
+      <section className="py-20 lg:py-24 px-6 lg:px-16 border-b border-gray-100">
+        <div className="max-w-7xl mx-auto">
+          <ScrollAnimation>
+            <div className="mb-14">
+              <p className="text-[10px] tracking-[0.28em] uppercase text-gray-400 font-medium mb-2">Achievements</p>
+              <h2 className="text-3xl sm:text-4xl font-black text-black tracking-tight">Past Accomplishments</h2>
+            </div>
           </ScrollAnimation>
-          
-          {/* Mobile: Horizontal Scroll */}
-          <div className="block md:hidden">
-            <div className="flex space-x-4 overflow-x-auto pb-2 scrollbar-hide">
-              {[
-                { number: "Annual", label: "Culture Shows" },
-                { number: "Coed IM", label: "Soccer Team" },
-                { number: "AAPI", label: "Month Events" },
-                { number: "Winter", label: "Formal" },
-                { number: "Social", label: "Gatherings" },
-                { number: "Korean", label: "Community" }
-              ].map((stat, index) => (
-                <ScrollAnimation key={index} className={`stagger-${index + 1} flex-shrink-0`}>
-                  <div className="text-center min-w-[120px]">
-                    <div className="modern-card rounded-lg p-4 hover-lift shadow-lg">
-                      <div className="text-2xl font-bold mb-1 text-black">{stat.number}</div>
-                      <div className="text-gray-600 text-xs">{stat.label}</div>
-                    </div>
-                  </div>
-                </ScrollAnimation>
+          <ScrollAnimation>
+            <div className="grid grid-cols-2 sm:grid-cols-3 border border-gray-100 divide-x divide-y divide-gray-100">
+              {accomplishments.map((stat, i) => (
+                <div key={i} className="text-center py-9 px-4">
+                  <div className="text-sm sm:text-base font-black text-black tracking-tight">{stat.label}</div>
+                  <div className="text-[10px] text-gray-400 tracking-[0.16em] uppercase font-medium mt-1.5">{stat.sub}</div>
+                </div>
               ))}
             </div>
-          </div>
-
-          {/* Tablet/Desktop: Grid Layout */}
-          <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-            {[
-              { number: "Annual", label: "Culture Shows" },
-              { number: "Coed IM", label: "Soccer Team" },
-              { number: "AAPI", label: "Month Events" },
-              { number: "Winter", label: "Formal" },
-              { number: "Social", label: "Gatherings" },
-              { number: "Korean", label: "Community" }
-            ].map((stat, index) => (
-              <ScrollAnimation key={index} className={`stagger-${index + 1}`}>
-                <div className="text-center modern-card p-6 hover-lift shadow-lg">
-                  <div className="text-2xl sm:text-3xl font-bold mb-2 text-black">{stat.number}</div>
-                  <div className="text-gray-600 text-sm sm:text-base">{stat.label}</div>
-                </div>
-              </ScrollAnimation>
-            ))}
-          </div>
+          </ScrollAnimation>
         </div>
       </section>
 
-      {/* Horizontal separator line */}
-      <ScrollAnimation>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="border-t border-gray-300"></div>
-        </div>
-      </ScrollAnimation>
-
-      {/* Get Involved */}
-      <section className="section-padding bg-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <ScrollAnimation>
-            <h2 className="section-title text-2xl sm:text-3xl md:text-4xl text-black mb-4 sm:mb-6">Join Our Community</h2>
-            <p className="font-body text-base sm:text-lg md:text-xl text-gray-600 mb-6 sm:mb-8 max-w-2xl mx-auto px-4">
-              Whether you're Korean, Korean-American, or simply interested in Korean culture, 
-              there's a place for you in KSO. Join us in celebrating culture, building community, 
-              and creating lasting friendships.
-            </p>
-          </ScrollAnimation>
-          <ScrollAnimation>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a 
-                href="mailto:ksouchicago@gmail.com"
-                className="modern-button bg-black text-white px-8 py-3 rounded-xl font-semibold hover:bg-gray-800 hover-lift shadow-lg"
-              >
-                Contact Us
-              </a>
-              <a 
-                href="https://linkedin.com/company/uchicago-kso"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="modern-button bg-blue-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-blue-700 hover-lift shadow-lg"
-              >
-                Connect on LinkedIn
-              </a>
-              <Link 
-                href="/culture-show"
-                className="modern-button border-2 border-black text-black px-8 py-3 rounded-xl font-semibold hover:bg-black hover:text-white hover-lift"
-              >
-                Attend Culture Show
-              </Link>
-            </div>
-          </ScrollAnimation>
+      {/* ── Get Involved ── */}
+      <section className="py-24 lg:py-32 px-6 lg:px-16">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-start">
+            <ScrollAnimation>
+              <p className="text-[10px] tracking-[0.28em] uppercase text-gray-400 font-medium mb-4">함께하기 · Join Us</p>
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-black text-black tracking-tight mb-2 leading-none">
+                Join Our<br />Community
+              </h2>
+              <p className="text-[#CD2E3A] text-base font-medium mb-6 tracking-wider">우리 공동체에 함께하세요</p>
+              <p className="text-gray-500 text-base leading-relaxed max-w-md">
+                Whether you&apos;re Korean, Korean-American, or simply interested in Korean culture,
+                there&apos;s a place for you in KSO. Join us in celebrating culture, building community,
+                and creating lasting friendships.
+              </p>
+            </ScrollAnimation>
+            <ScrollAnimation>
+              <div className="space-y-2.5">
+                <a
+                  href="mailto:ksouchicago@gmail.com"
+                  className="flex items-center justify-between w-full border border-gray-200 px-6 py-5 hover:border-black hover:bg-black group transition-colors duration-150"
+                >
+                  <span className="text-sm font-semibold tracking-tight text-black group-hover:text-white transition-colors">
+                    Contact Us
+                  </span>
+                  <svg className="w-4 h-4 text-gray-300 group-hover:text-white flex-shrink-0 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 17L17 7M17 7H7M17 7v10" />
+                  </svg>
+                </a>
+                <a
+                  href="https://linkedin.com/company/uchicago-kso"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-between w-full border border-gray-200 px-6 py-5 hover:border-black hover:bg-black group transition-colors duration-150"
+                >
+                  <span className="text-sm font-semibold tracking-tight text-black group-hover:text-white transition-colors">
+                    Connect on LinkedIn
+                  </span>
+                  <svg className="w-4 h-4 text-gray-300 group-hover:text-white flex-shrink-0 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 17L17 7M17 7H7M17 7v10" />
+                  </svg>
+                </a>
+                <Link
+                  href="/culture-show"
+                  className="flex items-center justify-between w-full bg-[#CD2E3A] px-6 py-5 group hover:bg-[#b02633] transition-colors duration-150"
+                >
+                  <span className="text-sm font-semibold tracking-tight text-white">
+                    Attend Culture Show
+                  </span>
+                  <svg className="w-4 h-4 text-white opacity-70 group-hover:opacity-100 flex-shrink-0 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 17L17 7M17 7H7M17 7v10" />
+                  </svg>
+                </Link>
+              </div>
+            </ScrollAnimation>
+          </div>
         </div>
       </section>
 
       <Footer />
     </div>
   );
-} 
+}

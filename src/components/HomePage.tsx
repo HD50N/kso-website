@@ -4,406 +4,416 @@ import { useState, useEffect } from 'react';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import ScrollAnimation from '@/components/ScrollAnimation';
-import AnimatedFlag from '@/components/AnimatedFlag';
-import AnimatedFan from '@/components/AnimatedFan';
-import AnimatedMask from '@/components/AnimatedMask';
-import AnimatedPalace from '@/components/AnimatedPalace';
-import PhotoCollage from '@/components/PhotoCollage';
 import Link from 'next/link';
-import Button from '@/components/ui/Button';
+import PhotoDownloadButton from '@/components/PhotoDownloadButton';
 
 type Photo = { src: string; alt: string };
 
 export default function HomePage({ homepagePhotos }: { homepagePhotos: Photo[] }) {
-  const [currentAnimation, setCurrentAnimation] = useState('flag');
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentAnimation(prev => {
-        if (prev === 'flag') return 'fan';
-        if (prev === 'fan') return 'mask';
-        if (prev === 'mask') return 'palace';
-        return 'flag';
-      });
-    }, 8000);
-
-    return () => clearInterval(interval);
-  }, []);
 
   const upcomingEvents = [
     {
       title: "General Meeting",
-      date: "Week 1-2",
+      date: "Week 1–2",
       description: "Join us for our general meeting to kick off winter quarter and learn about upcoming events.",
-      image: "/placeholder-rso-fair.jpg"
     },
     {
       title: "Family Event",
-      date: "Week 3-4",
+      date: "Week 3–4",
       description: "A special event for KSO families to bond and celebrate our community together.",
-      image: "/placeholder-family-event.jpg"
     },
     {
       title: "Winter Formal",
       date: "Week 5",
-      description: "Join us for our annual Winter Formal! A night of celebration, dancing, and community.",
-      image: "/placeholder-kso-phi-delt.jpg"
+      description: "Join us for our annual Winter Formal — a night of celebration, dancing, and community.",
     },
     {
       title: "TBD",
       date: "Week 5",
       description: "Details to be announced.",
-      image: "/placeholder-welcome-dinner.jpg"
     },
     {
       title: "Fundraiser",
-      date: "Week 6-7",
+      date: "Week 6–7",
       description: "Support KSO through our fundraising event. Details to be announced.",
-      image: "/placeholder-fundraiser.jpg"
     },
   ];
 
   const socialLinks = [
-    { name: 'Instagram', href: 'https://www.instagram.com/uchicagokso?utm_source=ig_web_button_share_sheet&igsh=MWEzNTJibndqMGJ0eA==', icon: (<svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>) },
-    { name: 'Facebook', href: 'https://www.facebook.com/share/g/16cdxUAiLv/', icon: (<svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>) },
-    { name: 'LinkedIn', href: 'https://linkedin.com/company/uchicago-kso', icon: (<svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>) },
-    { name: 'Email', href: 'mailto:ksouchicago@gmail.com', icon: (<svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 4.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>) }
+    { name: 'Instagram', korean: '인스타그램', href: 'https://www.instagram.com/uchicagokso?utm_source=ig_web_button_share_sheet&igsh=MWEzNTJibndqMGJ0eA==' },
+    { name: 'Facebook', korean: '페이스북', href: 'https://www.facebook.com/share/g/16cdxUAiLv/' },
+    { name: 'LinkedIn', korean: '링크드인', href: 'https://linkedin.com/company/uchicago-kso' },
+    { name: 'Email', korean: '이메일', href: 'mailto:ksouchicago@gmail.com' },
   ];
 
-  return (
-    <div className="min-h-screen">
-      <Navigation />
-      <div className="w-full bg-korean-gradient text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex items-center justify-between">
-          <div className="text-xs sm:text-sm font-body-bold tracking-wide">
-            Perform at Culture show!
-          </div>
-          <Link href="/applications" className="hidden sm:block">
-            <Button size="sm" variant="secondary" className="!bg-white !text-black !border-0">
-              Apply now
-            </Button>
-          </Link>
-        </div>
-      </div>
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
 
-      {/* Hero Section */}
-      <section className="relative overflow-hidden min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-[#fef2f2] via-[#f8f9fa] to-white">
-        <div className="absolute inset-0 hero-pattern-bg opacity-[0.02]" aria-hidden="true" />
-        <div className="absolute inset-0 bg-korean-gradient opacity-10" />
-        <div className="pointer-events-none absolute -top-20 -right-20 w-80 h-80 rounded-full bg-korean-red opacity-10 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-24 -left-24 w-96 h-96 rounded-full bg-korean-blue opacity-10 blur-3xl" />
-        <div className="relative max-w-7xl mx-auto py-8 sm:py-12 lg:py-16">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-            <div className="text-center lg:text-left order-2 lg:order-1">
-              <ScrollAnimation>
-                <h1 className="hero-title text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl 2xl:text-7xl mb-4 sm:mb-6 animate-bounce-in text-black leading-tight">
-                  Korean Students Organization
-                </h1>
-              </ScrollAnimation>
-              <ScrollAnimation>
-                <p className="hero-subtitle text-base sm:text-lg md:text-xl lg:text-2xl xl:text-3xl mb-2 sm:mb-8 text-gray-700 animate-slide-in-up stagger-1">
-                  University of Chicago
-                </p>
-              </ScrollAnimation>
-              <ScrollAnimation className="flex justify-center lg:hidden mb-0">
-                <div className="relative w-80 h-80 mx-auto">
-                  <div className="relative w-full h-full flex items-center justify-center">
-                    {['flag', 'fan', 'mask', 'palace'].map((key) => (
-                      <div key={key} className={`transition-all duration-1500 ease-in-out ${currentAnimation === key ? 'opacity-100 transform scale-100' : 'opacity-0 transform scale-95 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'}`}>
-                        {key === 'flag' && <AnimatedFlag />}
-                        {key === 'fan' && <AnimatedFan />}
-                        {key === 'mask' && <AnimatedMask />}
-                        {key === 'palace' && <AnimatedPalace />}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </ScrollAnimation>
-              <ScrollAnimation>
-                <p className="font-body text-sm sm:text-base md:text-lg lg:text-xl xl:text-2xl mb-8 sm:mb-12 max-w-2xl sm:max-w-3xl lg:max-w-4xl mx-auto lg:mx-0 text-gray-600 animate-fade-in stagger-2 px-4 lg:px-0 leading-relaxed">
-                  Representing the Korean community and strengthening its voice on campus and beyond
-                </p>
-              </ScrollAnimation>
-              <ScrollAnimation>
-                <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start animate-scale-in stagger-3 px-4 lg:px-0">
-                  <Link href="#winter-events">
-                    <Button size="lg" variant="primary" className="shadow-lg animate-float-slow">See Events</Button>
-                  </Link>
-                </div>
-              </ScrollAnimation>
+  useEffect(() => {
+    if (lightboxIndex === null) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setLightboxIndex(null);
+      if (e.key === 'ArrowLeft')
+        setLightboxIndex((i) => (i === null ? null : (i - 1 + homepagePhotos.length) % homepagePhotos.length));
+      if (e.key === 'ArrowRight')
+        setLightboxIndex((i) => (i === null ? null : (i + 1) % homepagePhotos.length));
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [lightboxIndex, homepagePhotos.length]);
+
+  return (
+    <div className="min-h-screen bg-white">
+      <Navigation />
+
+      {/* ── Hero ── */}
+      <section className="relative min-h-screen flex items-center border-b border-gray-100 overflow-hidden">
+        {/* Bold red accent column — desktop only */}
+        <div className="hidden lg:block absolute right-0 top-0 h-full w-[28%] bg-[#CD2E3A] overflow-hidden">
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-10 select-none pointer-events-none">
+            {/* Taegeuk ghost */}
+            <svg viewBox="0 0 100 100" className="w-44 h-44 opacity-[0.18]" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <g transform="rotate(18 50 50)">
+                <g transform="translate(100 0) scale(-1 1)">
+                  <circle cx="50" cy="50" r="49" fill="white"/>
+                  <g transform="rotate(-90 50 50)">
+                    <path d="M50,1 A49,49 0 0,0 50,99 A24.5,24.5 0 0,1 50,50 A24.5,24.5 0 0,0 50,1 Z" fill="#002060"/>
+                  </g>
+                </g>
+              </g>
+            </svg>
+            {/* Korean flag trigrams: ☰ ☵ / ☲ ☷ */}
+            <div className="grid grid-cols-2 gap-5 opacity-[0.22]">
+              <span className="text-white text-3xl text-center leading-none">☰</span>
+              <span className="text-white text-3xl text-center leading-none">☵</span>
+              <span className="text-white text-3xl text-center leading-none">☲</span>
+              <span className="text-white text-3xl text-center leading-none">☷</span>
             </div>
-            <ScrollAnimation className="hidden lg:flex lg:justify-end order-1 lg:order-2">
-              <div className="relative w-96 h-96">
-                <div className="relative w-full h-full flex items-center justify-center">
-                  {['flag', 'fan', 'mask', 'palace'].map((key) => (
-                    <div key={key} className={`transition-all duration-1500 ease-in-out ${currentAnimation === key ? 'opacity-100 transform scale-100' : 'opacity-0 transform scale-95 absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2'}`}>
-                      {key === 'flag' && <AnimatedFlag />}
-                      {key === 'fan' && <AnimatedFan />}
-                      {key === 'mask' && <AnimatedMask />}
-                      {key === 'palace' && <AnimatedPalace />}
-                    </div>
-                  ))}
-                </div>
+            <p className="text-white/20 text-[9px] tracking-[0.3em] uppercase font-medium">한국 문화 동아리</p>
+          </div>
+        </div>
+
+        <div className="relative max-w-7xl mx-auto px-6 lg:px-16 w-full py-24 lg:py-0">
+          <div className="lg:w-[68%]">
+            <ScrollAnimation>
+              <div className="mb-10 lg:mb-14">
+                <p className="text-[10px] tracking-[0.32em] uppercase text-gray-400 font-medium mb-1.5">
+                  University of Chicago · Est. 1976
+                </p>
+                <p className="text-[11px] text-gray-300 font-medium tracking-widest">한국 문화 동아리 · 시카고 대학교</p>
               </div>
+            </ScrollAnimation>
+            <ScrollAnimation>
+              <h1 className="text-[4rem] sm:text-[6rem] lg:text-[6rem] xl:text-[7.5rem] font-black text-black leading-[0.87] tracking-tighter mb-10 lg:mb-14">
+                Korean<br />Students<br />Organization
+              </h1>
+            </ScrollAnimation>
+            <ScrollAnimation>
+              <p className="text-gray-500 text-base sm:text-lg max-w-md leading-relaxed mb-10 lg:mb-14">
+                Representing the Korean community and strengthening its voice on campus and beyond.
+              </p>
+            </ScrollAnimation>
+            <ScrollAnimation>
+              <Link href="#winter-events">
+                <span className="inline-block border border-black text-black text-[10px] tracking-[0.22em] uppercase font-semibold px-8 py-4 hover:bg-black hover:text-white transition-colors cursor-pointer">
+                  Explore Events
+                </span>
+              </Link>
             </ScrollAnimation>
           </div>
         </div>
       </section>
 
-      <div className="h-24 bg-gradient-to-b from-white via-white to-white" />
-      <ScrollAnimation>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="border-t border-gray-300" />
-        </div>
-      </ScrollAnimation>
-
-      {/* Formal Highlights */}
+      {/* ── Formal Highlights ── */}
       {homepagePhotos.length > 0 && (
-        <>
-          <section className="section-padding bg-[#fafafa] px-4 sm:px-6 lg:px-8" id="formal-highlights">
-            <div className="max-w-7xl mx-auto">
-              <ScrollAnimation className="text-center mb-8 sm:mb-12">
-                <h2 className="section-title text-xl sm:text-2xl md:text-3xl lg:text-4xl text-black mb-3 sm:mb-4">
-                  Formal Highlights
-                </h2>
-                <p className="font-body text-sm sm:text-base text-gray-600 max-w-xl mx-auto">
-                  From KSO Formal
-                </p>
-              </ScrollAnimation>
-              <ScrollAnimation>
-                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 lg:gap-4 auto-rows-[minmax(140px,1fr)]">
-                  {homepagePhotos.map((photo, index) => (
-                    <div
-                      key={photo.src}
-                      className={`relative rounded-xl sm:rounded-2xl overflow-hidden bg-gray-200 shadow-md hover:shadow-xl transition-all duration-300 group ${
-                        index === 0
-                          ? 'col-span-2 row-span-2 min-h-[200px] sm:min-h-[240px] lg:min-h-[280px]'
-                          : 'aspect-[4/3] min-h-[120px]'
-                      }`}
+        <section className="py-20 lg:py-24 px-6 lg:px-16 border-b border-gray-100" id="formal-highlights">
+          <div className="max-w-7xl mx-auto">
+            <ScrollAnimation>
+              <div className="flex items-end justify-between mb-10">
+                <div>
+                  <p className="text-[10px] tracking-[0.28em] uppercase text-gray-400 font-medium mb-2">Gallery</p>
+                  <h2 className="text-3xl sm:text-4xl font-black text-black tracking-tight">2025–2026 Highlights</h2>
+                </div>
+                <div className="hidden sm:flex items-center gap-5">
+                  <Link
+                    href="/formal"
+                    className="text-[10px] tracking-[0.18em] uppercase font-semibold text-gray-400 hover:text-black transition-colors"
+                  >
+                    Formal →
+                  </Link>
+                  <Link
+                    href="/culture-show"
+                    className="text-[10px] tracking-[0.18em] uppercase font-semibold text-gray-400 hover:text-black transition-colors"
+                  >
+                    Culture Show →
+                  </Link>
+                </div>
+              </div>
+            </ScrollAnimation>
+            <ScrollAnimation>
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1.5 sm:gap-2 auto-rows-[minmax(140px,1fr)]">
+                {homepagePhotos.map((photo, index) => (
+                  <div
+                    key={photo.src}
+                    className={`relative overflow-hidden bg-gray-100 group ${
+                      index === 0
+                        ? 'col-span-2 row-span-2 min-h-[200px] sm:min-h-[280px]'
+                        : 'aspect-[4/3]'
+                    }`}
+                  >
+                    <button
+                      type="button"
+                      onClick={() => setLightboxIndex(index)}
+                      className="absolute inset-0 z-0 focus:outline-none cursor-zoom-in"
+                      aria-label={`View ${photo.alt} photo ${index + 1}`}
                     >
                       <img
                         src={photo.src}
                         alt={photo.alt}
-                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       />
-                    </div>
-                  ))}
-                </div>
-                <div className="text-center mt-8">
-                  <Link
-                    href="/formal"
-                    className="inline-flex items-center gap-2 text-black font-medium hover:underline underline-offset-2"
-                  >
-                    See more from KSO Formal
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-                  </Link>
-                </div>
-              </ScrollAnimation>
-            </div>
-          </section>
-          <ScrollAnimation>
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-              <div className="border-t border-gray-300" />
-            </div>
-          </ScrollAnimation>
-        </>
-      )}
-
-      {/* Upcoming Events – Timeline */}
-      <section id="winter-events" className="section-padding px-6 sm:px-6 lg:px-8 p-4 sm:p-0">
-        <div className="max-w-sm sm:max-w-7xl mx-auto">
-          <ScrollAnimation className="text-center mb-8 sm:mb-12 lg:mb-16">
-            <h2 className="section-title text-xl sm:text-2xl md:text-3xl lg:text-4xl text-black mb-3 sm:mb-4">Winter 2025-2026</h2>
-            <p className="font-body text-xs sm:text-sm md:text-base lg:text-lg xl:text-xl text-gray-600 max-w-2xl mx-auto px-4">Check out our latest events and stay connected with the Korean community</p>
-          </ScrollAnimation>
-          <div className="block sm:hidden">
-            <div className="relative">
-              <div className="absolute left-6 top-0 bottom-0 w-0.5 bg-gray-300" />
-              {upcomingEvents.map((event, index) => (
-                <ScrollAnimation key={index} className={`stagger-${index + 1} relative mb-8`}>
-                  <div className="flex items-start">
-                    <div className="flex-shrink-0 w-12 h-12 bg-black rounded-full flex items-center justify-center mr-4 relative z-10 shadow-lg">
-                      <div className="text-center px-1">
-                        <span className="text-white text-xs font-bold block leading-tight">{event.date.split(' ').slice(-1)[0]}</span>
-                      </div>
-                    </div>
-                    <div className="flex-1 bg-white rounded-lg shadow-lg p-3 sm:p-4 hover-lift border-l-4 border-black">
-                      <h3 className="text-base sm:text-lg font-bold text-black mb-2">{event.title}</h3>
-                      <p className="text-xs sm:text-sm text-gray-600 line-clamp-3">{event.description}</p>
+                      <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
+                    </button>
+                    <div className="absolute bottom-2 right-2 z-10 opacity-0 pointer-events-none transition-opacity group-hover:opacity-100 group-hover:pointer-events-auto">
+                      <PhotoDownloadButton imageUrl={photo.src} tone="onLight" size="sm" />
                     </div>
                   </div>
-                </ScrollAnimation>
-              ))}
-            </div>
-          </div>
-          <div className="hidden sm:block">
-            <div className="relative">
-              <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-gray-300 transform -translate-x-1/2" />
-              <div className="space-y-12">
-                {upcomingEvents.map((event, index) => (
-                  <ScrollAnimation key={index} className={`stagger-${index + 1} relative`}>
-                    <div className="flex items-center">
-                      <div className="flex-1 pr-8 text-right">
-                        <div className={`bg-white rounded-lg shadow-lg p-6 hover-lift border-l-4 border-black inline-block w-full max-w-md h-32 flex flex-col justify-center ${index % 2 === 0 ? 'block' : 'invisible'}`}>
-                          <h3 className="text-xl font-bold text-black mb-2">{event.title}</h3>
-                          <p className="text-sm text-gray-600 line-clamp-3">{event.description}</p>
-                        </div>
-                      </div>
-                      <div className="flex-shrink-0 w-16 h-16 bg-black rounded-full flex items-center justify-center relative z-10 shadow-lg" style={{ marginLeft: '-8px', marginRight: '-8px' }}>
-                        <div className="text-center px-1">
-                          <span className="text-white text-sm font-bold block leading-tight">{event.date.split(' ').slice(-1)[0]}</span>
-                          <span className="text-white text-xs block leading-tight">{event.date.split(' ').slice(0, -1).join(' ')}</span>
-                        </div>
-                      </div>
-                      <div className="flex-1 pl-8 text-left">
-                        <div className={`bg-white rounded-lg shadow-lg p-6 hover-lift border-l-4 border-black inline-block w-full max-w-md h-32 flex flex-col justify-center ${index % 2 === 1 ? 'block' : 'invisible'}`}>
-                          <h3 className="text-xl font-bold text-black mb-2">{event.title}</h3>
-                          <p className="text-sm text-gray-600 line-clamp-3">{event.description}</p>
-                        </div>
-                      </div>
-                    </div>
-                  </ScrollAnimation>
                 ))}
               </div>
+              <div className="sm:hidden mt-6 flex items-center justify-center gap-6">
+                <Link href="/formal" className="text-[10px] tracking-[0.18em] uppercase font-semibold text-gray-400 hover:text-black transition-colors">
+                  Formal →
+                </Link>
+                <Link href="/culture-show" className="text-[10px] tracking-[0.18em] uppercase font-semibold text-gray-400 hover:text-black transition-colors">
+                  Culture Show →
+                </Link>
+              </div>
+            </ScrollAnimation>
+          </div>
+        </section>
+      )}
+
+      {/* ── Events Timeline ── */}
+      <section id="winter-events" className="py-20 lg:py-24 px-6 lg:px-16 border-b border-gray-100">
+        <div className="max-w-7xl mx-auto">
+          <ScrollAnimation>
+            <div className="mb-14">
+              <div className="flex gap-1 mb-4">
+                <div className="w-5 h-[2px] bg-[#CD2E3A]" />
+                <div className="w-5 h-[2px] bg-[#0047A0]" />
+              </div>
+              <p className="text-[10px] tracking-[0.28em] uppercase text-gray-400 font-medium mb-2">일정 · Schedule</p>
+              <h2 className="text-3xl sm:text-4xl font-black text-black tracking-tight">Winter 2025–2026</h2>
+              <p className="text-sm text-gray-400 mt-1.5">겨울 학기</p>
             </div>
+          </ScrollAnimation>
+
+          <div className="divide-y divide-gray-100">
+            {upcomingEvents.map((event, index) => (
+              <ScrollAnimation key={index} className={`stagger-${index + 1}`}>
+                <div className="flex items-start gap-6 sm:gap-12 py-7 sm:py-8 -mx-2 px-2 hover:bg-gray-50 transition-colors">
+                  <div className="flex-shrink-0 w-20 sm:w-28 pt-0.5">
+                    <span className="text-[#CD2E3A] text-[10px] tracking-[0.14em] uppercase font-semibold leading-relaxed">
+                      {event.date}
+                    </span>
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-4 mb-2">
+                      <span className="text-gray-200 text-[10px] font-mono tabular-nums">
+                        {String(index + 1).padStart(2, '0')}
+                      </span>
+                      <h3 className="text-base sm:text-lg font-bold text-black tracking-tight">{event.title}</h3>
+                    </div>
+                    <p className="text-gray-500 text-sm leading-relaxed max-w-lg">{event.description}</p>
+                  </div>
+                </div>
+              </ScrollAnimation>
+            ))}
           </div>
         </div>
       </section>
 
-      <ScrollAnimation>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="border-t border-gray-300" />
-        </div>
-      </ScrollAnimation>
-
-      {/* Sponsors */}
-      <section className="section-padding bg-white px-4 sm:px-6 lg:px-8">
+      {/* ── Sponsors ── */}
+      <section className="py-20 lg:py-24 px-6 lg:px-16 border-b border-gray-100">
         <div className="max-w-7xl mx-auto">
-          <ScrollAnimation className="text-center mb-8 sm:mb-12">
-            <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-black mb-4">Sponsors</h2>
-            <p className="text-gray-600 text-xs sm:text-sm md:text-base max-w-2xl mx-auto px-4">
-              We're grateful for the support of the past, present, and future sponsors that have and will help make our events possible.
+          <ScrollAnimation>
+            <p className="text-[10px] tracking-[0.28em] uppercase text-gray-400 font-medium text-center mb-14">
+              Our Sponsors
             </p>
           </ScrollAnimation>
           <ScrollAnimation>
-            <div className="flex flex-nowrap overflow-x-auto gap-4 sm:gap-6 lg:gap-8 pb-4 sm:pb-0 sm:flex-wrap sm:justify-center scrollbar-hide justify-center">
-              <div className="modern-card hover-lift shadow-lg p-3 sm:p-6 lg:p-8 bg-white rounded-xl border border-gray-100 transition-all duration-300 hover:shadow-xl flex-shrink-0 w-48 sm:w-full sm:max-w-xs">
-                <div className="text-center">
-                  <div className="w-12 h-12 sm:w-20 sm:h-20 lg:w-24 lg:h-24 bg-white rounded-xl mx-auto mb-3 sm:mb-4 flex items-center justify-center p-2 sm:p-3 shadow-sm border border-gray-100">
-                    <img src="/weee!.jpg" alt="Weee! Sponsor Logo" className="w-full h-full object-contain" />
-                  </div>
-                  <h3 className="text-sm sm:text-lg font-bold text-black mb-1 sm:mb-2">Weee!</h3>
-                  <p className="text-xs sm:text-sm text-gray-600">Food & Grocery Sponsor</p>
-                </div>
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-16 sm:gap-28">
+              <div className="text-center">
+                <img
+                  src="/weee!.jpg"
+                  alt="Weee!"
+                  className="w-20 h-20 object-contain mx-auto mb-4 grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-300"
+                />
+                <div className="text-sm font-bold text-black tracking-tight">Weee!</div>
+                <div className="text-xs text-gray-400 mt-1">Food & Grocery Sponsor</div>
               </div>
-              <div className="modern-card hover-lift shadow-lg p-3 sm:p-6 lg:p-8 bg-white rounded-xl border border-gray-100 transition-all duration-300 hover:shadow-xl flex-shrink-0 w-48 sm:w-full sm:max-w-xs">
-                <div className="text-center">
-                  <div className="w-12 h-12 sm:w-20 sm:h-20 lg:w-24 lg:h-24 bg-white rounded-xl mx-auto mb-3 sm:mb-4 flex items-center justify-center p-2 sm:p-3 shadow-sm border border-gray-100">
-                    <img src="/thefaceshop.jpg" alt="The Face Shop Sponsor Logo" className="w-full h-full object-contain" />
-                  </div>
-                  <h3 className="text-sm sm:text-lg font-bold text-black mb-1 sm:mb-2">The Face Shop</h3>
-                  <p className="text-xs sm:text-sm text-gray-600">Clean Beauty Sponsor</p>
-                </div>
+              <div className="text-center">
+                <img
+                  src="/thefaceshop.jpg"
+                  alt="The Face Shop"
+                  className="w-20 h-20 object-contain mx-auto mb-4 grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-300"
+                />
+                <div className="text-sm font-bold text-black tracking-tight">The Face Shop</div>
+                <div className="text-xs text-gray-400 mt-1">Clean Beauty Sponsor</div>
               </div>
             </div>
           </ScrollAnimation>
         </div>
       </section>
 
-      <ScrollAnimation>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="border-t border-gray-300" />
-        </div>
-      </ScrollAnimation>
-
-      {/* Mission Statement */}
-      <section className="min-h-screen bg-white flex items-center justify-center relative overflow-hidden px-4 sm:px-6 lg:px-8">
-        <PhotoCollage />
-        <ScrollAnimation className="max-w-5xl mx-auto text-center relative z-10">
-          <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-light text-black leading-relaxed max-w-4xl mx-auto px-4">
-            Our mission is to represent the Korean community and strengthen its voice on (and beyond) campus
-            and to bring together those who have a common interest in Korean culture through social activities and events
-          </p>
+      {/* ── Mission Quote ── */}
+      <section className="py-28 sm:py-36 lg:py-44 px-6 lg:px-16 border-b border-gray-100">
+        <ScrollAnimation>
+          <div className="max-w-4xl mx-auto text-center">
+            <div className="flex justify-center gap-1 mb-8">
+              <div className="w-6 h-[2px] bg-[#CD2E3A]" />
+              <div className="w-6 h-[2px] bg-[#0047A0]" />
+            </div>
+            <p className="text-[10px] tracking-[0.28em] uppercase text-gray-300 font-medium mb-10">우리의 사명 · Our Mission</p>
+            <blockquote className="text-2xl sm:text-3xl lg:text-4xl font-light text-black leading-snug italic tracking-tight mb-8">
+              &ldquo;Our mission is to represent the Korean community and strengthen its voice on campus and beyond — bringing together those who share a common interest in Korean culture.&rdquo;
+            </blockquote>
+            <div className="flex justify-center gap-1 mt-2 mb-4">
+              <div className="w-6 h-[2px] bg-[#CD2E3A]" />
+              <div className="w-6 h-[2px] bg-[#0047A0]" />
+            </div>
+            <p className="text-xs text-gray-400 tracking-[0.18em] uppercase">— 한국 문화 동아리 · University of Chicago · Est. 1976</p>
+          </div>
         </ScrollAnimation>
       </section>
 
-      <ScrollAnimation>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="border-t border-gray-300" />
-        </div>
-      </ScrollAnimation>
-
-      {/* Our Impact */}
-      <section className="section-padding bg-white relative overflow-hidden px-4 sm:px-6 lg:px-8">
+      {/* ── Impact ── */}
+      <section className="py-20 lg:py-24 px-6 lg:px-16 border-b border-gray-100">
         <div className="max-w-7xl mx-auto">
-          <ScrollAnimation className="text-center mb-6 sm:mb-8 lg:mb-12">
-            <h2 className="section-title text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl mb-3 sm:mb-4 text-black">Our Impact</h2>
-            <p className="font-body text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 max-w-2xl mx-auto px-4">Celebrating community building and cultural celebration</p>
-          </ScrollAnimation>
-          <div className="block sm:hidden">
-            <div className="grid grid-cols-2 gap-3">
-              {[{ number: "KSO", label: "Community" }, { number: "Culture", label: "Show" }, { number: "Coed IM", label: "Soccer" }, { number: "AAPI", label: "Events" }].map((stat, index) => (
-                <ScrollAnimation key={index} className={`stagger-${index + 1}`}>
-                  <div className="modern-card rounded-lg p-3 hover-lift shadow-lg text-center">
-                    <div className="text-lg font-bold mb-1 text-black">{stat.number}</div>
-                    <div className="text-gray-700 text-xs font-medium">{stat.label}</div>
-                  </div>
-                </ScrollAnimation>
-              ))}
-            </div>
-          </div>
-          <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8 text-center">
-            {[{ number: "KSO", label: "Community" }, { number: "Culture", label: "Show" }, { number: "AAPI", label: "Events" }, { number: "Alumni", label: "Network" }].map((stat, index) => (
-              <ScrollAnimation key={index} className={`stagger-${index + 1}`}>
-                <div className="modern-card rounded-xl sm:rounded-2xl p-4 sm:p-6 lg:p-8 hover-lift shadow-lg">
-                  <div className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-2 sm:mb-3 text-black">{stat.number}</div>
-                  <div className="text-gray-700 text-sm sm:text-base lg:text-lg font-medium">{stat.label}</div>
-                </div>
-              </ScrollAnimation>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <ScrollAnimation>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="border-t border-gray-300" />
-        </div>
-      </ScrollAnimation>
-
-      {/* Social Media & Contact */}
-      <section className="section-padding bg-white px-4 sm:px-6 lg:px-8">
-        <div className="max-w-4xl mx-auto text-center">
           <ScrollAnimation>
-            <h2 className="section-title text-xl sm:text-2xl md:text-3xl lg:text-4xl text-black mb-4 sm:mb-6 lg:mb-8">Connect With Us</h2>
-            <p className="font-body text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 mb-6 sm:mb-8 lg:mb-12 max-w-2xl mx-auto px-4">
-              Stay updated with our latest events, announcements, and community highlights!
+            <div className="flex justify-center gap-1 mb-4">
+              <div className="w-5 h-[2px] bg-[#CD2E3A]" />
+              <div className="w-5 h-[2px] bg-[#0047A0]" />
+            </div>
+            <p className="text-[10px] tracking-[0.28em] uppercase text-gray-400 font-medium text-center mb-14">
+              우리의 공동체 · Our Community
             </p>
           </ScrollAnimation>
-          <div className="block sm:hidden mb-6">
-            <div className="flex justify-center space-x-3 overflow-x-auto pb-2 scrollbar-hide">
-              {socialLinks.map((link, index) => (
-                <ScrollAnimation key={link.name} className={`stagger-${index + 1} flex-shrink-0`}>
-                  <a href={link.href} target="_blank" rel="noopener noreferrer" className="modern-card flex flex-col items-center p-4 hover-lift hover-glow min-w-[80px]">
-                    <span className="text-2xl mb-2 animate-float-fast hover-rotate">{link.icon}</span>
-                    <span className="text-gray-700 font-semibold text-xs">{link.name}</span>
-                  </a>
-                </ScrollAnimation>
+          <ScrollAnimation>
+            <div className="grid grid-cols-2 lg:grid-cols-4 border border-gray-100 divide-y divide-x lg:divide-y-0 divide-gray-100">
+              {[
+                { label: 'KSO', sub: 'Community', korean: '공동체' },
+                { label: 'Culture', sub: 'Show', korean: '문화쇼' },
+                { label: 'AAPI', sub: 'Events', korean: '행사' },
+                { label: 'Alumni', sub: 'Network', korean: '동문' },
+              ].map((stat, i) => (
+                <div key={i} className="text-center py-10 px-6">
+                  <div className="text-xl sm:text-2xl font-black text-black tracking-tight mb-1">{stat.label}</div>
+                  <div className="text-[10px] text-gray-400 tracking-[0.16em] uppercase font-medium mb-1">{stat.sub}</div>
+                  <div className="text-[10px] text-[#CD2E3A] font-medium">{stat.korean}</div>
+                </div>
               ))}
             </div>
-          </div>
-          <div className="hidden sm:flex sm:flex-row justify-center gap-4 sm:gap-6 lg:gap-8 mb-8 sm:mb-12">
-            {socialLinks.map((link, index) => (
-              <ScrollAnimation key={link.name} className={`stagger-${index + 1}`}>
-                <a href={link.href} target="_blank" rel="noopener noreferrer" className="modern-card flex flex-col items-center p-6 sm:p-8 hover-lift hover-glow min-w-[100px] sm:min-w-[120px]">
-                  <span className="text-3xl sm:text-4xl mb-3 sm:mb-4 animate-float-slow hover-rotate">{link.icon}</span>
-                  <span className="text-gray-700 font-semibold text-sm sm:text-base">{link.name}</span>
-                </a>
-              </ScrollAnimation>
-            ))}
-          </div>
+          </ScrollAnimation>
         </div>
       </section>
+
+      {/* ── Connect ── */}
+      <section className="py-20 lg:py-24 px-6 lg:px-16">
+        <div className="max-w-7xl mx-auto">
+          <ScrollAnimation>
+            <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between mb-12 gap-4">
+              <div>
+                <p className="text-[10px] tracking-[0.28em] uppercase text-gray-400 font-medium mb-2">Social</p>
+                <h2 className="text-3xl sm:text-4xl font-black text-black tracking-tight">Connect With Us</h2>
+                <p className="text-base text-[#CD2E3A] font-medium mt-1.5 tracking-wider">연결하기</p>
+              </div>
+              <p className="text-gray-400 text-sm max-w-xs leading-relaxed">
+                Stay updated with our latest events, announcements, and community highlights.
+              </p>
+            </div>
+          </ScrollAnimation>
+          <ScrollAnimation>
+            <div className="grid grid-cols-2 sm:grid-cols-4 border border-gray-100 divide-x divide-y sm:divide-y-0 divide-gray-100">
+              {socialLinks.map((link, index) => (
+                <a
+                  key={link.name}
+                  href={link.href}
+                  target={link.href.startsWith('mailto') ? undefined : '_blank'}
+                  rel={link.href.startsWith('mailto') ? undefined : 'noopener noreferrer'}
+                  className={`flex flex-col items-center justify-center py-10 px-4 text-center group transition-colors duration-200 ${
+                    index < 2 ? 'hover:bg-[#CD2E3A]' : 'hover:bg-[#0047A0]'
+                  }`}
+                >
+                  <span className="text-[10px] text-gray-300 group-hover:text-white/70 transition-colors mb-1 tracking-wider">{link.korean}</span>
+                  <span className="text-xs font-semibold tracking-[0.14em] uppercase text-gray-500 group-hover:text-white transition-colors">
+                    {link.name}
+                  </span>
+                  <svg className="w-3.5 h-3.5 mt-2.5 text-gray-300 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 17L17 7M17 7H7M17 7v10" />
+                  </svg>
+                </a>
+              ))}
+            </div>
+          </ScrollAnimation>
+        </div>
+      </section>
+
+      {lightboxIndex !== null && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/95 backdrop-blur-sm"
+          onClick={() => setLightboxIndex(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Photo lightbox"
+        >
+          <button
+            type="button"
+            onClick={() => setLightboxIndex(null)}
+            className="absolute top-4 right-4 z-10 w-10 h-10 flex items-center justify-center bg-white/10 text-white hover:bg-white/20 transition-colors"
+            aria-label="Close"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); setLightboxIndex((i) => (i === null ? null : (i - 1 + homepagePhotos.length) % homepagePhotos.length)); }}
+            className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center bg-white/10 text-white hover:bg-white/20 transition-colors"
+            aria-label="Previous photo"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+
+          <div className="relative max-w-6xl w-full flex flex-col items-center" onClick={(e) => e.stopPropagation()}>
+            <img
+              src={homepagePhotos[lightboxIndex].src}
+              alt={homepagePhotos[lightboxIndex].alt}
+              className="max-w-full max-h-[75vh] sm:max-h-[85vh] object-contain shadow-2xl"
+            />
+            <div className="mt-4 flex flex-wrap items-center justify-center gap-4">
+              <p className="text-white/50 text-xs tracking-[0.14em] uppercase">
+                {lightboxIndex + 1} / {homepagePhotos.length}
+              </p>
+              <PhotoDownloadButton imageUrl={homepagePhotos[lightboxIndex].src} tone="onDark" size="md" />
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={(e) => { e.stopPropagation(); setLightboxIndex((i) => (i === null ? null : (i + 1) % homepagePhotos.length)); }}
+            className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center bg-white/10 text-white hover:bg-white/20 transition-colors"
+            aria-label="Next photo"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+      )}
 
       <Footer />
     </div>

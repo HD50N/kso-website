@@ -25,20 +25,17 @@ export default function ShopPage() {
     color: '',
     size: ''
   });
-  
+
   const { cartItems, addToCart, removeFromCart, updateQuantity, clearCart, cartItemCount } = useCart();
 
-  // Fetch products from API
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         const response = await fetch('/api/products');
-        if (!response.ok) {
-          throw new Error('Failed to fetch products');
-        }
+        if (!response.ok) throw new Error('Failed to fetch products');
         const data = await response.json();
         setProducts(data);
-        setFilteredProducts(data); // Initialize filtered products with all products
+        setFilteredProducts(data);
       } catch (err) {
         setError('Failed to load products');
         console.error('Error fetching products:', err);
@@ -46,11 +43,9 @@ export default function ShopPage() {
         setLoading(false);
       }
     };
-
     fetchProducts();
   }, []);
 
-  // Filter products based on search query and filters
   useEffect(() => {
     if (!searchQuery.trim() && !filters.category && !filters.color && !filters.size) {
       setFilteredProducts(products);
@@ -59,46 +54,25 @@ export default function ShopPage() {
 
     const query = searchQuery.toLowerCase().trim();
     const filtered = products.filter(product => {
-      // Text search
-      const matchesQuery = !query || 
+      const matchesQuery = !query ||
         product.name.toLowerCase().includes(query) ||
         product.description.toLowerCase().includes(query) ||
         (product.category && product.category.toLowerCase().includes(query));
-
-      // Category filter
       const matchesCategory = !filters.category || product.category === filters.category;
-
-      // Color and size filters
       let matchesColor = !filters.color;
       let matchesSize = !filters.size;
-
       if (product.variants) {
-        if (filters.color) {
-          matchesColor = product.variants.some(variant => 
-            variant.color.toLowerCase() === filters.color.toLowerCase()
-          );
-        }
-        if (filters.size) {
-          matchesSize = product.variants.some(variant => 
-            variant.size.toLowerCase() === filters.size.toLowerCase()
-          );
-        }
+        if (filters.color) matchesColor = product.variants.some(variant => variant.color.toLowerCase() === filters.color.toLowerCase());
+        if (filters.size) matchesSize = product.variants.some(variant => variant.size.toLowerCase() === filters.size.toLowerCase());
       }
-
       return matchesQuery && matchesCategory && matchesColor && matchesSize;
     });
-
     setFilteredProducts(filtered);
   }, [searchQuery, filters, products]);
 
-  // Extract available filter options
   const availableCategories = [...new Set(products.map(p => p.category).filter((c): c is string => Boolean(c)))];
-  const availableColors = [...new Set(
-    products.flatMap(p => p.variants?.map(v => v.color) || []).filter((c): c is string => Boolean(c))
-  )];
-  const availableSizes = [...new Set(
-    products.flatMap(p => p.variants?.map(v => v.size) || []).filter((s): s is string => Boolean(s))
-  )].sort((a, b) => {
+  const availableColors = [...new Set(products.flatMap(p => p.variants?.map(v => v.color) || []).filter((c): c is string => Boolean(c)))];
+  const availableSizes = [...new Set(products.flatMap(p => p.variants?.map(v => v.size) || []).filter((s): s is string => Boolean(s)))].sort((a, b) => {
     const sizeOrder = ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL', '4XL', '5XL'];
     const aIndex = sizeOrder.indexOf(a.toUpperCase());
     const bIndex = sizeOrder.indexOf(b.toUpperCase());
@@ -108,42 +82,18 @@ export default function ShopPage() {
     return a.localeCompare(b);
   });
 
+  const openProductModal = (product: Product) => { setSelectedProduct(product); setIsProductModalOpen(true); };
+  const closeProductModal = () => { setIsProductModalOpen(false); setSelectedProduct(null); };
 
-  // Open product modal
-  const openProductModal = (product: Product) => {
-    setSelectedProduct(product);
-    setIsProductModalOpen(true);
-  };
-
-  // Close product modal
-  const closeProductModal = () => {
-    setIsProductModalOpen(false);
-    setSelectedProduct(null);
-  };
-
-
-
-  // Handle checkout
   const handleCheckout = async (customerEmail: string) => {
     try {
       const response = await fetch('/api/checkout', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          items: cartItems,
-          customerEmail,
-        }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items: cartItems, customerEmail }),
       });
-
-      if (!response.ok) {
-        throw new Error('Checkout failed');
-      }
-
+      if (!response.ok) throw new Error('Checkout failed');
       const { url } = await response.json();
-      
-      // Redirect to Stripe checkout
       window.location.href = url;
     } catch (error) {
       console.error('Checkout error:', error);
@@ -151,36 +101,55 @@ export default function ShopPage() {
     }
   };
 
-
-
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen bg-white">
       <Navigation onOpenCart={() => setIsCartOpen(true)} />
-      
-      {/* Hero Section */}
-      <section className="relative overflow-hidden bg-white text-black py-16 sm:py-20 lg:py-24">
-        <div className="absolute inset-0 hero-pattern-bg opacity-[0.02]" aria-hidden="true" />
-        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h1 className="hero-title text-3xl sm:text-4xl md:text-5xl lg:text-6xl mb-4 sm:mb-6 animate-bounce-in text-black">KSO Shop</h1>
-          <p className="hero-subtitle text-lg sm:text-xl lg:text-2xl text-gray-700 px-4 animate-slide-in-up stagger-1">
-            Show your KSO pride with our exclusive merchandise
-          </p>
+
+      {/* Hero */}
+      <section className="border-b border-gray-100 py-20 lg:py-28">
+        <div className="max-w-7xl mx-auto px-6 lg:px-16">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 lg:gap-24 items-start">
+            <div>
+              <p className="text-[10px] tracking-[0.32em] uppercase text-gray-400 font-medium mb-10">
+                KSO Merchandise
+              </p>
+              <h1 className="text-[4.5rem] sm:text-[6rem] lg:text-[7.5rem] font-black text-black leading-[0.87] tracking-tighter">
+                KSO<br />Shop
+              </h1>
+            </div>
+            <div className="lg:pt-20">
+              <div className="w-10 h-px bg-[#CD2E3A] mb-8" />
+              <p className="text-lg sm:text-xl text-gray-700 leading-relaxed font-light italic mb-6">
+                &ldquo;Show your KSO pride — every purchase supports our events and programming.&rdquo;
+              </p>
+              <p className="text-sm text-gray-500 leading-relaxed max-w-md mb-8">
+                Exclusive merchandise for members and friends of KSO. Browse variants, add to cart, and check out securely.
+              </p>
+              <button
+                type="button"
+                onClick={() => setIsCartOpen(true)}
+                className="flex items-center gap-3 border border-gray-200 px-6 py-3 hover:border-black hover:bg-black group transition-colors"
+              >
+                <svg className="w-4 h-4 text-gray-400 group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+                <span className="text-[10px] font-semibold tracking-[0.18em] uppercase text-black group-hover:text-white transition-colors">
+                  Cart ({cartItemCount})
+                </span>
+              </button>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Horizontal separator line */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="border-t border-gray-300"></div>
-      </div>
+      {/* Products */}
+      <section className="py-20 lg:py-24 px-6 lg:px-16 border-b border-gray-100">
+        <div className="max-w-7xl mx-auto">
 
-      {/* Shop Section */}
-      <section className="py-16 sm:py-20 lg:py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Header with Cart Button and Search Bar */}
-          <div className="flex flex-col sm:flex-row justify-between items-start mb-8 gap-4">
-            {/* Search Bar */}
-            <div className="w-full sm:w-auto sm:flex-1">
-              <SearchBar 
+          {/* Search */}
+          <div className="flex flex-col sm:flex-row gap-3 mb-10">
+            <div className="flex-1">
+              <SearchBar
                 onSearch={setSearchQuery}
                 onFilterChange={setFilters}
                 placeholder="Search products, colors, sizes..."
@@ -189,76 +158,46 @@ export default function ShopPage() {
                 availableSizes={availableSizes}
               />
             </div>
-
-            {/* Cart Button */}
-            <button
-              onClick={() => setIsCartOpen(true)}
-              className="bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition-colors flex items-center space-x-2 cursor-pointer whitespace-nowrap"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-              </svg>
-              <span>Cart ({cartItemCount})</span>
-            </button>
           </div>
 
-          {/* Search Results Counter */}
           {searchQuery && (
-            <div className="text-center mb-6">
-              <p className="text-gray-600">
-                {filteredProducts.length} product{filteredProducts.length !== 1 ? 's' : ''} found
-                {searchQuery && ` for "${searchQuery}"`}
-              </p>
-            </div>
+            <p className="text-[10px] tracking-[0.18em] uppercase text-gray-400 font-medium mb-8">
+              {filteredProducts.length} result{filteredProducts.length !== 1 ? 's' : ''} for &ldquo;{searchQuery}&rdquo;
+            </p>
           )}
 
-          {/* Products Grid */}
           {loading ? (
-            <div className="text-center py-16">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-black mx-auto"></div>
-              <p className="mt-4 text-gray-600">Loading products...</p>
+            <div className="py-24 text-center">
+              <div className="w-8 h-8 border border-black border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+              <p className="text-sm text-gray-400">Loading products...</p>
             </div>
           ) : error ? (
-            <div className="text-center py-16">
-              <div className="text-6xl mb-4">😔</div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Oops!</h2>
-              <p className="text-gray-600 mb-4">{error}</p>
-              <button
-                onClick={() => window.location.reload()}
-                className="bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition-colors"
-              >
+            <div className="py-24 text-center">
+              <p className="text-sm text-gray-400 mb-4">{error}</p>
+              <button onClick={() => window.location.reload()} className="text-[10px] tracking-[0.14em] uppercase font-semibold text-black underline underline-offset-2 hover:no-underline">
                 Try Again
               </button>
             </div>
           ) : filteredProducts.length === 0 ? (
-            <div className="text-center py-16">
+            <div className="py-24 text-center">
               {searchQuery ? (
                 <>
-                  <div className="text-6xl mb-4">🔍</div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">No products found</h2>
-                  <p className="text-gray-600 mb-4">
-                    No products match "{searchQuery}". Try a different search term.
-                  </p>
-                  <button
-                    onClick={() => setSearchQuery('')}
-                    className="bg-black text-white px-6 py-2 rounded-lg hover:bg-gray-800 transition-colors"
-                  >
+                  <p className="text-sm text-gray-400 mb-4">No products match &ldquo;{searchQuery}&rdquo;.</p>
+                  <button onClick={() => setSearchQuery('')} className="text-[10px] tracking-[0.14em] uppercase font-semibold text-black underline underline-offset-2 hover:no-underline">
                     Clear Search
                   </button>
                 </>
               ) : (
                 <>
-                  <div className="text-6xl mb-4">🛍️</div>
-                  <h2 className="text-2xl font-bold text-gray-900 mb-2">Coming Soon</h2>
-                  <p className="text-gray-600 max-w-2xl mx-auto">
-                    We're working hard to bring you amazing KSO merchandise. 
-                    Stay tuned for exclusive clothing, accessories, and more!
+                  <h2 className="text-2xl font-black text-black tracking-tight mb-3">Coming Soon</h2>
+                  <p className="text-sm text-gray-400 max-w-md mx-auto">
+                    We&apos;re working on bringing you amazing KSO merchandise. Stay tuned for exclusive clothing, accessories, and more.
                   </p>
                 </>
               )}
             </div>
           ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
               {filteredProducts.map((product) => (
                 <ProductCard
                   key={product.id}
@@ -272,7 +211,6 @@ export default function ShopPage() {
         </div>
       </section>
 
-      {/* Shopping Cart Modal */}
       <ShoppingCart
         items={cartItems}
         onRemove={removeFromCart}
@@ -283,7 +221,6 @@ export default function ShopPage() {
         onClose={() => setIsCartOpen(false)}
       />
 
-      {/* Product Detail Modal */}
       {selectedProduct && (
         <ProductModal
           product={selectedProduct}
@@ -296,4 +233,4 @@ export default function ShopPage() {
       <Footer />
     </div>
   );
-} 
+}

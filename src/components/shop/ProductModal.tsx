@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Product, ProductVariant } from '@/types/shop';
+import PhotoDownloadButton from '@/components/PhotoDownloadButton';
 
 interface ProductModalProps {
   product: Product;
@@ -138,12 +139,22 @@ export default function ProductModal({ product, isOpen, onClose, onAddToCart }: 
               {/* Product Images */}
               <div className="space-y-4">
                 {/* Main Image */}
-                <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
+                <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden relative">
                                   <img
                   src={productImages[currentImageIndex]}
                   alt={product.name}
                   className="w-full h-full object-cover"
                 />
+                  {productImages[currentImageIndex] && (
+                    <div className="absolute bottom-2 right-2 z-10">
+                      <PhotoDownloadButton
+                        imageUrl={productImages[currentImageIndex]}
+                        fileName={`${product.name.replace(/\s+/g, '-')}-kso-shop-${currentImageIndex + 1}.jpg`}
+                        tone="onLight"
+                        size="sm"
+                      />
+                    </div>
+                  )}
                 </div>
 
                 {/* Thumbnail Images */}

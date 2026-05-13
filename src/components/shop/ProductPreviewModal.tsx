@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import PhotoDownloadButton from '@/components/PhotoDownloadButton';
 
 interface ProductPreviewModalProps {
   product: any;
@@ -92,43 +93,50 @@ export default function ProductPreviewModal({ product, isOpen, onClose }: Produc
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-      <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="p-6">
-          {/* Header */}
-          <div className="flex justify-between items-start mb-6">
-            <h2 className="text-2xl font-bold text-gray-900">{product.name}</h2>
-            <button
-              onClick={onClose}
-              className="text-gray-400 hover:text-gray-600 p-2"
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
+    <div className="fixed inset-0 flex items-center justify-center z-[70] p-4 backdrop-blur-md bg-black/20">
+      <div className="bg-white border border-gray-100 shadow-sm max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="flex items-start justify-between gap-4 px-6 py-4 border-b border-gray-100">
+          <div>
+            <p className="text-[10px] font-semibold tracking-[0.2em] uppercase text-gray-400 mb-1">Printful preview</p>
+            <h2 className="text-xl font-bold text-black tracking-tight pr-4">{product.name}</h2>
           </div>
+          <button type="button" onClick={onClose} className="shrink-0 p-1 text-gray-400 hover:text-black transition-colors" aria-label="Close">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
 
+        <div className="p-6">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Product Images */}
             <div className="space-y-4">
-              {/* Main Image */}
-              <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
+              <div className="aspect-square bg-gray-50 border border-gray-100 overflow-hidden relative">
                 <img
                   src={productImages[currentImageIndex]}
                   alt={product.name}
                   className="w-full h-full object-cover"
                 />
+                {productImages[currentImageIndex] && (
+                  <div className="absolute bottom-2 right-2 z-10">
+                    <PhotoDownloadButton
+                      imageUrl={productImages[currentImageIndex]}
+                      fileName={`${String(product.name).replace(/\s+/g, '-')}-printful-${currentImageIndex + 1}.jpg`}
+                      tone="onLight"
+                      size="sm"
+                    />
+                  </div>
+                )}
               </div>
 
-              {/* Thumbnail Images */}
               {productImages.length > 1 && (
-                <div className="flex space-x-2">
+                <div className="flex flex-wrap gap-2">
                   {productImages.map((image: string, index: number) => (
                     <button
+                      type="button"
                       key={index}
                       onClick={() => setCurrentImageIndex(index)}
-                      className={`w-16 h-16 rounded-lg overflow-hidden border-2 ${
-                        currentImageIndex === index ? 'border-black' : 'border-gray-200'
+                      className={`w-16 h-16 overflow-hidden border ${
+                        currentImageIndex === index ? 'border-black' : 'border-gray-200 hover:border-gray-400'
                       }`}
                     >
                       <img
@@ -142,132 +150,134 @@ export default function ProductPreviewModal({ product, isOpen, onClose }: Produc
               )}
             </div>
 
-            {/* Product Details */}
             <div className="space-y-6">
-              {/* Price */}
-              <div className="text-3xl font-bold text-gray-900">
-                ${currentPrice.toFixed(2)}
-              </div>
+              <div className="text-3xl font-bold text-black tracking-tight">${currentPrice.toFixed(2)}</div>
 
-              {/* Description */}
               <div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Description</h3>
-                <p className="text-gray-600 leading-relaxed">
+                <h3 className="text-[10px] font-semibold tracking-[0.2em] uppercase text-gray-400 mb-2">Description</h3>
+                <p className="text-sm text-gray-600 leading-relaxed">
                   {product.description || 'No description available.'}
                 </p>
               </div>
 
-              {/* Color and Size Selection */}
               {variants.length > 0 && (
-                <div className="space-y-4">
-                  {/* Color Selection */}
+                <div className="space-y-5">
                   {colors.length > 1 && (
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Color</h3>
+                      <h3 className="text-[10px] font-semibold tracking-[0.2em] uppercase text-gray-400 mb-3">Color</h3>
                       <div className="grid grid-cols-3 gap-2">
                         {colors.map((color) => (
                           <button
+                            type="button"
                             key={color}
                             onClick={() => setSelectedColor(color)}
-                            className={`p-3 rounded-lg border-2 transition-colors text-center ${
+                            className={`p-3 border text-center text-sm transition-colors ${
                               selectedColor === color
-                                ? 'border-black bg-gray-50'
-                                : 'border-gray-200 hover:border-gray-300'
+                                ? 'border-black bg-gray-50 text-black'
+                                : 'border-gray-200 text-gray-700 hover:border-gray-400'
                             }`}
                           >
-                            <div className="font-medium capitalize">{color}</div>
+                            <span className="font-medium capitalize">{color}</span>
                           </button>
                         ))}
                       </div>
                     </div>
                   )}
 
-                  {/* Size Selection */}
                   {sizes.length > 1 && (
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-900 mb-3">Size</h3>
+                      <h3 className="text-[10px] font-semibold tracking-[0.2em] uppercase text-gray-400 mb-3">Size</h3>
                       <div className="grid grid-cols-4 gap-2">
                         {sizes.map((size) => (
                           <button
+                            type="button"
                             key={size}
                             onClick={() => setSelectedSize(size)}
-                            className={`p-3 rounded-lg border-2 transition-colors text-center ${
+                            className={`p-3 border text-center text-sm transition-colors ${
                               selectedSize === size
-                                ? 'border-black bg-gray-50'
-                                : 'border-gray-200 hover:border-gray-300'
+                                ? 'border-black bg-gray-50 text-black'
+                                : 'border-gray-200 text-gray-700 hover:border-gray-400'
                             }`}
                           >
-                            <div className="font-medium">{size}</div>
+                            <span className="font-medium">{size}</span>
                           </button>
                         ))}
                       </div>
                     </div>
                   )}
 
-                  {/* Selected Variant Info */}
                   {selectedVariant && (
-                    <div className="bg-gray-50 p-3 rounded-lg">
-                      <div className="text-sm text-gray-600">
-                        Selected: <span className="font-medium capitalize">{selectedColor}</span> / <span className="font-medium">{selectedSize}</span>
-                      </div>
-                      <div className="text-lg font-semibold text-gray-900">
-                        ${parseFloat(selectedVariant.retail_price).toFixed(2)}
-                      </div>
+                    <div className="border border-gray-100 bg-gray-50 px-4 py-3">
+                      <p className="text-[10px] uppercase tracking-wider text-gray-400 mb-1">Selected variant</p>
+                      <p className="text-sm text-gray-600">
+                        <span className="font-medium capitalize text-black">{selectedColor}</span>
+                        <span className="text-gray-400"> / </span>
+                        <span className="font-medium text-black">{selectedSize}</span>
+                      </p>
+                      <p className="text-lg font-bold text-black mt-1">${parseFloat(selectedVariant.retail_price).toFixed(2)}</p>
                     </div>
                   )}
                 </div>
               )}
 
-              {/* Loading State */}
               {loadingVariants && (
-                <div className="flex items-center justify-center py-4">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900"></div>
-                  <span className="ml-2 text-gray-600">Loading variants...</span>
+                <div className="flex items-center gap-3 py-2">
+                  <div className="w-6 h-6 border border-black border-t-transparent rounded-full animate-spin" />
+                  <span className="text-sm text-gray-500">Loading variants…</span>
                 </div>
               )}
 
-              {/* Product Info */}
-              <div className="border-t pt-4 space-y-2 text-sm text-gray-600">
-                <div className="flex justify-between">
-                  <span>Product ID:</span>
-                  <span>{product.id}</span>
+              <div className="border-t border-gray-100 pt-4 space-y-2 text-xs text-gray-600">
+                <div className="flex justify-between gap-4">
+                  <span className="text-[10px] uppercase tracking-wider text-gray-400">Product ID</span>
+                  <span className="text-right font-mono text-gray-800">{product.id}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span>Variants:</span>
+                <div className="flex justify-between gap-4">
+                  <span className="text-[10px] uppercase tracking-wider text-gray-400">Variants</span>
                   <span>{variants.length || product.variants}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span>Synced:</span>
-                  <span>{product.synced}</span>
+                <div className="flex justify-between gap-4">
+                  <span className="text-[10px] uppercase tracking-wider text-gray-400">Synced</span>
+                  <span>{String(product.synced)}</span>
                 </div>
-                <div className="flex justify-between">
-                  <span>Status:</span>
-                  <span className={product.is_ignored ? 'text-red-600' : 'text-green-600'}>
+                <div className="flex justify-between gap-4 items-center">
+                  <span className="text-[10px] uppercase tracking-wider text-gray-400">Status</span>
+                  <span
+                    className={`text-[10px] font-semibold tracking-[0.08em] uppercase px-2 py-1 border ${
+                      product.is_ignored
+                        ? 'border-[#CD2E3A]/40 text-[#CD2E3A]'
+                        : 'border-gray-200 text-gray-700'
+                    }`}
+                  >
                     {product.is_ignored ? 'Ignored' : 'Active'}
                   </span>
                 </div>
                 {product.external_id && (
-                  <div className="flex justify-between">
-                    <span>External ID:</span>
-                    <span>{product.external_id}</span>
+                  <div className="flex justify-between gap-4">
+                    <span className="text-[10px] uppercase tracking-wider text-gray-400">External ID</span>
+                    <span className="text-right font-mono text-gray-800">{product.external_id}</span>
                   </div>
                 )}
               </div>
 
-              {/* Preview Notice */}
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <div className="flex items-center">
-                  <svg className="w-5 h-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span className="text-blue-800 text-sm font-medium">
-                    This is a preview of the product as it appears in Printful. 
-                    All variants and options are shown for your review.
-                  </span>
-                </div>
+              <div className="border border-gray-100 px-4 py-3">
+                <p className="text-[10px] font-semibold tracking-[0.18em] uppercase text-gray-400 mb-2">Note</p>
+                <p className="text-sm text-gray-600 leading-relaxed">
+                  Preview matches Printful. All variants and options are shown for review before syncing.
+                </p>
               </div>
             </div>
           </div>
+        </div>
+
+        <div className="flex justify-end px-6 py-4 border-t border-gray-100">
+          <button
+            type="button"
+            onClick={onClose}
+            className="text-[10px] font-semibold tracking-[0.18em] uppercase px-6 py-3 border border-gray-200 text-black hover:border-black transition-colors"
+          >
+            Close
+          </button>
         </div>
       </div>
     </div>
