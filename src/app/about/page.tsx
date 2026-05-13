@@ -71,7 +71,7 @@ export default function About() {
       <Navigation />
 
       {/* ── Hero — editorial split ── */}
-      <section className="border-b border-gray-100 py-20 lg:py-28">
+      <section className="border-b border-gray-100 py-12 lg:py-16">
         <div className="max-w-7xl mx-auto px-6 lg:px-16">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 lg:gap-24 items-start">
             <ScrollAnimation>
@@ -87,7 +87,7 @@ export default function About() {
               </div>
             </ScrollAnimation>
             <ScrollAnimation>
-              <div className="lg:pt-20">
+              <div className="lg:pt-10">
                 <div className="w-10 h-px bg-[#CD2E3A] mb-8" />
                 <p className="text-lg sm:text-xl text-gray-700 leading-relaxed font-light italic mb-6">
                   &ldquo;Our mission is to represent the Korean community and strengthen its voice on (and beyond) campus and to bring together those who have a common interest in Korean culture through social activities and events.&rdquo;
@@ -203,7 +203,7 @@ export default function About() {
       </section>
 
       {/* ── Get Involved ── */}
-      <section className="py-24 lg:py-32 px-6 lg:px-16">
+      <section className="py-14 lg:py-20 px-6 lg:px-16">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24 items-start">
             <ScrollAnimation>

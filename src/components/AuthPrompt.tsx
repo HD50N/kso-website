@@ -14,7 +14,7 @@ export default function AuthPrompt({ title, description, features, ctaText, ctaH
   return (
     <div className="min-h-screen bg-white">
       <Navigation />
-      <section className="border-b border-gray-100 py-20 lg:py-28">
+      <section className="border-b border-gray-100 py-12 lg:py-16">
         <div className="max-w-7xl mx-auto px-6 lg:px-16">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 lg:gap-24 items-start">
             <div>

@@ -1,3 +1,5 @@
+import SocialBrandIcon, { type SocialBrand } from '@/components/SocialBrandIcon';
+
 export default function Footer() {
   const links = [
     { label: 'About Us', href: '/about' },
@@ -8,11 +10,11 @@ export default function Footer() {
     { label: 'Internships', href: '/internships' },
   ];
 
-  const socials = [
-    { label: 'Instagram', href: 'https://www.instagram.com/uchicagokso?utm_source=ig_web_button_share_sheet&igsh=MWEzNTJibndqMGJ0eA==' },
-    { label: 'Facebook', href: 'https://www.facebook.com/share/g/16cdxUAiLv/' },
-    { label: 'LinkedIn', href: 'https://linkedin.com/company/uchicago-kso' },
-    { label: 'Email', href: 'mailto:ksouchicago@gmail.com' },
+  const socials: { label: string; href: string; brand: SocialBrand }[] = [
+    { label: 'Instagram', href: 'https://www.instagram.com/uchicagokso?utm_source=ig_web_button_share_sheet&igsh=MWEzNTJibndqMGJ0eA==', brand: 'instagram' },
+    { label: 'Facebook', href: 'https://www.facebook.com/share/g/16cdxUAiLv/', brand: 'facebook' },
+    { label: 'LinkedIn', href: 'https://linkedin.com/company/uchicago-kso', brand: 'linkedin' },
+    { label: 'Email', href: 'mailto:ksouchicago@gmail.com', brand: 'email' },
   ];
 
   return (
@@ -77,9 +79,15 @@ export default function Footer() {
                   href={s.href}
                   target={s.href.startsWith('mailto') ? undefined : '_blank'}
                   rel={s.href.startsWith('mailto') ? undefined : 'noopener noreferrer'}
-                  className="flex items-center justify-between border border-gray-800 px-4 py-2.5 hover:border-gray-600 hover:text-white group transition-colors duration-150"
+                  className="flex items-center justify-between gap-3 border border-gray-800 px-4 py-2.5 hover:border-gray-600 hover:text-white group transition-colors duration-150"
                 >
-                  <span className="text-gray-400 text-sm group-hover:text-white transition-colors">{s.label}</span>
+                  <span className="flex items-center gap-3 min-w-0">
+                    <SocialBrandIcon
+                      brand={s.brand}
+                      className="w-5 h-5 text-gray-500 group-hover:text-white transition-colors flex-shrink-0"
+                    />
+                    <span className="text-gray-400 text-sm group-hover:text-white transition-colors truncate">{s.label}</span>
+                  </span>
                   <svg className="w-3 h-3 text-gray-700 group-hover:text-gray-400 flex-shrink-0 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 17L17 7M17 7H7M17 7v10" />
                   </svg>

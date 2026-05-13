@@ -38,7 +38,7 @@ function SuccessContent() {
 
   return (
     <div className="max-w-7xl mx-auto px-6 lg:px-16">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 lg:gap-24 items-start py-20 lg:py-28">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 lg:gap-24 items-start py-12 lg:py-16">
         <div>
           <p className="text-[10px] tracking-[0.32em] uppercase text-gray-400 font-medium mb-10">
             Order Confirmed
@@ -66,7 +66,7 @@ function SuccessContent() {
         </div>
 
         {orderDetails && (
-          <div className="lg:pt-20 border border-gray-100 p-8">
+          <div className="lg:pt-10 border border-gray-100 p-8">
             <div className="w-10 h-px bg-[#CD2E3A] mb-8" />
             <p className="text-[10px] tracking-[0.28em] uppercase text-gray-400 font-medium mb-4">Order Summary</p>
             <div className="divide-y divide-gray-100">

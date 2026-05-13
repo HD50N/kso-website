@@ -5,9 +5,19 @@ import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 
 import Link from 'next/link';
-import PhotoDownloadButton from '@/components/PhotoDownloadButton';
 import { supabase } from '@/lib/supabase';
 import { Profile, BoardPosition } from '@/lib/supabase';
+
+/** Up to two letters from first + last name (or first two of a single word). */
+function initialsFromFullName(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return '?';
+  if (parts.length === 1) {
+    const w = parts[0]!;
+    return w.slice(0, 2).toUpperCase();
+  }
+  return (parts[0]!.charAt(0) + parts[parts.length - 1]!.charAt(0)).toUpperCase();
+}
 
 function ProfileBio({
   bio,
@@ -107,7 +117,6 @@ export default function Board() {
   const [error, setError] = useState<string>('');
   const [retryCount, setRetryCount] = useState(0);
   const [expandedProfiles, setExpandedProfiles] = useState<Set<number>>(new Set());
-  const [expandedCardIndex, setExpandedCardIndex] = useState<number | null>(null);
 
   const fetchBoardMembers = useCallback(async (isRetry = false) => {
     try {
@@ -224,7 +233,7 @@ export default function Board() {
       )}
 
       {/* Hero */}
-      <section className="border-b border-gray-100 py-20 lg:py-28">
+      <section className="border-b border-gray-100 py-12 lg:py-16">
         <div className="max-w-7xl mx-auto px-6 lg:px-16">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-14 lg:gap-24 items-start">
             <div>
@@ -235,7 +244,7 @@ export default function Board() {
                 Executive<br />Board
               </h1>
             </div>
-            <div className="lg:pt-20">
+            <div className="lg:pt-10">
               <div className="w-10 h-px bg-[#CD2E3A] mb-8" />
               <p className="text-lg sm:text-xl text-gray-700 leading-relaxed font-light italic mb-6">
                 &ldquo;Meet the dedicated leaders who make KSO possible.&rdquo;
@@ -268,27 +277,26 @@ export default function Board() {
             ) : (
               boardMembers.map((member, index) => (
                 <div key={index} className="flex items-start gap-5 py-6">
-                  <div className="relative group w-14 shrink-0 aspect-[3/4]">
+                  <div className="relative w-14 shrink-0 aspect-[3/4]">
                     <div className="absolute inset-0 border border-gray-200 bg-white p-[3px] shadow-sm">
                       <div
-                        className={`relative h-full w-full overflow-hidden ${member.hasUser && member.avatar_url ? 'bg-gray-50' : 'bg-white'}`}
+                        className={`relative h-full w-full overflow-hidden ${
+                          member.hasUser && member.avatar_url ? 'bg-gray-50' : 'bg-white'
+                        }`}
                       >
                         {member.hasUser && member.avatar_url ? (
-                          <>
-                            <img
-                              src={member.avatar_url}
-                              alt={member.name}
-                              className="h-full w-full object-contain object-center"
-                            />
-                            <div className="absolute bottom-0.5 right-0.5 z-10 opacity-0 pointer-events-none transition-opacity group-hover:opacity-100 group-hover:pointer-events-auto">
-                              <PhotoDownloadButton
-                                imageUrl={member.avatar_url}
-                                fileName={`${member.name.replace(/\s+/g, '_')}-kso-board.jpg`}
-                                tone="onLight"
-                                size="sm"
-                              />
-                            </div>
-                          </>
+                          <img
+                            src={member.avatar_url}
+                            alt={member.name}
+                            className="h-full w-full object-contain object-center"
+                          />
+                        ) : member.hasUser ? (
+                          <div
+                            className="flex h-full w-full items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 text-sm font-semibold tracking-tight text-gray-600 select-none"
+                            aria-label={member.name}
+                          >
+                            {initialsFromFullName(member.name)}
+                          </div>
                         ) : (
                           <div className="flex h-full w-full items-center justify-center">
                             <svg className="w-6 h-6 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -331,45 +339,35 @@ export default function Board() {
               ))
             ) : (
               boardMembers.map((member, index) => {
-                const isExpanded = expandedCardIndex === index;
-                const isRightmostColumn = (index % 4) === 3;
-                const rowNumber = Math.floor(index / 4) + 1;
-                const hasPortrait = member.hasUser && member.avatar_url;
+                const hasPhoto = Boolean(member.hasUser && member.avatar_url);
                 return (
-                  <div
-                    key={index}
-                    style={isExpanded && isRightmostColumn ? { gridColumn: '3 / span 2', gridRow: `${rowNumber}` } : undefined}
-                    className={`bg-white flex flex-col transition-all duration-300 ${
-                      isExpanded ? (isRightmostColumn ? 'md:col-span-2' : 'md:col-span-2 lg:col-span-2') : ''
-                    }`}
-                  >
+                  <div key={index} className="bg-white flex flex-col">
                     {/* Photo — portrait scaled inside a mat + frame */}
                     <div
-                      className={`relative group flex shrink-0 flex-col border-b border-gray-100 ${
-                        hasPortrait ? 'bg-[#fafafa]' : 'bg-white'
-                      } ${isExpanded ? 'min-h-[200px]' : 'min-h-[240px] lg:min-h-[300px]'}`}
+                      className={`relative flex shrink-0 flex-col border-b border-gray-100 ${
+                        member.hasUser ? 'bg-[#fafafa]' : 'bg-white'
+                      } min-h-[240px] lg:min-h-[300px]`}
                     >
                       <div className="flex flex-1 items-center justify-center px-5 py-6 lg:px-6 lg:py-8">
-                        {hasPortrait ? (
-                          <>
-                            <div className="relative w-[68%] max-w-[200px] lg:max-w-[232px] aspect-[3/4] border border-gray-200 bg-white p-1.5 shadow-[0_2px_12px_rgba(0,0,0,0.06)]">
-                              <div className="relative h-full w-full overflow-hidden bg-gray-50">
-                                <img
-                                  src={member.avatar_url}
-                                  alt={member.name}
-                                  className="h-full w-full object-contain object-center"
-                                />
-                              </div>
-                            </div>
-                            <div className="absolute top-2 left-2 z-20 opacity-0 pointer-events-none transition-opacity group-hover:opacity-100 group-hover:pointer-events-auto">
-                              <PhotoDownloadButton
-                                imageUrl={member.avatar_url}
-                                fileName={`${member.name.replace(/\s+/g, '_')}-kso-board.jpg`}
-                                tone="onLight"
-                                size="sm"
+                        {hasPhoto ? (
+                          <div className="relative w-[68%] max-w-[200px] lg:max-w-[232px] aspect-[3/4] border border-gray-200 bg-white p-1.5 shadow-[0_2px_12px_rgba(0,0,0,0.06)]">
+                            <div className="relative h-full w-full overflow-hidden bg-gray-50">
+                              <img
+                                src={member.avatar_url}
+                                alt={member.name}
+                                className="h-full w-full object-contain object-center"
                               />
                             </div>
-                          </>
+                          </div>
+                        ) : member.hasUser ? (
+                          <div className="relative flex aspect-[3/4] w-[68%] max-w-[200px] lg:max-w-[232px] items-center justify-center border border-gray-200 bg-white p-1.5 shadow-[0_2px_12px_rgba(0,0,0,0.06)]">
+                            <div
+                              className="flex h-full w-full items-center justify-center bg-gradient-to-br from-gray-100 to-gray-200 text-2xl lg:text-3xl font-semibold tracking-tight text-gray-600 select-none"
+                              aria-label={member.name}
+                            >
+                              {initialsFromFullName(member.name)}
+                            </div>
+                          </div>
                         ) : (
                           <div className="relative flex aspect-[3/4] w-[68%] max-w-[200px] lg:max-w-[232px] items-center justify-center border border-dashed border-gray-200 bg-white p-1.5">
                             <div className="flex h-full w-full items-center justify-center bg-white">
@@ -383,31 +381,15 @@ export default function Board() {
                       <div className="border-t border-gray-100 bg-white px-4 py-2.5 text-center">
                         <span className="text-[9px] tracking-[0.16em] uppercase font-semibold text-[#CD2E3A]">{member.role}</span>
                       </div>
-                      {hasPortrait && (
-                        <button
-                          type="button"
-                          onClick={() => setExpandedCardIndex(isExpanded ? null : index)}
-                          className="absolute top-2 right-2 z-30 flex h-7 w-7 items-center justify-center border border-gray-200 bg-white text-gray-500 shadow-sm hover:border-black hover:text-black transition-colors"
-                          title={isExpanded ? 'Collapse' : 'Expand'}
-                        >
-                          {isExpanded ? (
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                          ) : (
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-                            </svg>
-                          )}
-                        </button>
-                      )}
                     </div>
 
                     {/* Info */}
                     <div className="p-5 flex flex-col flex-1">
                       <h3 className="text-base font-bold text-black tracking-tight mb-0.5">{member.name}</h3>
                       {member.year && <p className="text-xs text-gray-400 mb-3">Class of {member.year}</p>}
-                      {isExpanded && member.username && <p className="text-xs text-gray-400 mb-3">@{member.username}</p>}
+                      {member.hasUser && member.username && (
+                        <p className="text-xs text-gray-400 mb-3">@{member.username}</p>
+                      )}
                       {member.major && <p className="text-xs text-gray-500 mb-3 line-clamp-1">{member.major}</p>}
                       {member.bio && (
                         <ProfileBioDesktop bio={member.bio} index={index} expandedProfiles={expandedProfiles} setExpandedProfiles={setExpandedProfiles} />

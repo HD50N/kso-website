@@ -7,6 +7,14 @@ import Footer from '@/components/Footer';
 import ScrollAnimation from '@/components/ScrollAnimation';
 import Link from 'next/link';
 import PhotoDownloadButton from '@/components/PhotoDownloadButton';
+import SocialBrandIcon, { type SocialBrand } from '@/components/SocialBrandIcon';
+
+type SocialLink = {
+  name: string;
+  korean: string;
+  href: string;
+  brand: SocialBrand;
+};
 
 type Photo = { src: string; alt: string };
 
@@ -40,11 +48,11 @@ export default function HomePage({ homepagePhotos }: { homepagePhotos: Photo[] }
     },
   ];
 
-  const socialLinks = [
-    { name: 'Instagram', korean: '인스타그램', href: 'https://www.instagram.com/uchicagokso?utm_source=ig_web_button_share_sheet&igsh=MWEzNTJibndqMGJ0eA==' },
-    { name: 'Facebook', korean: '페이스북', href: 'https://www.facebook.com/share/g/16cdxUAiLv/' },
-    { name: 'LinkedIn', korean: '링크드인', href: 'https://linkedin.com/company/uchicago-kso' },
-    { name: 'Email', korean: '이메일', href: 'mailto:ksouchicago@gmail.com' },
+  const socialLinks: SocialLink[] = [
+    { name: 'Instagram', korean: '인스타그램', href: 'https://www.instagram.com/uchicagokso?utm_source=ig_web_button_share_sheet&igsh=MWEzNTJibndqMGJ0eA==', brand: 'instagram' },
+    { name: 'Facebook', korean: '페이스북', href: 'https://www.facebook.com/share/g/16cdxUAiLv/', brand: 'facebook' },
+    { name: 'LinkedIn', korean: '링크드인', href: 'https://linkedin.com/company/uchicago-kso', brand: 'linkedin' },
+    { name: 'Email', korean: '이메일', href: 'mailto:ksouchicago@gmail.com', brand: 'email' },
   ];
 
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
@@ -66,8 +74,8 @@ export default function HomePage({ homepagePhotos }: { homepagePhotos: Photo[] }
     <div className="min-h-screen bg-white">
       <Navigation />
 
-      {/* ── Hero ── */}
-      <section className="relative min-h-screen flex items-center border-b border-gray-100 overflow-hidden">
+      {/* ── Hero: fill viewport below nav (stripe 3px + h-16 + banner h-9) ── */}
+      <section className="relative min-h-[calc(100.5svh-6.5rem)] flex items-center border-b border-gray-100 overflow-hidden">
         {/* Bold red accent column — desktop only */}
         <div className="hidden lg:block absolute right-0 top-0 h-full w-[28%] bg-[#CD2E3A] overflow-hidden">
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-10 select-none pointer-events-none">
@@ -354,6 +362,10 @@ export default function HomePage({ homepagePhotos }: { homepagePhotos: Photo[] }
                     index < 2 ? 'hover:bg-[#CD2E3A]' : 'hover:bg-[#0047A0]'
                   }`}
                 >
+                  <SocialBrandIcon
+                    brand={link.brand}
+                    className="w-8 h-8 mb-3 text-gray-500 group-hover:text-white transition-colors"
+                  />
                   <span className="text-[10px] text-gray-300 group-hover:text-white/70 transition-colors mb-1 tracking-wider">{link.korean}</span>
                   <span className="text-xs font-semibold tracking-[0.14em] uppercase text-gray-500 group-hover:text-white transition-colors">
                     {link.name}
