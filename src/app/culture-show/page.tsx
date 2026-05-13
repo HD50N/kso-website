@@ -1,26 +1,15 @@
-import { readdirSync } from 'fs';
-import path from 'path';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import ScrollAnimation from '@/components/ScrollAnimation';
 import EventPhotoGallery from '@/components/EventPhotoGallery';
+import { EVENT_PHOTOS_BUCKET, EVENT_PHOTOS_PREFIX_CULTURE_SHOW } from '@/lib/event-photos';
+import { getCultureShowEventPhotos } from '@/lib/event-photos-storage.server';
 
-const IMAGE_EXT = /\.(jpg|jpeg|png|webp|gif)$/i;
+export const revalidate = 300;
 
-function getCultureShowPhotos(): { src: string; alt: string }[] {
-  const dir = path.join(process.cwd(), 'public', 'culture-show');
-  try {
-    const files = readdirSync(dir)
-      .filter((f) => IMAGE_EXT.test(f))
-      .sort();
-    return files.map((name) => ({ src: `/culture-show/${name}`, alt: 'KSO Culture Show' }));
-  } catch {
-    return [];
-  }
-}
-
-export default function CultureShowPage() {
-  const photos = getCultureShowPhotos();
+export default async function CultureShowPage() {
+  const photos = await getCultureShowEventPhotos();
+  const emptyDescription = `No photos found. Upload images to the Supabase bucket “${EVENT_PHOTOS_BUCKET}” under “${EVENT_PHOTOS_PREFIX_CULTURE_SHOW}/”, or add files to public/culture-show for local development.`;
 
   return (
     <div className="min-h-screen bg-white">
@@ -70,7 +59,7 @@ export default function CultureShowPage() {
 
       <EventPhotoGallery
         photos={photos}
-        emptyFolderHint="public/culture-show"
+        emptyDescription={emptyDescription}
         sectionEyebrow="Photos"
         sectionTitle="Gallery"
       />

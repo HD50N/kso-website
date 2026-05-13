@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import ScrollAnimation from '@/components/ScrollAnimation';
 import PhotoDownloadButton from '@/components/PhotoDownloadButton';
 
@@ -8,15 +9,15 @@ type Photo = { src: string; alt: string };
 
 type EventPhotoGalleryProps = {
   photos: Photo[];
-  /** Shown when `photos` is empty, e.g. <code>public/culture-show</code> */
-  emptyFolderHint: string;
+  /** Shown when `photos` is empty (Supabase path + local fallback). */
+  emptyDescription: string;
   sectionEyebrow?: string;
   sectionTitle?: string;
 };
 
 export default function EventPhotoGallery({
   photos,
-  emptyFolderHint,
+  emptyDescription,
   sectionEyebrow = 'Photos',
   sectionTitle = 'Gallery',
 }: EventPhotoGalleryProps) {
@@ -38,10 +39,7 @@ export default function EventPhotoGallery({
     return (
       <section className="py-20 lg:py-24 px-6 lg:px-16">
         <div className="max-w-7xl mx-auto text-center">
-          <p className="text-gray-400 text-sm">
-            Add photos to the{' '}
-            <code className="bg-gray-100 px-1.5 py-0.5 text-xs">{emptyFolderHint}</code> folder to see them here.
-          </p>
+          <p className="text-gray-400 text-sm max-w-lg mx-auto leading-relaxed">{emptyDescription}</p>
         </div>
       </section>
     );
@@ -67,10 +65,14 @@ export default function EventPhotoGallery({
                     className="absolute inset-0 z-0 focus:outline-none"
                     aria-label={`Open photo ${index + 1} in gallery`}
                   >
-                    <img
+                    <Image
                       src={photo.src}
                       alt={photo.alt}
-                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      fill
+                      sizes="(max-width: 640px) 50vw, 33vw"
+                      quality={78}
+                      loading="lazy"
+                      className="object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                     <div
                       className="absolute inset-0 bg-black opacity-0 group-hover:opacity-20 transition-opacity duration-300"
@@ -124,11 +126,17 @@ export default function EventPhotoGallery({
             className="relative max-w-6xl w-full flex flex-col items-center"
             onClick={(e) => e.stopPropagation()}
           >
-            <img
-              src={photos[lightboxIndex].src}
-              alt={photos[lightboxIndex].alt}
-              className="max-w-full max-h-[75vh] sm:max-h-[85vh] object-contain shadow-2xl"
-            />
+            <div className="relative w-full max-w-[min(100vw-2rem,1400px)] h-[min(85vh,920px)] mx-auto">
+              <Image
+                src={photos[lightboxIndex].src}
+                alt={photos[lightboxIndex].alt}
+                fill
+                sizes="100vw"
+                quality={85}
+                priority
+                className="object-contain shadow-2xl"
+              />
+            </div>
             <div className="mt-4 flex flex-wrap items-center justify-center gap-4">
               <p className="text-white/50 text-xs tracking-[0.14em] uppercase">
                 {lightboxIndex + 1} / {photos.length}

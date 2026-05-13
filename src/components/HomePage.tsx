@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import ScrollAnimation from '@/components/ScrollAnimation';
@@ -166,10 +167,19 @@ export default function HomePage({ homepagePhotos }: { homepagePhotos: Photo[] }
                       className="absolute inset-0 z-0 focus:outline-none cursor-zoom-in"
                       aria-label={`View ${photo.alt} photo ${index + 1}`}
                     >
-                      <img
+                      <Image
                         src={photo.src}
                         alt={photo.alt}
-                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        fill
+                        sizes={
+                          index === 0
+                            ? '(max-width: 640px) 100vw, (max-width: 1024px) 66vw, 50vw'
+                            : '(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw'
+                        }
+                        quality={78}
+                        priority={index === 0}
+                        loading={index === 0 ? undefined : 'lazy'}
+                        className="object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                       <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
                     </button>
@@ -389,11 +399,17 @@ export default function HomePage({ homepagePhotos }: { homepagePhotos: Photo[] }
           </button>
 
           <div className="relative max-w-6xl w-full flex flex-col items-center" onClick={(e) => e.stopPropagation()}>
-            <img
-              src={homepagePhotos[lightboxIndex].src}
-              alt={homepagePhotos[lightboxIndex].alt}
-              className="max-w-full max-h-[75vh] sm:max-h-[85vh] object-contain shadow-2xl"
-            />
+            <div className="relative w-full max-w-[min(100vw-2rem,1400px)] h-[min(85vh,920px)] mx-auto">
+              <Image
+                src={homepagePhotos[lightboxIndex].src}
+                alt={homepagePhotos[lightboxIndex].alt}
+                fill
+                sizes="100vw"
+                quality={85}
+                priority
+                className="object-contain shadow-2xl"
+              />
+            </div>
             <div className="mt-4 flex flex-wrap items-center justify-center gap-4">
               <p className="text-white/50 text-xs tracking-[0.14em] uppercase">
                 {lightboxIndex + 1} / {homepagePhotos.length}

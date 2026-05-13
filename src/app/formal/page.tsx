@@ -1,26 +1,16 @@
-import { readdirSync } from 'fs';
-import path from 'path';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import ScrollAnimation from '@/components/ScrollAnimation';
 import EventPhotoGallery from '@/components/EventPhotoGallery';
+import { EVENT_PHOTOS_BUCKET, EVENT_PHOTOS_PREFIX_FORMAL } from '@/lib/event-photos';
+import { getFormalEventPhotos } from '@/lib/event-photos-storage.server';
 
-const IMAGE_EXT = /\.(jpg|jpeg|png|webp|gif)$/i;
+/** Revalidate gallery list from Storage / local public folder. */
+export const revalidate = 300;
 
-function getFormalPhotos(): { src: string; alt: string }[] {
-  const formalDir = path.join(process.cwd(), 'public', 'formal');
-  try {
-    const files = readdirSync(formalDir)
-      .filter((f) => IMAGE_EXT.test(f))
-      .sort();
-    return files.map((name) => ({ src: `/formal/${name}`, alt: 'KSO Formal' }));
-  } catch {
-    return [];
-  }
-}
-
-export default function FormalPage() {
-  const photos = getFormalPhotos();
+export default async function FormalPage() {
+  const photos = await getFormalEventPhotos();
+  const emptyDescription = `No photos found. Upload images to the Supabase bucket “${EVENT_PHOTOS_BUCKET}” under “${EVENT_PHOTOS_PREFIX_FORMAL}/”, or add files to public/formal for local development.`;
 
   return (
     <div className="min-h-screen bg-white">
@@ -64,7 +54,7 @@ export default function FormalPage() {
         </div>
       </section>
 
-      <EventPhotoGallery photos={photos} emptyFolderHint="public/formal" />
+      <EventPhotoGallery photos={photos} emptyDescription={emptyDescription} />
 
       <Footer />
     </div>
