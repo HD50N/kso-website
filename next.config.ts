@@ -16,7 +16,11 @@ if (supabaseUrl) {
 }
 
 const nextConfig: NextConfig = {
-  ...(supabaseImagePatterns.length > 0 ? { images: { remotePatterns: supabaseImagePatterns } } : {}),
+  images: {
+    /** Default in Next 16 is [75]; gallery `Image` uses 78 / 85. */
+    qualities: [75, 78, 85],
+    ...(supabaseImagePatterns.length > 0 ? { remotePatterns: supabaseImagePatterns } : {}),
+  },
   async headers() {
     return [
       {

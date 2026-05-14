@@ -48,12 +48,19 @@ export default function Navigation({ onOpenCart }: NavigationProps) {
               href="/"
               className="flex items-center gap-3 flex-shrink-0 z-10 font-[family-name:var(--font-poppins)]"
             >
-              <div className="w-6 h-6 flex-shrink-0 grid grid-cols-2 place-items-center" aria-hidden="true">
-                <span className="text-[11px] leading-none text-black">☰</span>
-                <span className="text-[11px] leading-none text-black">☵</span>
-                <span className="text-[11px] leading-none text-black">☲</span>
-                <span className="text-[11px] leading-none text-black">☷</span>
-              </div>
+              <svg viewBox="0 0 100 100" className="w-6 h-6 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <g transform="rotate(18 50 50)">
+                  <g transform="translate(100 0) scale(-1 1)">
+                    <circle cx="50" cy="50" r="49" fill="#CD2E3A" />
+                    <g transform="rotate(-90 50 50)">
+                      <path
+                        d="M50,1 A49,49 0 0,0 50,99 A24.5,24.5 0 0,1 50,50 A24.5,24.5 0 0,0 50,1 Z"
+                        fill="#0047A0"
+                      />
+                    </g>
+                  </g>
+                </g>
+              </svg>
               <div className="flex items-center">
                 <span className="text-black font-semibold text-[15px] tracking-[-0.02em]">KSO</span>
                 <span className="w-px h-4 bg-[#CD2E3A] mx-2.5 flex-shrink-0" aria-hidden />
@@ -168,12 +175,19 @@ export default function Navigation({ onOpenCart }: NavigationProps) {
               onClick={() => setIsMenuOpen(false)}
               className="flex items-center gap-2 font-[family-name:var(--font-poppins)]"
             >
-              <div className="w-6 h-6 flex-shrink-0 grid grid-cols-2 place-items-center" aria-hidden="true">
-                <span className="text-[11px] leading-none text-black">☰</span>
-                <span className="text-[11px] leading-none text-black">☵</span>
-                <span className="text-[11px] leading-none text-black">☲</span>
-                <span className="text-[11px] leading-none text-black">☷</span>
-              </div>
+              <svg viewBox="0 0 100 100" className="w-6 h-6 flex-shrink-0" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <g transform="rotate(18 50 50)">
+                  <g transform="translate(100 0) scale(-1 1)">
+                    <circle cx="50" cy="50" r="49" fill="#CD2E3A" />
+                    <g transform="rotate(-90 50 50)">
+                      <path
+                        d="M50,1 A49,49 0 0,0 50,99 A24.5,24.5 0 0,1 50,50 A24.5,24.5 0 0,0 50,1 Z"
+                        fill="#0047A0"
+                      />
+                    </g>
+                  </g>
+                </g>
+              </svg>
               <span className="text-black font-semibold text-[15px] tracking-[-0.02em]">KSO</span>
             </Link>
             <button

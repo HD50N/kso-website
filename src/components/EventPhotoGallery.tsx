@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import ScrollAnimation from '@/components/ScrollAnimation';
 import PhotoDownloadButton from '@/components/PhotoDownloadButton';
+import { isRemoteImageUrl } from '@/lib/utils';
 
 type Photo = { src: string; alt: string };
 
@@ -72,6 +73,7 @@ export default function EventPhotoGallery({
                       sizes="(max-width: 640px) 50vw, 33vw"
                       quality={78}
                       loading="lazy"
+                      unoptimized={isRemoteImageUrl(photo.src)}
                       className="object-cover transition-transform duration-500 group-hover:scale-105"
                     />
                     <div
@@ -134,6 +136,7 @@ export default function EventPhotoGallery({
                 sizes="100vw"
                 quality={85}
                 priority
+                unoptimized={isRemoteImageUrl(photos[lightboxIndex].src)}
                 className="object-contain shadow-2xl"
               />
             </div>

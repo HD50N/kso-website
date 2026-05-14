@@ -8,6 +8,7 @@ import ScrollAnimation from '@/components/ScrollAnimation';
 import Link from 'next/link';
 import PhotoDownloadButton from '@/components/PhotoDownloadButton';
 import SocialBrandIcon, { type SocialBrand } from '@/components/SocialBrandIcon';
+import { isRemoteImageUrl } from '@/lib/utils';
 
 type SocialLink = {
   name: string;
@@ -187,6 +188,7 @@ export default function HomePage({ homepagePhotos }: { homepagePhotos: Photo[] }
                         quality={78}
                         priority={index === 0}
                         loading={index === 0 ? undefined : 'lazy'}
+                        unoptimized={isRemoteImageUrl(photo.src)}
                         className="object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                       <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
@@ -419,6 +421,7 @@ export default function HomePage({ homepagePhotos }: { homepagePhotos: Photo[] }
                 sizes="100vw"
                 quality={85}
                 priority
+                unoptimized={isRemoteImageUrl(homepagePhotos[lightboxIndex].src)}
                 className="object-contain shadow-2xl"
               />
             </div>
