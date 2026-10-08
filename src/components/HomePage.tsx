@@ -8,7 +8,6 @@ import ScrollAnimation from '@/components/ScrollAnimation';
 import Link from 'next/link';
 import PhotoDownloadButton from '@/components/PhotoDownloadButton';
 import SocialBrandIcon, { type SocialBrand } from '@/components/SocialBrandIcon';
-import { isRemoteImageUrl } from '@/lib/utils';
 
 type SocialLink = {
   name: string;
@@ -57,19 +56,34 @@ export default function HomePage({ homepagePhotos }: { homepagePhotos: Photo[] }
   ];
 
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [failedSrcs, setFailedSrcs] = useState<Set<string>>(() => new Set());
+  const workingPhotos = homepagePhotos.filter((p) => !failedSrcs.has(p.src));
+
+  function markFailed(src: string) {
+    setFailedSrcs((prev) => {
+      if (prev.has(src)) return prev;
+      const next = new Set(prev);
+      next.add(src);
+      return next;
+    });
+  }
 
   useEffect(() => {
     if (lightboxIndex === null) return;
+    if (lightboxIndex >= workingPhotos.length) {
+      setLightboxIndex(workingPhotos.length > 0 ? workingPhotos.length - 1 : null);
+      return;
+    }
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setLightboxIndex(null);
       if (e.key === 'ArrowLeft')
-        setLightboxIndex((i) => (i === null ? null : (i - 1 + homepagePhotos.length) % homepagePhotos.length));
+        setLightboxIndex((i) => (i === null ? null : (i - 1 + workingPhotos.length) % workingPhotos.length));
       if (e.key === 'ArrowRight')
-        setLightboxIndex((i) => (i === null ? null : (i + 1) % homepagePhotos.length));
+        setLightboxIndex((i) => (i === null ? null : (i + 1) % workingPhotos.length));
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [lightboxIndex, homepagePhotos.length]);
+  }, [lightboxIndex, workingPhotos.length]);
 
   return (
     <div className="min-h-screen bg-white">
@@ -134,7 +148,7 @@ export default function HomePage({ homepagePhotos }: { homepagePhotos: Photo[] }
       </section>
 
       {/* ── Formal Highlights ── */}
-      {homepagePhotos.length > 0 && (
+      {workingPhotos.length > 0 && (
         <section className="py-20 lg:py-24 px-6 lg:px-16 border-b border-gray-100" id="formal-highlights">
           <div className="max-w-7xl mx-auto">
             <ScrollAnimation>
@@ -161,7 +175,7 @@ export default function HomePage({ homepagePhotos }: { homepagePhotos: Photo[] }
             </ScrollAnimation>
             <ScrollAnimation>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-1.5 sm:gap-2 auto-rows-[minmax(140px,1fr)]">
-                {homepagePhotos.map((photo, index) => (
+                {workingPhotos.map((photo, index) => (
                   <div
                     key={photo.src}
                     className={`relative overflow-hidden bg-gray-100 group ${
@@ -185,10 +199,10 @@ export default function HomePage({ homepagePhotos }: { homepagePhotos: Photo[] }
                             ? '(max-width: 640px) 100vw, (max-width: 1024px) 66vw, 50vw'
                             : '(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw'
                         }
-                        quality={78}
+                        quality={65}
                         priority={index === 0}
                         loading={index === 0 ? undefined : 'lazy'}
-                        unoptimized={isRemoteImageUrl(photo.src)}
+                        onError={() => markFailed(photo.src)}
                         className="object-cover transition-transform duration-500 group-hover:scale-105"
                       />
                       <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-20 transition-opacity duration-300" />
@@ -382,7 +396,7 @@ export default function HomePage({ homepagePhotos }: { homepagePhotos: Photo[] }
         </div>
       </section>
 
-      {lightboxIndex !== null && (
+      {lightboxIndex !== null && workingPhotos[lightboxIndex] && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/95 backdrop-blur-sm"
           onClick={() => setLightboxIndex(null)}
@@ -403,7 +417,7 @@ export default function HomePage({ homepagePhotos }: { homepagePhotos: Photo[] }
 
           <button
             type="button"
-            onClick={(e) => { e.stopPropagation(); setLightboxIndex((i) => (i === null ? null : (i - 1 + homepagePhotos.length) % homepagePhotos.length)); }}
+            onClick={(e) => { e.stopPropagation(); setLightboxIndex((i) => (i === null ? null : (i - 1 + workingPhotos.length) % workingPhotos.length)); }}
             className="absolute left-3 sm:left-5 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center bg-white/10 text-white hover:bg-white/20 transition-colors"
             aria-label="Previous photo"
           >
@@ -415,27 +429,27 @@ export default function HomePage({ homepagePhotos }: { homepagePhotos: Photo[] }
           <div className="relative max-w-6xl w-full flex flex-col items-center" onClick={(e) => e.stopPropagation()}>
             <div className="relative w-full max-w-[min(100vw-2rem,1400px)] h-[min(85vh,920px)] mx-auto">
               <Image
-                src={homepagePhotos[lightboxIndex].src}
-                alt={homepagePhotos[lightboxIndex].alt}
+                src={workingPhotos[lightboxIndex].src}
+                alt={workingPhotos[lightboxIndex].alt}
                 fill
-                sizes="100vw"
-                quality={85}
+                sizes="(max-width: 1400px) 100vw, 1400px"
+                quality={75}
                 priority
-                unoptimized={isRemoteImageUrl(homepagePhotos[lightboxIndex].src)}
+                onError={() => markFailed(workingPhotos[lightboxIndex].src)}
                 className="object-contain shadow-2xl"
               />
             </div>
             <div className="mt-4 flex flex-wrap items-center justify-center gap-4">
               <p className="text-white/50 text-xs tracking-[0.14em] uppercase">
-                {lightboxIndex + 1} / {homepagePhotos.length}
+                {lightboxIndex + 1} / {workingPhotos.length}
               </p>
-              <PhotoDownloadButton imageUrl={homepagePhotos[lightboxIndex].src} tone="onDark" size="md" />
+              <PhotoDownloadButton imageUrl={workingPhotos[lightboxIndex].src} tone="onDark" size="md" />
             </div>
           </div>
 
           <button
             type="button"
-            onClick={(e) => { e.stopPropagation(); setLightboxIndex((i) => (i === null ? null : (i + 1) % homepagePhotos.length)); }}
+            onClick={(e) => { e.stopPropagation(); setLightboxIndex((i) => (i === null ? null : (i + 1) % workingPhotos.length)); }}
             className="absolute right-3 sm:right-5 top-1/2 -translate-y-1/2 z-10 w-10 h-10 flex items-center justify-center bg-white/10 text-white hover:bg-white/20 transition-colors"
             aria-label="Next photo"
           >

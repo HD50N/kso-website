@@ -56,8 +56,3 @@ export function getProductDisplayImage(product: any): string {
   // Fall back to placeholder
   return '/placeholder-product.jpg';
 }
-
-/** `https?://` — use with `next/image` `unoptimized` so huge remote JPEGs (e.g. Supabase) are not processed on the server (avoids optimizer timeouts). */
-export function isRemoteImageUrl(src: string): boolean {
-  return src.startsWith('https://') || src.startsWith('http://');
-}

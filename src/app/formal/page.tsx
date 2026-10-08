@@ -2,7 +2,6 @@ import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import ScrollAnimation from '@/components/ScrollAnimation';
 import EventPhotoGallery from '@/components/EventPhotoGallery';
-import { EVENT_PHOTOS_BUCKET, EVENT_PHOTOS_PREFIX_FORMAL } from '@/lib/event-photos';
 import { getFormalEventPhotos } from '@/lib/event-photos-storage.server';
 
 /** Revalidate gallery list from Storage / local public folder. */
@@ -10,7 +9,6 @@ export const revalidate = 300;
 
 export default async function FormalPage() {
   const photos = await getFormalEventPhotos();
-  const emptyDescription = `No photos found. Upload images to the Supabase bucket “${EVENT_PHOTOS_BUCKET}” under “${EVENT_PHOTOS_PREFIX_FORMAL}/”, or add files to public/formal for local development.`;
 
   return (
     <div className="min-h-screen bg-white">
@@ -54,7 +52,7 @@ export default async function FormalPage() {
         </div>
       </section>
 
-      <EventPhotoGallery photos={photos} emptyDescription={emptyDescription} />
+      <EventPhotoGallery photos={photos} />
 
       <Footer />
     </div>

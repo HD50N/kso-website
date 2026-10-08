@@ -37,7 +37,7 @@ export async function downloadImageFromUrl(url: string, suggestedName?: string):
       : `${window.location.origin}${url.startsWith('/') ? url : `/${url}`}`;
 
   try {
-    const res = await fetch(absoluteUrl, { mode: 'cors', credentials: 'omit', cache: 'no-store' });
+    const res = await fetch(absoluteUrl, { mode: 'cors', credentials: 'omit' });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const blob = await res.blob();
     const objectUrl = URL.createObjectURL(blob);

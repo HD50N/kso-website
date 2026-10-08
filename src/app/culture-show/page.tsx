@@ -2,14 +2,12 @@ import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import ScrollAnimation from '@/components/ScrollAnimation';
 import EventPhotoGallery from '@/components/EventPhotoGallery';
-import { EVENT_PHOTOS_BUCKET, EVENT_PHOTOS_PREFIX_CULTURE_SHOW } from '@/lib/event-photos';
 import { getCultureShowEventPhotos } from '@/lib/event-photos-storage.server';
 
 export const revalidate = 300;
 
 export default async function CultureShowPage() {
   const photos = await getCultureShowEventPhotos();
-  const emptyDescription = `No photos found. Upload images to the Supabase bucket “${EVENT_PHOTOS_BUCKET}” under “${EVENT_PHOTOS_PREFIX_CULTURE_SHOW}/”, or add files to public/culture-show for local development.`;
 
   return (
     <div className="min-h-screen bg-white">
@@ -57,12 +55,7 @@ export default async function CultureShowPage() {
         </div>
       </section>
 
-      <EventPhotoGallery
-        photos={photos}
-        emptyDescription={emptyDescription}
-        sectionEyebrow="Photos"
-        sectionTitle="Gallery"
-      />
+      <EventPhotoGallery photos={photos} sectionEyebrow="Photos" sectionTitle="Gallery" />
 
       {/* Coming Soon */}
       <section className="py-20 lg:py-24 px-6 lg:px-16 border-b border-gray-100">
