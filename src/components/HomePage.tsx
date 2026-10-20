@@ -294,6 +294,15 @@ export default function HomePage({ homepagePhotos }: { homepagePhotos: Photo[] }
                 <div className="text-sm font-bold text-black tracking-tight">The Face Shop</div>
                 <div className="text-xs text-gray-400 mt-1">Clean Beauty Sponsor</div>
               </div>
+              <div className="text-center">
+                <img
+                  src="/perilla.jpg"
+                  alt="Perilla"
+                  className="w-44 h-20 object-contain mx-auto mb-4 grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-300"
+                />
+                <div className="text-sm font-bold text-black tracking-tight">Perilla</div>
+                <div className="text-xs text-gray-400 mt-1">Korean American Fare & Steakhouse</div>
+              </div>
             </div>
           </ScrollAnimation>
         </div>
