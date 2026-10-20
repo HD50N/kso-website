@@ -23,7 +23,6 @@ export default function Navigation({ onOpenCart }: NavigationProps) {
     { name: 'About', href: '/about' },
     { name: 'Board', href: '/board' },
     { name: 'Network', href: '/alumni' },
-    { name: 'Internships', href: '/internships' },
     { name: 'Applications', href: '/applications' },
   ];
 
