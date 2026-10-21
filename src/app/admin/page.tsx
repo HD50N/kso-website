@@ -54,8 +54,6 @@ export default function AdminPage() {
   const [savingChanges, setSavingChanges] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-  const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
-  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
   
   // Sync products state
   const [syncProducts, setSyncProducts] = useState<any[]>([]);
@@ -246,62 +244,19 @@ export default function AdminPage() {
     }
   };
 
-  const insertPosition = (fromIndex: number, toIndex: number) => {
-    if (fromIndex < 0 || toIndex < 0 || fromIndex >= localBoardPositions.length || toIndex >= localBoardPositions.length) {
-      return;
-    }
-
-    // If dragging to the same position, do nothing
-    if (fromIndex === toIndex) {
-      return;
-    }
+  const movePosition = (index: number, direction: -1 | 1) => {
+    const target = index + direction;
+    if (target < 0 || target >= localBoardPositions.length) return;
 
     const newPositions = [...localBoardPositions];
-    const [removed] = newPositions.splice(fromIndex, 1);
-    
-    // Calculate the correct insert index
-    // If dragging forward (fromIndex < toIndex), we need to adjust because we removed an item
-    // If dragging backward (fromIndex > toIndex), the index is already correct
-    const insertIndex = fromIndex < toIndex ? toIndex - 1 : toIndex;
-    newPositions.splice(insertIndex, 0, removed);
-    
-    // Update display_order based on new positions (left to right, top to bottom)
-    newPositions.forEach((position, index) => {
-      position.display_order = index;
+    const [removed] = newPositions.splice(index, 1);
+    newPositions.splice(target, 0, removed);
+    newPositions.forEach((position, i) => {
+      position.display_order = i;
     });
-    
+
     setLocalBoardPositions(newPositions);
     setHasUnsavedChanges(true);
-  };
-
-  const handleDragStart = (index: number) => {
-    setDraggedIndex(index);
-  };
-
-  const handleDragOver = (e: React.DragEvent, index: number) => {
-    e.preventDefault();
-    e.dataTransfer.dropEffect = 'move';
-    if (draggedIndex !== null && draggedIndex !== index) {
-      setDragOverIndex(index);
-    }
-  };
-
-  const handleDragLeave = () => {
-    setDragOverIndex(null);
-  };
-
-  const handleDrop = (e: React.DragEvent, dropIndex: number) => {
-    e.preventDefault();
-    if (draggedIndex !== null && draggedIndex !== dropIndex) {
-      insertPosition(draggedIndex, dropIndex);
-    }
-    setDraggedIndex(null);
-    setDragOverIndex(null);
-  };
-
-  const handleDragEnd = () => {
-    setDraggedIndex(null);
-    setDragOverIndex(null);
   };
 
   const updateLocalPosition = (positionId: string, updates: Partial<BoardPosition>) => {
@@ -313,24 +268,6 @@ export default function AdminPage() {
       )
     );
     setHasUnsavedChanges(true);
-  };
-
-  // Function to validate username exists when assigned to a position
-  const validateUsername = async (username: string): Promise<boolean> => {
-    if (!username) return true; // Empty username is valid (unassigned position)
-    
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('username')
-      .eq('username', username)
-      .single();
-
-    if (error || !data) {
-      setError(`Username "${username}" not found. Please enter a valid username.`);
-      return false;
-    }
-    
-    return true;
   };
 
   const deleteLocalPosition = (positionId: string) => {
@@ -746,6 +683,11 @@ export default function AdminPage() {
     );
   }
 
+  const assignableUsers = users
+    .filter((member): member is Profile & { username: string } => Boolean(member.username))
+    .slice()
+    .sort((a, b) => a.full_name.localeCompare(b.full_name));
+
   return (
     <div className="min-h-screen bg-white">
       <Navigation />
@@ -883,7 +825,7 @@ export default function AdminPage() {
                           <p className={ADMIN_SECTION_TITLE}>Executive board</p>
                           <h2 className={ADMIN_HEADING}>Board positions</h2>
                           <p className={ADMIN_LEAD}>
-                            Map roles to usernames for the public board page. Drag cards to set display order (left to right, then next row).
+                            Pick a member for each role. The list order is the order on the public board page.
                           </p>
 
                           {error && (
@@ -1101,7 +1043,7 @@ export default function AdminPage() {
                           </>
                         )}
 
-                        {/* Board Positions - Draggable Cards */}
+                        {/* Board positions — ordered list */}
                         {activeTab === 'board' && (
                           <>
                             {boardLoading ? (
@@ -1113,127 +1055,109 @@ export default function AdminPage() {
                               </div>
                             ) : (
                               <>
-                                <p className="text-sm text-gray-500 mb-6 max-w-2xl">
-                                  <span className="text-[10px] font-semibold tracking-[0.14em] uppercase text-black">Reorder</span>
-                                  {' — '}Drag cards to change order. Order follows left to right, then the next row.
-                                </p>
-
-                                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
-                                    {localBoardPositions.map((position, index) => (
+                                <div className="border border-gray-100 bg-white divide-y divide-gray-100">
+                                  {localBoardPositions.length === 0 && (
+                                    <p className="px-4 py-6 text-sm text-gray-500 text-center">
+                                      No positions yet. Add one to start the board.
+                                    </p>
+                                  )}
+                                  {localBoardPositions.map((position, index) => {
+                                    const usernameKnown = !position.username || assignableUsers.some((member) => member.username === position.username);
+                                    const compactField = `${ADMIN_FIELD} !px-2.5 !py-1.5 text-sm`;
+                                    return (
                                       <div
                                         key={position.id}
-                                        draggable
-                                        onDragStart={() => handleDragStart(index)}
-                                        onDragOver={(e) => handleDragOver(e, index)}
-                                        onDragLeave={handleDragLeave}
-                                        onDrop={(e) => handleDrop(e, index)}
-                                        onDragEnd={handleDragEnd}
-                                        className={`bg-white border p-4 transition-all duration-200 cursor-move ${
-                                          draggedIndex === index
-                                            ? 'opacity-40 border-black scale-[0.98]'
-                                            : dragOverIndex === index
-                                            ? 'border-black ring-1 ring-black/10'
-                                            : 'border-gray-100 hover:border-gray-300'
-                                        }`}
+                                        className={`flex flex-wrap items-center gap-2 px-3 py-2 ${position.is_active ? '' : 'bg-gray-50/80'}`}
                                       >
-                                        <div className="flex items-center justify-between mb-3 pb-3 border-b border-gray-100">
-                                          <div className="flex items-center gap-1 cursor-grab active:cursor-grabbing text-gray-400">
-                                            <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
-                                              <path d="M7 2a2 2 0 1 1 .001 4.001A2 2 0 0 1 7 2zm0 6a2 2 0 1 1 .001 4.001A2 2 0 0 1 7 8zm0 6a2 2 0 1 1 .001 4.001A2 2 0 0 1 7 14zm6-8a2 2 0 1 1 .001-4.001A2 2 0 0 1 13 6zm0 2a2 2 0 1 1 .001 4.001A2 2 0 0 1 13 8zm0 6a2 2 0 1 1 .001 4.001A2 2 0 0 1 13 14z" />
-                                            </svg>
-                                          </div>
-                                          <span className="text-[10px] font-mono tabular-nums text-gray-300">
-                                            {String(index + 1).padStart(2, '0')}
-                                          </span>
-                                        </div>
-
-                                        <div className="mb-3">
-                                          <label className="block text-[10px] tracking-[0.14em] uppercase text-gray-400 font-medium mb-1.5">Role</label>
-                                          <input
-                                            type="text"
-                                            value={position.role}
-                                            onChange={(e) => updateLocalPosition(position.id, { role: e.target.value })}
-                                            className={`${ADMIN_FIELD} py-2 text-xs font-semibold`}
-                                            placeholder="Role title"
-                                          />
-                                        </div>
-
-                                        <div className="mb-3">
-                                          <label className="block text-[10px] tracking-[0.14em] uppercase text-gray-400 font-medium mb-1.5">Username</label>
-                                          <div className="flex items-center gap-1">
-                                            <input
-                                              type="text"
-                                              value={position.username || ''}
-                                              onChange={(e) => updateLocalPosition(position.id, { username: e.target.value || undefined })}
-                                              onBlur={async (e) => {
-                                                const username = e.target.value.trim();
-                                                if (username) {
-                                                  await validateUsername(username);
-                                                }
-                                              }}
-                                              placeholder="username"
-                                              className={`${ADMIN_FIELD} py-2 text-xs flex-1`}
-                                            />
-                                            {position.username && (
-                                              <span className="text-[10px] text-gray-400 shrink-0">✓</span>
-                                            )}
-                                          </div>
-                                        </div>
-
-                                        <div className="flex items-center justify-between pt-3 border-t border-gray-100">
-                                          <span
-                                            className={`text-[10px] font-semibold tracking-[0.12em] uppercase ${
-                                              position.is_active ? 'text-black' : 'text-gray-400'
-                                            }`}
+                                        <span className="text-[10px] font-mono tabular-nums text-gray-300 w-5 shrink-0">
+                                          {String(index + 1).padStart(2, '0')}
+                                        </span>
+                                        <div className="flex shrink-0">
+                                          <button
+                                            type="button"
+                                            onClick={() => movePosition(index, -1)}
+                                            disabled={index === 0}
+                                            className="w-6 h-7 border border-gray-200 text-[11px] text-gray-500 hover:border-black hover:text-black disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                                            aria-label="Move up"
                                           >
-                                            {position.is_active ? 'Active' : 'Inactive'}
-                                          </span>
-                                          <div className="flex gap-1">
-                                            <button
-                                              type="button"
-                                              onClick={() => updateLocalPosition(position.id, { is_active: !position.is_active })}
-                                              className="text-[10px] font-semibold tracking-[0.12em] uppercase px-2 py-1.5 border border-gray-200 hover:border-black transition-colors"
-                                              title={position.is_active ? 'Deactivate' : 'Activate'}
-                                            >
-                                              {position.is_active ? 'Off' : 'On'}
-                                            </button>
-                                            <button
-                                              type="button"
-                                              onClick={() => deleteLocalPosition(position.id)}
-                                              className="text-[10px] font-semibold tracking-[0.12em] uppercase px-2 py-1.5 border border-[#CD2E3A]/30 text-[#CD2E3A] hover:bg-[#CD2E3A] hover:text-white transition-colors"
-                                              title="Remove position"
-                                            >
-                                              ×
-                                            </button>
-                                          </div>
+                                            ↑
+                                          </button>
+                                          <button
+                                            type="button"
+                                            onClick={() => movePosition(index, 1)}
+                                            disabled={index === localBoardPositions.length - 1}
+                                            className="w-6 h-7 -ml-px border border-gray-200 text-[11px] text-gray-500 hover:border-black hover:text-black disabled:opacity-30 disabled:pointer-events-none transition-colors"
+                                            aria-label="Move down"
+                                          >
+                                            ↓
+                                          </button>
                                         </div>
+                                        <input
+                                          type="text"
+                                          value={position.role}
+                                          onChange={(e) => updateLocalPosition(position.id, { role: e.target.value })}
+                                          className={`${compactField} w-40 sm:w-48 shrink-0`}
+                                          placeholder="Role"
+                                          aria-label="Role"
+                                        />
+                                        <select
+                                          value={position.username || ''}
+                                          onChange={(e) =>
+                                            updateLocalPosition(position.id, { username: e.target.value || undefined })
+                                          }
+                                          className={`${compactField} min-w-0 flex-1`}
+                                          aria-label="Member"
+                                        >
+                                          <option value="">Unassigned</option>
+                                          {position.username && !usernameKnown && (
+                                            <option value={position.username}>
+                                              @{position.username} (not in member list)
+                                            </option>
+                                          )}
+                                          {assignableUsers.map((member) => (
+                                            <option key={member.id} value={member.username}>
+                                              {member.full_name} (@{member.username})
+                                            </option>
+                                          ))}
+                                        </select>
+                                        <button
+                                          type="button"
+                                          onClick={() => updateLocalPosition(position.id, { is_active: !position.is_active })}
+                                          className={`shrink-0 text-[10px] font-semibold tracking-[0.12em] uppercase px-2 py-1.5 border transition-colors ${
+                                            position.is_active
+                                              ? 'border-gray-200 text-black hover:border-black'
+                                              : 'border-gray-200 text-gray-400 hover:border-black hover:text-black'
+                                          }`}
+                                        >
+                                          {position.is_active ? 'Active' : 'Hidden'}
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={() => deleteLocalPosition(position.id)}
+                                          className="shrink-0 text-[10px] font-semibold tracking-[0.12em] uppercase px-2 py-1.5 border border-[#CD2E3A]/30 text-[#CD2E3A] hover:bg-[#CD2E3A] hover:text-white transition-colors"
+                                        >
+                                          Remove
+                                        </button>
                                       </div>
-                                    ))}
+                                    );
+                                  })}
+                                </div>
 
-                                    <button
-                                      type="button"
-                                      onClick={addBoardPosition}
-                                      disabled={addingPosition}
-                                      className="border border-dashed border-gray-200 bg-gray-50/50 p-4 transition-all min-h-[160px] flex flex-col items-center justify-center hover:border-gray-400 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
-                                    >
-                                      {addingPosition ? (
-                                        <div className="w-6 h-6 border border-black border-t-transparent rounded-full animate-spin" />
-                                      ) : (
-                                        <>
-                                          <svg className="w-6 h-6 text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4v16m8-8H4" />
-                                          </svg>
-                                          <span className="text-[10px] font-semibold tracking-[0.14em] uppercase text-gray-500">Add position</span>
-                                        </>
-                                      )}
-                                    </button>
-                                  </div>
-
-                                {localBoardPositions.length > 0 && (
-                                  <p className="mt-6 text-[10px] tracking-[0.18em] uppercase text-gray-400 font-medium">
-                                    {localBoardPositions.filter((p) => p.is_active).length} active · {localBoardPositions.length} total
-                                  </p>
-                                )}
+                                <div className="mt-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                                  <button
+                                    type="button"
+                                    onClick={addBoardPosition}
+                                    disabled={addingPosition}
+                                    className={ADMIN_BTN_OUTLINE}
+                                  >
+                                    {addingPosition ? 'Adding…' : 'Add position'}
+                                  </button>
+                                  {localBoardPositions.length > 0 && (
+                                    <p className="text-[10px] tracking-[0.18em] uppercase text-gray-400 font-medium">
+                                      {localBoardPositions.filter((p) => p.is_active).length} active · {localBoardPositions.length} total
+                                    </p>
+                                  )}
+                                </div>
                               </>
                             )}
                           </>
