@@ -1,17 +1,30 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { Profile } from '@/lib/supabase';
+import {
+  effectiveMemberType,
+  isAlumniClassYear,
+  isBoardMember,
+  memberTypeLabel,
+  userTypeForSave,
+} from '@/lib/membership';
 import { supabase } from '@/lib/supabase';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import ScrollAnimation from '@/components/ScrollAnimation';
 import AuthPrompt from '@/components/AuthPrompt';
 import PhotoDownloadButton from '@/components/PhotoDownloadButton';
-import ReactCrop, { Crop, PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
-import 'react-image-crop/dist/ReactCrop.css';
+import AvatarCropper from '@/components/AvatarCropper';
+import {
+  AVATAR_ACCEPT,
+  fetchAvatarAsFile,
+  toCroppableImage,
+  uploadAvatar,
+  validateSourceImage,
+} from '@/lib/avatar';
 
 export default function ProfilePage() {
   const { user, profile, updateProfile, signOut, loading: authLoading } = useAuth();
@@ -19,20 +32,18 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [convertingPhoto, setConvertingPhoto] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [formData, setFormData] = useState<Partial<Profile>>({});
   const [usernameError, setUsernameError] = useState<string>('');
   const [isCheckingUsername, setIsCheckingUsername] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [showCropModal, setShowCropModal] = useState(false);
-  const [crop, setCrop] = useState<Crop>();
-  const [completedCrop, setCompletedCrop] = useState<PixelCrop>();
+  /** The image open in the cropper: a newly picked file, or the stored photo. */
+  const [editingFile, setEditingFile] = useState<File | null>(null);
+  /** True when `editingFile` is the existing photo rather than a new upload. */
+  const [adjustingCurrent, setAdjustingCurrent] = useState(false);
+  const [loadingCurrentPhoto, setLoadingCurrentPhoto] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
-  const [pendingPhotoUrl, setPendingPhotoUrl] = useState<string | null>(null);
-  const [croppedFile, setCroppedFile] = useState<File | null>(null);
-  const imgRef = useRef<HTMLImageElement>(null);
 
   useEffect(() => {
     if (profile) {
@@ -49,10 +60,6 @@ export default function ProfilePage() {
       });
     }
   }, [profile]);
-
-  useEffect(() => {
-    return () => { if (previewUrl) { URL.revokeObjectURL(previewUrl); } };
-  }, [previewUrl]);
 
   useEffect(() => {
     const handleOnline = () => setIsOnline(true);
@@ -105,7 +112,12 @@ export default function ProfilePage() {
         instagram_url: formData.instagram_url?.trim(),
         bio: formData.bio?.trim(),
         graduation_year: formData.graduation_year ? Number(formData.graduation_year) : undefined,
-        user_type: formData.user_type === 'board_member' ? profile?.user_type || 'undergrad' : formData.user_type,
+        // `profile.user_type` is the stored value, so a board role survives the save.
+        user_type: userTypeForSave(
+          profile?.user_type,
+          formData.user_type,
+          formData.graduation_year ? Number(formData.graduation_year) : undefined,
+        ),
       };
 
       const timeoutPromise = new Promise((_, reject) => { setTimeout(() => reject(new Error('Operation timed out')), 15000); });
@@ -126,6 +138,8 @@ export default function ProfilePage() {
   };
 
   const handleInputChange = (field: keyof Profile, value: any) => {
+    // No need to rewrite user_type here: the Member Type control derives its
+    // value from the graduation year, and the save path derives what it stores.
     setFormData(prev => ({ ...prev, [field]: value }));
     if (field === 'username') { setUsernameError(''); }
   };
@@ -134,62 +148,61 @@ export default function ProfilePage() {
     if (formData.username && formData.username !== profile?.username) { await validateUsername(formData.username); }
   };
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      if (!file.type.startsWith('image/')) { setError('Please select an image file'); return; }
-      if (file.size > 5 * 1024 * 1024) { setError('Image must be smaller than 5MB'); return; }
-      setSelectedFile(file);
-      setError('');
-      const url = URL.createObjectURL(file);
-      setPreviewUrl(url);
-      setShowCropModal(true);
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const input = event.target;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    const invalid = validateSourceImage(file);
+    if (invalid) { setError(invalid); return; }
+
+    setError('');
+    // Clear the input so re-picking the same file still fires onChange.
+    input.value = '';
+
+    let croppable: File;
+    try {
+      croppable = await toCroppableImage(file, setConvertingPhoto);
+    } catch (err) {
+      console.error('Image decode failed:', err);
+      setError('We could not read that image. Please try a JPEG or PNG.');
+      return;
+    }
+
+    setAdjustingCurrent(false);
+    setEditingFile(croppable);
+  };
+
+  /** Re-open the photo already on the profile, to straighten or re-crop it. */
+  const handleAdjustCurrentPhoto = async () => {
+    if (!profile?.avatar_url) return;
+    setError('');
+    setLoadingCurrentPhoto(true);
+    try {
+      setAdjustingCurrent(true);
+      setEditingFile(await fetchAvatarAsFile(profile.avatar_url));
+    } catch (err: any) {
+      console.error('Could not load the current photo:', err);
+      setAdjustingCurrent(false);
+      setError('Could not load your current photo for editing. Try uploading it again instead.');
+    } finally {
+      setLoadingCurrentPhoto(false);
     }
   };
 
-  const centerAspectCrop = (mediaWidth: number, mediaHeight: number, aspect: number) => {
-    return centerCrop(makeAspectCrop({ unit: '%', width: 90 }, aspect, mediaWidth, mediaHeight), mediaWidth, mediaHeight);
+  const closeCropper = () => {
+    setEditingFile(null);
+    setAdjustingCurrent(false);
   };
 
-  const onImageLoad = (e: React.SyntheticEvent<HTMLImageElement>) => {
-    if (aspect) { const { width, height } = e.currentTarget; setCrop(centerAspectCrop(width, height, aspect)); }
-  };
-
-  const aspect = 1;
-
-  const getCroppedImg = (image: HTMLImageElement, crop: PixelCrop, fileName: string): Promise<File> => {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    if (!ctx) throw new Error('No 2d context');
-    const scaleX = image.naturalWidth / image.width;
-    const scaleY = image.naturalHeight / image.height;
-    canvas.width = crop.width;
-    canvas.height = crop.height;
-    ctx.imageSmoothingQuality = 'high';
-    ctx.drawImage(image, crop.x * scaleX, crop.y * scaleY, crop.width * scaleX, crop.height * scaleY, 0, 0, crop.width, crop.height);
-    return new Promise((resolve, reject) => {
-      canvas.toBlob((blob) => {
-        if (!blob) { reject(new Error('Canvas is empty')); return; }
-        resolve(new File([blob], fileName, { type: 'image/jpeg' }));
-      }, 'image/jpeg', 0.95);
-    });
-  };
-
-  const handleCropComplete = async () => {
-    if (!completedCrop || !imgRef.current || !selectedFile || !user) return;
+  const handleCroppedPhoto = async (croppedImageFile: File) => {
+    if (!user) return;
     try {
       setUploadingPhoto(true);
       setError('');
-      const croppedImageFile = await getCroppedImg(imgRef.current, completedCrop, selectedFile.name);
-      const fileExt = croppedImageFile.name.split('.').pop();
-      const fileName = `${Date.now()}.${fileExt}`;
-      const filePath = `${user.id}/${fileName}`;
-      const { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, croppedImageFile);
-      if (uploadError) throw new Error(`Photo upload failed: ${uploadError.message}`);
-      const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(filePath);
+      const publicUrl = await uploadAvatar(user.id, croppedImageFile);
       await updateProfile({ avatar_url: publicUrl });
-      setCroppedFile(null); setSelectedFile(null); setPreviewUrl(null); setPendingPhotoUrl(null);
-      setShowCropModal(false); setCrop(undefined); setCompletedCrop(undefined);
+      closeCropper();
       setSuccess('Profile photo updated successfully!');
       setTimeout(() => setSuccess(''), 3000);
     } catch (error: any) {
@@ -206,7 +219,7 @@ export default function ProfilePage() {
       setUploadingPhoto(true);
       setError('');
       await updateProfile({ avatar_url: undefined });
-      setCroppedFile(null); setSelectedFile(null); setPreviewUrl(null); setPendingPhotoUrl(null);
+      closeCropper();
       setSuccess('Profile photo removed successfully!');
       setTimeout(() => setSuccess(''), 3000);
     } catch (error: any) {
@@ -329,7 +342,7 @@ export default function ProfilePage() {
                     {profile?.avatar_url ? (
                       <>
                         <img src={profile.avatar_url} alt="Profile" className="w-20 h-20 object-cover" />
-                        {!selectedFile && (
+                        {!editingFile && (
                           <div className="absolute top-0 left-0 z-10 opacity-0 pointer-events-none transition-opacity group-hover:opacity-100 group-hover:pointer-events-auto">
                             <PhotoDownloadButton
                               imageUrl={profile.avatar_url}
@@ -340,8 +353,6 @@ export default function ProfilePage() {
                           </div>
                         )}
                       </>
-                    ) : previewUrl ? (
-                      <img src={previewUrl} alt="Preview" className="w-20 h-20 object-cover" />
                     ) : (
                       <div className="w-20 h-20 bg-gray-100 flex items-center justify-center">
                         <span className="text-2xl font-black text-gray-300">
@@ -353,30 +364,32 @@ export default function ProfilePage() {
                       <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                       </svg>
-                      <input type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
+                      <input type="file" accept={AVATAR_ACCEPT} onChange={handleFileSelect} className="hidden" />
                     </label>
                   </div>
 
-                  {showCropModal && (
-                    <div className="space-y-2 mb-4">
-                      <button onClick={handleCropComplete} disabled={uploadingPhoto} className="w-full text-[10px] tracking-[0.14em] uppercase font-semibold py-2 bg-black text-white hover:bg-gray-800 transition-colors disabled:opacity-50">
-                        {uploadingPhoto ? 'Cropping...' : 'Crop Photo'}
+                  {convertingPhoto && (
+                    <p className="text-[10px] tracking-[0.14em] uppercase font-semibold text-gray-400 mb-4">
+                      Converting photo…
+                    </p>
+                  )}
+
+                  {profile?.avatar_url && !editingFile && (
+                    <div className="w-full space-y-2 mb-4">
+                      <button onClick={handleAdjustCurrentPhoto} disabled={uploadingPhoto || loadingCurrentPhoto} className="w-full text-[10px] tracking-[0.14em] uppercase font-semibold py-2 border border-gray-200 text-gray-600 hover:border-black hover:text-black transition-colors disabled:opacity-50">
+                        {loadingCurrentPhoto ? 'Loading...' : 'Adjust Photo'}
                       </button>
-                      <button onClick={() => { setSelectedFile(null); setPreviewUrl(null); setShowCropModal(false); setCrop(undefined); setCompletedCrop(undefined); }} className="w-full text-[10px] tracking-[0.14em] uppercase font-semibold py-2 border border-gray-200 text-gray-500 hover:border-black hover:text-black transition-colors">
-                        Cancel
+                      <button onClick={removeProfilePhoto} disabled={uploadingPhoto} className="w-full text-[10px] tracking-[0.14em] uppercase font-semibold py-2 border border-gray-200 text-gray-400 hover:border-[#CD2E3A] hover:text-[#CD2E3A] transition-colors disabled:opacity-50">
+                        {uploadingPhoto ? 'Removing...' : 'Remove Photo'}
                       </button>
                     </div>
                   )}
 
-                  {profile?.avatar_url && !selectedFile && (
-                    <button onClick={removeProfilePhoto} disabled={uploadingPhoto} className="w-full text-[10px] tracking-[0.14em] uppercase font-semibold py-2 border border-gray-200 text-gray-400 hover:border-[#CD2E3A] hover:text-[#CD2E3A] transition-colors disabled:opacity-50 mb-4">
-                      {uploadingPhoto ? 'Removing...' : 'Remove Photo'}
-                    </button>
-                  )}
-
                   <h2 className="text-base font-black text-black tracking-tight">{profile?.full_name || 'User'}</h2>
                   {profile?.username && <p className="text-xs text-gray-400 mt-0.5">@{profile.username}</p>}
-                  <p className="text-xs text-gray-500 mt-1 capitalize">{profile?.user_type?.replace('_', ' ') || 'Member'}</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    {memberTypeLabel(profile?.user_type, profile?.graduation_year)}
+                  </p>
                   {profile?.board_position && <p className="text-xs text-[#CD2E3A] font-semibold mt-1">{profile.board_position}</p>}
                 </div>
 
@@ -469,21 +482,42 @@ export default function ProfilePage() {
                       <label className={labelClass}>Member Type</label>
                       {isEditing ? (
                         <div>
-                          <select value={formData.user_type || 'undergrad'} onChange={(e) => handleInputChange('user_type', e.target.value)} className={inputClass}>
-                            <option value="undergrad">Undergraduate Student</option>
-                            <option value="grad">Graduate Student</option>
-                            <option value="alumni">Alumni</option>
-                          </select>
-                          <p className="text-gray-400 text-xs mt-1.5">Board member status can only be assigned by administrators.</p>
+                          {profile?.user_type === 'board_member' ? (
+                            <p className="text-gray-900 py-3 text-sm">
+                              {memberTypeLabel(profile?.user_type, formData.graduation_year)}
+                            </p>
+                          ) : (
+                            <select
+                              value={effectiveMemberType(formData.user_type, formData.graduation_year)}
+                              onChange={(e) => handleInputChange('user_type', e.target.value)}
+                              disabled={isAlumniClassYear(formData.graduation_year)}
+                              className={inputClass}
+                            >
+                              <option value="undergrad">Undergraduate Student</option>
+                              <option value="grad">Graduate Student</option>
+                              <option value="alumni">Alumni</option>
+                            </select>
+                          )}
+                          <p className="text-gray-400 text-xs mt-1.5">
+                            {profile?.user_type === 'board_member'
+                              ? 'Your standing follows your class year. Board positions are assigned by administrators.'
+                              : isAlumniClassYear(formData.graduation_year)
+                                ? 'Class years are counted as alumni starting in June of that year.'
+                                : 'Board positions are assigned by administrators.'}
+                          </p>
                         </div>
                       ) : (
                         <div>
-                          <p className="text-gray-900 py-3 text-sm capitalize">{profile?.user_type?.replace('_', ' ')}</p>
-                          {profile?.user_type === 'board_member' && <p className="text-xs text-gray-400">Board member status managed by admins.</p>}
+                          <p className="text-gray-900 py-3 text-sm">
+                            {memberTypeLabel(profile?.user_type, profile?.graduation_year)}
+                          </p>
+                          {isBoardMember(profile?.user_type, profile?.board_position) && (
+                            <p className="text-xs text-gray-400">Board position managed by admins.</p>
+                          )}
                         </div>
                       )}
                     </div>
-                    {(formData.user_type === 'board_member' || profile?.user_type === 'board_member') && (
+                    {isBoardMember(profile?.user_type, profile?.board_position) && (
                       <div>
                         <label className={labelClass}>Board Position</label>
                         {isEditing ? (
@@ -555,34 +589,36 @@ export default function ProfilePage() {
       </section>
 
       {/* Crop modal */}
-      {showCropModal && previewUrl && (
+      {editingFile && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white max-w-2xl w-full max-h-[90vh] overflow-hidden border border-gray-100">
             <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
               <div>
-                <h3 className="text-base font-black text-black tracking-tight">Crop Profile Photo</h3>
-                <p className="text-xs text-gray-400 mt-0.5">Drag to position, resize to crop</p>
+                <h3 className="text-base font-black text-black tracking-tight">
+                  {adjustingCurrent ? 'Adjust Profile Photo' : 'Crop Profile Photo'}
+                </h3>
+                <p className="text-xs text-gray-400 mt-0.5">Rotate to straighten, drag to position, resize to crop</p>
               </div>
-              <button onClick={() => { setSelectedFile(null); setPreviewUrl(null); setShowCropModal(false); setCrop(undefined); setCompletedCrop(undefined); }} className="p-1.5 text-gray-400 hover:text-black transition-colors">
+              <button onClick={closeCropper} className="p-1.5 text-gray-400 hover:text-black transition-colors" aria-label="Close">
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
-            <div className="p-6 overflow-auto max-h-[60vh]">
-              <div className="flex justify-center">
-                <ReactCrop crop={crop} onChange={(_, percentCrop) => setCrop(percentCrop)} onComplete={(c) => setCompletedCrop(c)} aspect={aspect} circularCrop minWidth={100} minHeight={100}>
-                  <img ref={imgRef} alt="Crop me" src={previewUrl} onLoad={onImageLoad} className="max-w-full max-h-[50vh] object-contain" />
-                </ReactCrop>
-              </div>
-            </div>
-            <div className="px-6 py-4 border-t border-gray-100 flex justify-end gap-3">
-              <button onClick={() => { setSelectedFile(null); setPreviewUrl(null); setShowCropModal(false); setCrop(undefined); setCompletedCrop(undefined); }} className="px-5 py-2.5 border border-gray-200 text-sm text-gray-600 hover:border-black hover:text-black transition-colors">
-                Cancel
-              </button>
-              <button onClick={handleCropComplete} disabled={uploadingPhoto || !completedCrop} className="px-5 py-2.5 bg-black text-white text-[10px] font-semibold tracking-[0.14em] uppercase hover:bg-gray-800 transition-colors disabled:opacity-50">
-                {uploadingPhoto ? 'Uploading...' : 'Crop & Save'}
-              </button>
+            <div className="p-6 overflow-auto max-h-[70vh]">
+              <AvatarCropper
+                file={editingFile}
+                busy={uploadingPhoto}
+                onSave={handleCroppedPhoto}
+                onCancel={closeCropper}
+                saveLabel={adjustingCurrent ? 'Save changes' : 'Crop & save'}
+                busyLabel="Uploading…"
+                note={
+                  adjustingCurrent
+                    ? 'Straightening or re-centring your stored photo. Cropping much tighter will soften it — upload the original again for full resolution.'
+                    : undefined
+                }
+              />
             </div>
           </div>
         </div>

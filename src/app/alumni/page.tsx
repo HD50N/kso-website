@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { Profile } from '@/lib/supabase';
+import { isBoardMember, matchesMemberTypeFilter, memberTypeLabel } from '@/lib/membership';
 import { useAuth } from '@/contexts/AuthContext';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
@@ -105,7 +106,7 @@ export default function AlumniPage() {
   const filteredAlumni = alumni.filter((person) => {
     const matchesSearch = person.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          (person.major && person.major.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesType = filterType === 'all' || person.user_type === filterType;
+    const matchesType = matchesMemberTypeFilter(filterType, person);
     const matchesYear = filterYear === 'all' ||
                        (person.graduation_year && person.graduation_year.toString() === filterYear);
     return matchesSearch && matchesType && matchesYear;
@@ -274,12 +275,14 @@ export default function AlumniPage() {
                   )}
 
                   <div className="space-y-0.5 text-xs text-gray-500">
-                    {person.user_type && (
-                      <p className="capitalize">
-                        {person.user_type.replace('_', ' ')}
-                        {person.board_position && ` · ${person.board_position}`}
-                      </p>
-                    )}
+                    <p>
+                      {memberTypeLabel(person.user_type, person.graduation_year)}
+                      {person.board_position
+                        ? ` · ${person.board_position}`
+                        : isBoardMember(person.user_type, person.board_position)
+                          ? ' · Board Member'
+                          : ''}
+                    </p>
                     {person.graduation_year && <p>Class of {person.graduation_year}</p>}
                     {person.major && <p className="line-clamp-1">{person.major}</p>}
                     {person.bio && (

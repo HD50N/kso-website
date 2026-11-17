@@ -12,6 +12,12 @@ import UserProfileModal from '@/components/UserProfileModal';
 import ProductPreviewModal from '@/components/shop/ProductPreviewModal';
 import PhotoDownloadButton from '@/components/PhotoDownloadButton';
 import { getProductDisplayImage } from '@/lib/utils';
+import {
+  isBoardMember,
+  matchesMemberTypeFilter,
+  memberTypeAfterBoardRemoval,
+  memberTypeLabel,
+} from '@/lib/membership';
 
 /** Shared field + control styles (editorial / rest of site) */
 const ADMIN_FIELD =
@@ -572,13 +578,13 @@ export default function AdminPage() {
               console.error(`Error updating profile for ${change.username}:`, error);
             }
           } else {
-            // User has no other positions, revert to previous user_type
-            // We'll need to determine what the previous type was
-            // For now, we'll set it to 'undergrad' as a default
+            // No positions left: fall back to academic standing rather than a
+            // flat 'undergrad', which used to demote graduated board members.
+            const profile = users.find((u) => u.username === change.username);
             const { error } = await supabase
               .from('profiles')
               .update({
-                user_type: 'undergrad',
+                user_type: memberTypeAfterBoardRemoval(profile?.graduation_year, profile?.user_type),
                 board_position: null
               })
               .eq('username', change.username);
@@ -608,7 +614,7 @@ export default function AdminPage() {
     const matchesSearch = user.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          (user.username && user.username.toLowerCase().includes(searchTerm.toLowerCase()));
 
-    const matchesType = filterType === 'all' || user.user_type === filterType;
+    const matchesType = matchesMemberTypeFilter(filterType, user);
 
     return matchesSearch && matchesType;
   });
@@ -952,9 +958,16 @@ export default function AdminPage() {
                                           </div>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                          <span className="inline-block border border-gray-200 px-2 py-1 text-[10px] font-semibold tracking-[0.08em] uppercase text-gray-700">
-                                            {user.user_type?.replace('_', ' ')}
-                                          </span>
+                                          <div className="flex flex-wrap gap-1.5">
+                                            <span className="inline-block border border-gray-200 px-2 py-1 text-[10px] font-semibold tracking-[0.08em] uppercase text-gray-700">
+                                              {memberTypeLabel(user.user_type, user.graduation_year)}
+                                            </span>
+                                            {isBoardMember(user.user_type, user.board_position) && (
+                                              <span className="inline-block border border-[#CD2E3A]/40 px-2 py-1 text-[10px] font-semibold tracking-[0.08em] uppercase text-[#CD2E3A]">
+                                                Board
+                                              </span>
+                                            )}
+                                          </div>
                                           {user.board_position && (
                                             <div className="text-[10px] tracking-[0.12em] uppercase text-gray-400 mt-1.5">
                                               {user.board_position}
@@ -986,7 +999,10 @@ export default function AdminPage() {
                                               type="button"
                                               onClick={() =>
                                                 updateUserStatus(user.id, {
-                                                  user_type: user.user_type === 'board_member' ? 'undergrad' : 'board_member',
+                                                  user_type:
+                                                    user.user_type === 'board_member'
+                                                      ? memberTypeAfterBoardRemoval(user.graduation_year, user.user_type)
+                                                      : 'board_member',
                                                 })
                                               }
                                               disabled={updatingUser === user.id}

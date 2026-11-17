@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/lib/supabase';
+import { isAlumniClassYear, memberTypeLabel, type MemberType } from '@/lib/membership';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 
@@ -15,11 +16,14 @@ export default function AuthPage() {
   const [username, setUsername] = useState('');
   const [graduationYear, setGraduationYear] = useState('');
   const [major, setMajor] = useState('');
+  const [memberType, setMemberType] = useState<MemberType>('undergrad');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [usernameError, setUsernameError] = useState('');
   const [isCheckingUsername, setIsCheckingUsername] = useState(false);
-  const { signIn, signUp } = useAuth();
+  const [isForgot, setIsForgot] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
+  const { signIn, signUp, requestPasswordReset } = useAuth();
   const router = useRouter();
 
   const validateUsername = async (username: string): Promise<boolean> => {
@@ -62,6 +66,13 @@ export default function AuthPage() {
     setError('');
 
     try {
+      if (isForgot) {
+        if (!email.trim()) { setError('Email address is required'); setLoading(false); return; }
+        await requestPasswordReset(email);
+        setResetSent(true);
+        return;
+      }
+
       if (isLogin) {
         await signIn(email, password);
       } else {
@@ -76,7 +87,7 @@ export default function AuthPage() {
         const isUsernameAvailable = await validateUsername(username.trim());
         if (!isUsernameAvailable) { setError('Username is already taken'); setLoading(false); return; }
 
-        await signUp(email, password, fullName.trim(), username.trim(), year, major.trim(), undefined);
+        await signUp(email, password, fullName.trim(), username.trim(), year, major.trim(), undefined, memberType);
       }
       router.push('/profile');
     } catch (error: any) {
@@ -103,7 +114,9 @@ export default function AuthPage() {
                 Korean Students Organization · UChicago
               </p>
               <h1 className="text-[4.5rem] sm:text-[6rem] lg:text-[7.5rem] font-black text-black leading-[0.87] tracking-tighter mb-10">
-                {isLogin ? (
+                {isForgot ? (
+                  <>Reset<br />Password</>
+                ) : isLogin ? (
                   <>Welcome<br />Back</>
                 ) : (
                   <>Join<br />KSO</>
@@ -111,9 +124,11 @@ export default function AuthPage() {
               </h1>
               <div className="w-10 h-px bg-[#CD2E3A] mb-8" />
               <p className="text-base text-gray-500 leading-relaxed max-w-sm mb-10">
-                {isLogin
-                  ? 'Sign in to access your profile and connect with fellow members.'
-                  : 'Become part of the Korean Students Organization at the University of Chicago.'}
+                {isForgot
+                  ? 'Enter the email address on your account and we will send you a link to set a new password.'
+                  : isLogin
+                    ? 'Sign in to access your profile and connect with fellow members.'
+                    : 'Become part of the Korean Students Organization at the University of Chicago.'}
               </p>
 
               {/* Stats */}
@@ -141,9 +156,31 @@ export default function AuthPage() {
             <div className="lg:pt-12">
               <div className="border border-gray-100 p-8 lg:p-10">
                 <h2 className="text-xl font-black text-black tracking-tight mb-8">
-                  {isLogin ? 'Sign In' : 'Create Account'}
+                  {isForgot ? 'Reset Password' : isLogin ? 'Sign In' : 'Create Account'}
                 </h2>
 
+                {isForgot && resetSent ? (
+                  <div>
+                    <div className="border border-gray-200 bg-gray-50 px-4 py-4">
+                      <p className="text-sm text-black font-medium mb-1">Check your email</p>
+                      <p className="text-sm text-gray-500 leading-relaxed">
+                        If an account exists for {email.trim()}, a password reset link is on its way.
+                        The link expires in one hour.
+                      </p>
+                    </div>
+                    <p className="text-xs text-gray-400 mt-4 leading-relaxed">
+                      Open the link in this same browser. If nothing arrives, check your spam folder
+                      and confirm you used the address you signed up with.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => { setIsForgot(false); setResetSent(false); setError(''); setPassword(''); }}
+                      className="w-full border border-gray-200 text-black text-[10px] font-semibold tracking-[0.18em] uppercase py-4 hover:border-black transition-colors mt-6"
+                    >
+                      Back to sign in
+                    </button>
+                  </div>
+                ) : (
                 <form onSubmit={handleSubmit} className="space-y-5">
                   {!isLogin && (
                     <>
@@ -174,6 +211,28 @@ export default function AuthPage() {
                         </label>
                         <input id="major" type="text" value={major} onChange={(e) => setMajor(e.target.value)} required={!isLogin} className={inputClass} placeholder="e.g., Computer Science" />
                       </div>
+                      <div>
+                        <label htmlFor="memberType" className={labelClass}>
+                          Member Type <span className="text-[#CD2E3A]">*</span>
+                        </label>
+                        <select
+                          id="memberType"
+                          value={isAlumniClassYear(parseInt(graduationYear)) ? 'alumni' : memberType}
+                          onChange={(e) => setMemberType(e.target.value as MemberType)}
+                          disabled={isAlumniClassYear(parseInt(graduationYear))}
+                          className={inputClass}
+                        >
+                          <option value="undergrad">Undergraduate Student</option>
+                          <option value="grad">Graduate Student</option>
+                          <option value="alumni">Alumni</option>
+                        </select>
+                        {isAlumniClassYear(parseInt(graduationYear)) && (
+                          <p className="text-xs text-gray-400 mt-1.5">
+                            Class of {graduationYear} has graduated, so you&apos;ll join as{' '}
+                            {memberTypeLabel(null, parseInt(graduationYear))}.
+                          </p>
+                        )}
+                      </div>
                     </>
                   )}
 
@@ -184,12 +243,23 @@ export default function AuthPage() {
                     <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className={inputClass} placeholder="Enter your email" />
                   </div>
 
-                  <div>
-                    <label htmlFor="password" className={labelClass}>
-                      Password <span className="text-[#CD2E3A]">*</span>
-                    </label>
-                    <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className={inputClass} placeholder="Enter your password" />
-                  </div>
+                  {!isForgot && (
+                    <div>
+                      <label htmlFor="password" className={labelClass}>
+                        Password <span className="text-[#CD2E3A]">*</span>
+                      </label>
+                      <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required={!isForgot} className={inputClass} placeholder="Enter your password" />
+                      {isLogin && (
+                        <button
+                          type="button"
+                          onClick={() => { setIsForgot(true); setError(''); setPassword(''); }}
+                          className="text-xs text-gray-400 hover:text-black transition-colors mt-2"
+                        >
+                          Forgot your password?
+                        </button>
+                      )}
+                    </div>
+                  )}
 
                   {error && (
                     <div className="border border-[#CD2E3A]/20 bg-[#CD2E3A]/5 px-4 py-3">
@@ -202,13 +272,20 @@ export default function AuthPage() {
                     disabled={loading}
                     className="w-full bg-black text-white text-[10px] font-semibold tracking-[0.18em] uppercase py-4 hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed mt-2"
                   >
-                    {loading ? 'Loading...' : isLogin ? 'Sign In' : 'Sign Up'}
+                    {loading ? 'Loading...' : isForgot ? 'Send reset link' : isLogin ? 'Sign In' : 'Sign Up'}
                   </button>
                 </form>
+                )}
 
                 <div className="mt-6 pt-6 border-t border-gray-100 text-center">
                   <button
                     onClick={() => {
+                      if (isForgot) {
+                        setIsForgot(false);
+                        setResetSent(false);
+                        setError('');
+                        return;
+                      }
                       setIsLogin(!isLogin);
                       setError('');
                       setUsernameError('');
@@ -216,10 +293,15 @@ export default function AuthPage() {
                       setFullName('');
                       setGraduationYear('');
                       setMajor('');
+                      setMemberType('undergrad');
                     }}
                     className="text-sm text-gray-400 hover:text-black transition-colors"
                   >
-                    {isLogin ? "Don't have an account? Sign up" : 'Already have an account? Sign in'}
+                    {isForgot
+                      ? 'Back to sign in'
+                      : isLogin
+                        ? "Don't have an account? Sign up"
+                        : 'Already have an account? Sign in'}
                   </button>
                 </div>
               </div>

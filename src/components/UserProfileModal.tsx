@@ -3,6 +3,9 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import PhotoDownloadButton from '@/components/PhotoDownloadButton';
+import { isBoardMember, memberTypeLabel } from '@/lib/membership';
+import { useAuth } from '@/contexts/AuthContext';
+import AdminAvatarUploader from '@/components/AdminAvatarUploader';
 
 interface Profile {
   id: string;
@@ -29,6 +32,7 @@ interface UserProfileModalProps {
 }
 
 export default function UserProfileModal({ userId, isOpen, onClose }: UserProfileModalProps) {
+  const { profile: viewer } = useAuth();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -125,8 +129,13 @@ export default function UserProfileModal({ userId, isOpen, onClose }: UserProfil
                   {profile.username && <p className="text-xs text-gray-400">@{profile.username}</p>}
                   <div className="flex flex-wrap gap-2 mt-2">
                     <span className="inline-block border border-gray-200 px-2 py-1 text-[10px] font-semibold tracking-[0.08em] uppercase text-gray-700">
-                      {profile.user_type?.replace('_', ' ') || 'undergrad'}
+                      {memberTypeLabel(profile.user_type, profile.graduation_year)}
                     </span>
+                    {isBoardMember(profile.user_type, profile.board_position) && (
+                      <span className="inline-block border border-gray-200 px-2 py-1 text-[10px] font-semibold tracking-[0.08em] uppercase text-gray-700">
+                        {profile.board_position || 'Board Member'}
+                      </span>
+                    )}
                     {profile.is_admin && (
                       <span className="inline-block border border-[#CD2E3A]/40 px-2 py-1 text-[10px] font-semibold tracking-[0.08em] uppercase text-[#CD2E3A]">
                         Admin
@@ -135,6 +144,17 @@ export default function UserProfileModal({ userId, isOpen, onClose }: UserProfil
                   </div>
                 </div>
               </div>
+
+              {viewer?.is_admin && (
+                <AdminAvatarUploader
+                  targetUserId={profile.user_id}
+                  targetName={profile.full_name}
+                  currentAvatarUrl={profile.avatar_url}
+                  onChanged={(avatarUrl) =>
+                    setProfile((prev) => (prev ? { ...prev, avatar_url: avatarUrl ?? undefined } : prev))
+                  }
+                />
+              )}
 
               {/* Profile Details */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 pt-2">

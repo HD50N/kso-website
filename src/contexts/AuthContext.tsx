@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState, useRef, useMemo } from 
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { Profile } from '@/lib/supabase';
+import { effectiveMemberType, type MemberType } from '@/lib/membership';
 
 interface AuthContextType {
   user: User | null;
@@ -11,9 +12,11 @@ interface AuthContextType {
   session: Session | null;
   loading: boolean;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, fullName: string, username: string, graduationYear: number, major: string, bio?: string) => Promise<void>;
+  signUp: (email: string, password: string, fullName: string, username: string, graduationYear: number, major: string, bio?: string, memberType?: MemberType) => Promise<void>;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<Profile>) => Promise<void>;
+  requestPasswordReset: (email: string) => Promise<void>;
+  updatePassword: (newPassword: string) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -131,7 +134,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (error) throw error;
   };
 
-  const signUp = async (email: string, password: string, fullName: string, username: string, graduationYear: number, major: string, bio?: string) => {
+  const signUp = async (email: string, password: string, fullName: string, username: string, graduationYear: number, major: string, bio?: string, memberType: MemberType = 'undergrad') => {
     try {
       console.log('Attempting to sign up user:', email);
       
@@ -169,7 +172,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             graduation_year: graduationYear,
             major: major,
             bio: bio || null,
-            user_type: 'undergrad',
+            user_type: effectiveMemberType(memberType, graduationYear),
             is_admin: false,
           })
           .select()
@@ -186,7 +189,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
               graduation_year: graduationYear,
               major: major,
               bio: bio || null,
-              user_type: 'undergrad',
+              user_type: effectiveMemberType(memberType, graduationYear),
               is_admin: false,
             })
             .eq('user_id', data.user.id)
@@ -307,6 +310,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  /**
+   * Email a recovery link.
+   *
+   * Supabase already returns success for an address with no account, so member
+   * emails cannot be enumerated here and we do not need to swallow errors to
+   * achieve that. Errors ARE surfaced, because the most likely one is a
+   * `redirectTo` that has not been allowlisted in the Supabase dashboard —
+   * hiding that would look like a silently undelivered email.
+   */
+  const requestPasswordReset = async (email: string) => {
+    const redirectTo = `${window.location.origin}/auth/reset-password`;
+    const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), { redirectTo });
+
+    if (error) {
+      console.error('Password reset request failed:', error);
+      if (error.status === 429) {
+        throw new Error('Too many reset requests. Please wait a minute and try again.');
+      }
+      throw error;
+    }
+  };
+
+  /** Set a new password for the currently authenticated (or recovering) user. */
+  const updatePassword = async (newPassword: string) => {
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+    if (error) throw error;
+  };
+
   // Memoize the context value to prevent unnecessary re-renders
   const value = useMemo(() => ({
     user,
@@ -317,6 +348,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signUp,
     signOut,
     updateProfile,
+    requestPasswordReset,
+    updatePassword,
   }), [
     user,
     profile,
